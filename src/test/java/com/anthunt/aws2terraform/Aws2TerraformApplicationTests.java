@@ -1,4 +1,4 @@
-package com.anthunt.AWS2Terraform;
+package com.anthunt.aws2terraform;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
