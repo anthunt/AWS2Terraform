@@ -1,0 +1,15 @@
+# Basic dependabot.yml file with
+# minimum configuration for two package managers
+
+version: 1
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "java"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
