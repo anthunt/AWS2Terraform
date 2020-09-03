@@ -1,4 +1,5 @@
 plugins {
+//	id 'org.springframework.boot' version '1.5.6.RELEASE'
 	id 'org.springframework.boot' version '2.3.3.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
 	id 'java'
@@ -24,12 +25,14 @@ ext {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.shell:spring-shell-starter:2.0.0.RELEASE'
+//	implementation 'org.springframework.boot:spring-boot-starter-validation'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-aws'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+//	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+//	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -44,4 +47,9 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+// https://github.com/spring-projects/spring-shell/issues/167
+bootRun {
+	standardInput = System.in
 }
