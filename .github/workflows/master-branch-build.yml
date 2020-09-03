@@ -4,8 +4,6 @@
 name: master branch build
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     types: [ closed ]
     branches: [ master ]
