@@ -27,7 +27,6 @@ jobs:
         with:
           name: Aws2terraform
           path: build/libs
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
