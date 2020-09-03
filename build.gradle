@@ -5,6 +5,7 @@ plugins {
 }
 
 group = 'com.anthunt'
+archivesBaseName = 'terraform-generator-aws'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
