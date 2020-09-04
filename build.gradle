@@ -27,6 +27,7 @@ ext {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.shell:spring-shell-starter:2.0.0.RELEASE'
+	implementation 'software.amazon.awssdk:aws-sdk-java:2.14.10'
 //	implementation 'org.springframework.boot:spring-boot-starter-validation'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-aws'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
@@ -49,7 +50,11 @@ test {
 	useJUnitPlatform()
 }
 
-// https://github.com/spring-projects/spring-shell/issues/167
 bootRun {
+	// https://github.com/spring-projects/spring-shell/issues/167
 	standardInput = System.in
+}
+
+bootJar {
+	archiveClassifier = 'boot'
 }
