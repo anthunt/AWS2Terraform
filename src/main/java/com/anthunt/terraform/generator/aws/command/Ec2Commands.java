@@ -18,7 +18,7 @@ public class Ec2Commands {
 
     @ShellMethod("describe Instances")
     public void describeInstances() {
-        DescribeInstancesResponse response = clients.ec2Client.describeInstances();
+        DescribeInstancesResponse response = clients.getEc2Client().describeInstances();
         log.debug("response=>{}", response.reservations());
         System.out.println(response.reservations());
     }
