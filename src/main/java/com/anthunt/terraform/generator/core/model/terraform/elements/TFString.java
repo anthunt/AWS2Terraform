@@ -23,10 +23,11 @@ public class TFString extends AbstractMarshaller<TFString> {
 
     @Override
     protected String unmarshalling(int tabSize) {
+        this.value = "".equals(this.value) ? null : this.value;
         return new StringBuffer()
-                .append("\"")
+                .append(this.value == null ? "" : "\"")
                 .append(this.value)
-                .append("\"\n")
+                .append(this.value == null ? "\n" : "\"\n")
                 .toString();
     }
 }
