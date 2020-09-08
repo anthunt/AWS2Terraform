@@ -1,6 +1,6 @@
-package com.anthunt.terraform.generator.core.model.elements.types;
+package com.anthunt.terraform.generator.core.model.terraform.elements;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import lombok.Builder;
 
 @Builder

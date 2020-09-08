@@ -1,6 +1,7 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.nodes;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import lombok.Builder;
 
 @Builder
@@ -8,7 +9,7 @@ public class Resource extends AbstractMarshaller<Resource> {
 
     private String api;
     private String name;
-    private Arguments arguments;
+    private TFArguments arguments;
 
     @Override
     protected Resource marshalling(String source) {
@@ -23,7 +24,7 @@ public class Resource extends AbstractMarshaller<Resource> {
                 .append(" ")
                 .append(name)
                 .append(" {\n")
-                .append(arguments.unmarshall(tabSize))
+                .append(arguments.unmarshall(tabSize++))
                 .append("}\n")
                 .toString();
     }

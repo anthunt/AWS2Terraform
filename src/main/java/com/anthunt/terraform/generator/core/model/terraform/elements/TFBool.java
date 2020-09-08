@@ -1,6 +1,6 @@
-package com.anthunt.terraform.generator.core.model.elements.types;
+package com.anthunt.terraform.generator.core.model.terraform.elements;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import lombok.Builder;
 
 @Builder
@@ -16,7 +16,7 @@ public class TFBool extends AbstractMarshaller<TFBool> {
     @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
-                .append(this.bool)
+                .append(Boolean.toString(this.bool))
                 .append("\n")
                 .toString();
     }

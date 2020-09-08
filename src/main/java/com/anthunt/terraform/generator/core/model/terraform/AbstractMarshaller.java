@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.core.model;
+package com.anthunt.terraform.generator.core.model.terraform;
 
 import java.lang.reflect.ParameterizedType;
 
@@ -9,6 +9,10 @@ public abstract class AbstractMarshaller<T> {
 
     public T marshall(String source) {
         return this.marshalling(source);
+    }
+
+    public String unmarshall() {
+        return this.unmarshall(0);
     }
 
     public String unmarshall(int tabSize) {

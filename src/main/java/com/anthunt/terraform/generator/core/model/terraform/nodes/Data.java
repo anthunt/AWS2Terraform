@@ -1,18 +1,15 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.nodes;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import lombok.Builder;
-import lombok.Singular;
-
-import java.util.List;
-import java.util.Map;
 
 @Builder
 public class Data extends AbstractMarshaller<Data> {
 
     private String api;
     private String name;
-    private Arguments arguments;
+    private TFArguments arguments;
 
     @Override
     protected Data marshalling(String source) {
@@ -27,7 +24,7 @@ public class Data extends AbstractMarshaller<Data> {
                 .append(" ")
                 .append(name)
                 .append(" {\n")
-                .append(arguments.unmarshall(tabSize))
+                .append(arguments.unmarshall(tabSize++))
                 .append("}\n")
                 .toString();
     }

@@ -1,13 +1,15 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.nodes;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
+import com.anthunt.terraform.generator.core.model.terraform.types.ProviderType;
 import lombok.Builder;
 
 @Builder
 public class Provider extends AbstractMarshaller<Provider> {
 
     private ProviderType providerType;
-    private Arguments arguments;
+    private TFArguments arguments;
 
     @Override
     protected Provider marshalling(String source) {
@@ -20,7 +22,7 @@ public class Provider extends AbstractMarshaller<Provider> {
                 .append("provider ")
                 .append(this.providerType.provider())
                 .append(" {\n")
-                .append(this.arguments.unmarshall(tabSize))
+                .append(this.arguments.unmarshall(tabSize++))
                 .append("}\n")
                 .toString();
     }
