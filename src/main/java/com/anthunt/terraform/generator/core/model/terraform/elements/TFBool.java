@@ -6,7 +6,13 @@ import lombok.Builder;
 @Builder
 public class TFBool extends AbstractMarshaller<TFBool> {
 
-    private boolean bool;
+    private Boolean bool;
+
+    public static TFBool build(Boolean bool) {
+        return TFBool.builder()
+                .bool(bool)
+                .build();
+    }
 
     @Override
     protected TFBool marshalling(String source) {
@@ -16,7 +22,7 @@ public class TFBool extends AbstractMarshaller<TFBool> {
     @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
-                .append(Boolean.toString(this.bool))
+                .append(this.bool.toString())
                 .append("\n")
                 .toString();
     }

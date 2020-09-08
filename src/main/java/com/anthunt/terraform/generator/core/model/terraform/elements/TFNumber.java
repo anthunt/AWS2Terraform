@@ -8,6 +8,12 @@ public class TFNumber extends AbstractMarshaller<TFNumber> {
 
     private String value;
 
+    public static TFNumber build(String value) {
+        return TFNumber.builder()
+                .value(value)
+                .build();
+    }
+
     @Override
     protected TFNumber marshalling(String source) {
         return TFNumber.builder()
