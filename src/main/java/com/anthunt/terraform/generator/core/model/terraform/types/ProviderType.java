@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.types;
 
 public enum ProviderType {
     AWS("aws");

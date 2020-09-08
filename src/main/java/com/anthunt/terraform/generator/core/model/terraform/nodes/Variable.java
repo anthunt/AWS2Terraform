@@ -1,14 +1,14 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.nodes;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
-import com.anthunt.terraform.generator.core.model.elements.types.VARType;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFType;
 import lombok.Builder;
 
 @Builder
 public class Variable extends AbstractMarshaller<Variable> {
 
     private String name;
-    private VARType type;
+    private TFType type;
     private AbstractMarshaller<?> defaultValue;
 
     @Override
@@ -22,8 +22,8 @@ public class Variable extends AbstractMarshaller<Variable> {
                 .append("variable ")
                 .append(name)
                 .append(" {\n")
-                .append(type != null ? "\t\t" + type.unmarshall(tabSize) : "")
-                .append(defaultValue != null ? "\t\t" + defaultValue.unmarshall(tabSize) : "")
+                .append(type != null ? "\t" + type.unmarshall(tabSize++) : "")
+                .append(defaultValue != null ? "\tdefault = " + defaultValue.unmarshall(tabSize++) : "")
                 .append("}\n")
                 .toString();
     }

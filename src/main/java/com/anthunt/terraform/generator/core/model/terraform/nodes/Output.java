@@ -1,10 +1,7 @@
-package com.anthunt.terraform.generator.core.model.elements;
+package com.anthunt.terraform.generator.core.model.terraform.nodes;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import lombok.Builder;
-import lombok.Singular;
-
-import java.util.Map;
 
 @Builder
 public class Output extends AbstractMarshaller<Output> {
@@ -23,7 +20,7 @@ public class Output extends AbstractMarshaller<Output> {
                 .append("output ")
                 .append(name)
                 .append(" {\n")
-                .append("\tvalue = ").append(value.unmarshall(tabSize))
+                .append("\tvalue = ").append(value.unmarshall(tabSize++))
                 .append("}\n")
                 .toString();
     }

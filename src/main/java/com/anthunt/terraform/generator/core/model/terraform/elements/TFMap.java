@@ -1,6 +1,6 @@
-package com.anthunt.terraform.generator.core.model.elements.types;
+package com.anthunt.terraform.generator.core.model.terraform.elements;
 
-import com.anthunt.terraform.generator.core.model.AbstractMarshaller;
+import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import lombok.Builder;
 import lombok.Singular;
 
@@ -19,15 +19,18 @@ public class TFMap extends AbstractMarshaller<TFMap> {
     @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
-
+        int nextTabSize = tabSize + 1;
         stringBuffer.append("{\n");
         this.maps.forEach((key, value) -> {
             stringBuffer
+                    .append("\t".repeat(tabSize + 1))
                     .append(key)
                     .append(" = ")
-                    .append(value.unmarshall(tabSize));
+                    .append(value.unmarshall(nextTabSize));
         });
-        stringBuffer.append("}\n");
+        stringBuffer
+                .append("\t".repeat(tabSize))
+                .append("}\n");
 
         return stringBuffer.toString();
     }
