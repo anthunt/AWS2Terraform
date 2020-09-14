@@ -15,6 +15,6 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
 
     @Override
     protected String unmarshalling(int tabSize) {
-        return arguments.unmarshall(tabSize++);
+        return arguments == null ? "" : arguments.unmarshall(tabSize++);
     }
 }

@@ -30,7 +30,7 @@ public class Locals extends AbstractMarshaller<Locals> {
                     .append(" = ")
                     .append(value.unmarshall(nextTabSize));
         });
-        stringBuffer.append("}\n");
+        stringBuffer.append("}\n\n");
 
         return stringBuffer.toString();
     }
