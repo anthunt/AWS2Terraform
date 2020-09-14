@@ -9,3 +9,17 @@
 [![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](LICENSE)
 
 Generating terrform code from exisiting aws resources
+
+- set default config
+  1. add custom config file
+        application-custom.yml
+        ``` yaml
+        amazon-clients:
+          profile-name: XXX-XXX-XXX
+          region: ap-northeast-2
+        ```
+  2. add environment values
+        ``` 
+        spring.profiles.active=custom
+        ```  
+

@@ -1,29 +1,36 @@
-package com.anthunt.terraform.generator.core.model;
+package com.anthunt.terraform.generator.core.model.terraform;
 
-import com.anthunt.terraform.generator.core.model.terraform.Terraform;
+import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
-import com.anthunt.terraform.generator.core.model.terraform.types.ProviderType;
-import com.anthunt.terraform.generator.core.model.terraform.nodes.*;
-import com.anthunt.terraform.generator.core.model.terraform.types.VariableType;
-import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Test {
+@Slf4j
+@SpringBootTest(classes = {AmazonClients.class})
+public class TerraformTest {
+
+    @Autowired
+    private AmazonClients amazonClients;
 
     public static String getTag(List<Tag> tags, String keyName) {
         return tags.stream().filter(tag->keyName.equals(tag.key())).findFirst().get().value();
     }
 
-    public static void main(String[] args) {
+    @Test
+    public void aws_ec2_to_terraform_string() {
 
-        Ec2Client ec2Client = Ec2Client.builder().credentialsProvider(ProfileCredentialsProvider.create("SFA-DEV")).region(Region.AP_NORTHEAST_2).build();
+        Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.<Resource>builder();
+        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
         DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances();
         for(Reservation reservation : describeInstancesResponse.reservations()) {
@@ -148,7 +155,7 @@ public class Test {
                 )
                 .build();
         */
-        System.out.println(terraform.unmarshall());
+        log.info("result=>'{}'", terraform.unmarshall());
     }
 
 }

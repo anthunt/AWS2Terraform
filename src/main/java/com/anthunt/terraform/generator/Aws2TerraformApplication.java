@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws;
+package com.anthunt.terraform.generator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
