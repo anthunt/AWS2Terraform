@@ -25,7 +25,7 @@ public class Resource extends AbstractMarshaller<Resource> {
                 .append(name)
                 .append(" {\n")
                 .append(arguments.unmarshall(tabSize++))
-                .append("}\n")
+                .append("}\n\n")
                 .toString();
     }
 }

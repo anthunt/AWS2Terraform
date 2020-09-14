@@ -8,6 +8,12 @@ public class TFExpression extends AbstractMarshaller<TFExpression> {
 
     private String expression;
 
+    public static TFExpression build(String expression) {
+        return TFExpression.builder()
+                .expression(expression)
+                .build();
+    }
+
     @Override
     protected TFExpression marshalling(String source) {
         return TFExpression.builder().expression(source).build();

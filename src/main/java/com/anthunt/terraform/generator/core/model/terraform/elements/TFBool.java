@@ -22,7 +22,7 @@ public class TFBool extends AbstractMarshaller<TFBool> {
     @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
-                .append(this.bool.toString())
+                .append(this.bool == null ? null : this.bool.toString())
                 .append("\n")
                 .toString();
     }

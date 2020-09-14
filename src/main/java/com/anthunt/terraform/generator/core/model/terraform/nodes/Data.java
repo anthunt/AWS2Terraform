@@ -25,7 +25,7 @@ public class Data extends AbstractMarshaller<Data> {
                 .append(name)
                 .append(" {\n")
                 .append(arguments.unmarshall(tabSize++))
-                .append("}\n")
+                .append("}\n\n")
                 .toString();
     }
 }
