@@ -17,10 +17,20 @@ public class ClientCommands {
         this.clients = clients;
     }
 
-    @ShellMethod("set-profile")
-    public void setProfile(String profileName) {
+    @ShellMethod("get-profile-name")
+    public void getProfileName() {
+        System.out.println("Profile => " + clients.getProfileName());
+    }
+
+    @ShellMethod("set-profile-name")
+    public void setProfileName(String profileName) {
         clients.setProfileName(profileName);
         System.out.println("Profile is changed into " + clients.getProfileName());
+    }
+
+    @ShellMethod("get-region")
+    public void getRegion() {
+        System.out.println("Region => " + clients.getRegion());
     }
 
     @ShellMethod("set-region")
@@ -28,4 +38,5 @@ public class ClientCommands {
         clients.setRegion(Region.of(region));
         System.out.println("Region is changed into " + clients.getRegion());
     }
+
 }

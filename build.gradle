@@ -28,6 +28,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
 	implementation 'software.amazon.awssdk:aws-sdk-java:2.14.15'
+    implementation 'junit:junit:4.12'
+	implementation 'junit:junit:4.12'
 //	implementation 'org.springframework.boot:spring-boot-starter-validation'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-aws'
 //	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
@@ -35,9 +37,9 @@ dependencies {
 //	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 //	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 //dependencyManagement {

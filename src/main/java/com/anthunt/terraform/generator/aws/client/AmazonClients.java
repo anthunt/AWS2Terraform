@@ -2,6 +2,10 @@ package com.anthunt.terraform.generator.aws.client;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -20,12 +24,18 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import javax.annotation.PostConstruct;
+
+@Slf4j
 @Getter
 @Setter
 @Component
 public class AmazonClients {
 
+    @Value("${amazon-clients.region:#{null}}")
     private Region region;
+
+    @Value("${amazon-clients.profile-name:#{null}}")
     private String profileName;
 
     private ProfileCredentialsProvider getCredentialsProvider() {
@@ -34,6 +44,12 @@ public class AmazonClients {
         } else {
             return ProfileCredentialsProvider.create(profileName);
         }
+    }
+
+    @PostConstruct
+    void init() {
+        log.debug("region => '{}'", region );
+        log.debug("profileName => '{}'", profileName );
     }
 
     public Ec2Client getEc2Client() {
