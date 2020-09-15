@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 *.log
 src/main/resources/application-custom.yml
+src/test/resources/application-custom.yml
 
 ### STS ###
 .apt_generated
