@@ -1,0 +1,14 @@
+group 'com.anthunt.terraform'
+version '0.0.1-SNAPSHOT'
+
+test {
+    useJUnitPlatform()
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}

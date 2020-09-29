@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.shell.aws.command;
+package com.anthunt.terraform.generator.aws.command;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.shell.CompletionContext;
