@@ -1,7 +1,0 @@
-logging:
-  level:
-    org.springframework: DEBUG
-
-amazon-clients:
-  profile-name: SFA-DEV
-  region: ap-northeast-2

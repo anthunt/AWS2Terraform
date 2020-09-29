@@ -1,4 +1,11 @@
-rootProject.name = 'terraform-generator-aws'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'terraform-generator'
 include 'terraform-generator-shell'
 include 'terraform-generator-core'
+include 'terraform-generator-aws'
 

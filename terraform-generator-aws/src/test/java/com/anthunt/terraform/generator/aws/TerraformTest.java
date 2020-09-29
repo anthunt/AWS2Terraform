@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.shell;
+package com.anthunt.terraform.generator.aws;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.core.model.terraform.Terraform;
@@ -10,6 +10,8 @@ import com.anthunt.terraform.generator.core.model.terraform.types.ProviderType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -21,11 +23,15 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @ActiveProfiles("custom")
+@EntityScan("com.anthunt.terraform.generator.*")
 @SpringBootTest(classes = {AmazonClients.class})
+@SpringBootApplication
 public class TerraformTest {
 
     @Autowired
     private AmazonClients amazonClients;
+
+    public void contextLoads() {}
 
     public static String getTag(List<Tag> tags, String keyName) {
         return tags.stream().filter(tag->keyName.equals(tag.key())).findFirst().get().value();
