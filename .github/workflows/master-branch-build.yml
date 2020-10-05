@@ -25,5 +25,5 @@ jobs:
         run: ./gradlew build -x test
       - uses: actions/upload-artifact@v2.1.4
         with:
-          name: Aws2terraform
-          path: build/libs
+          name: terraform-generator
+          path: terraform-generator-shell/build/libs

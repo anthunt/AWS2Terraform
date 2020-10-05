@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.command;
 import lombok.Builder;
 import lombok.Singular;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Builder

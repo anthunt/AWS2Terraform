@@ -1,10 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
-import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.shell.Availability;
 import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethodAvailability;
 
 @ShellComponent
 public abstract class AbstractCommands {
