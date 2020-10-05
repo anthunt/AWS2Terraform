@@ -10,11 +10,6 @@ public class Output extends AbstractMarshaller<Output> {
     private AbstractMarshaller<?> value;
 
     @Override
-    protected Output marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append("output ")

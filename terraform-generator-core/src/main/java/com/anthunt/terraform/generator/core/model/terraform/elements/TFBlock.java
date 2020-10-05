@@ -9,11 +9,6 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
     private TFArguments arguments;
 
     @Override
-    protected TFBlock marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return arguments == null ? "" : arguments.unmarshall(tabSize++);
     }

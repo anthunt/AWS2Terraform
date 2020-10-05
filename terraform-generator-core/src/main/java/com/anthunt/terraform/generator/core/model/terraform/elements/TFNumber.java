@@ -15,13 +15,6 @@ public class TFNumber extends AbstractMarshaller<TFNumber> {
     }
 
     @Override
-    protected TFNumber marshalling(String source) {
-        return TFNumber.builder()
-                .value(source)
-                .build();
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append(this.value)

@@ -21,13 +21,6 @@ public class TFString extends AbstractMarshaller<TFString> {
     }
 
     @Override
-    protected TFString marshalling(String source) {
-        return TFString.builder()
-                .value(source)
-                .build();
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         this.value = "".equals(this.value) ? null : this.value;
         return new StringBuffer()

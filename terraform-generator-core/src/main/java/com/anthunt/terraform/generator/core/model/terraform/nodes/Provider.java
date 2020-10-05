@@ -12,11 +12,6 @@ public class Provider extends AbstractMarshaller<Provider> {
     private TFArguments arguments;
 
     @Override
-    protected Provider marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append("provider ")

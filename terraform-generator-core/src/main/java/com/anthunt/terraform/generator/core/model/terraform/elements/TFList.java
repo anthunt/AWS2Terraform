@@ -12,11 +12,6 @@ public class TFList extends AbstractMarshaller<TFList> {
     @Singular private List<AbstractMarshaller<?>> lists;
 
     @Override
-    protected TFList marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;

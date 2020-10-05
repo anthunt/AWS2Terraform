@@ -12,11 +12,6 @@ public class Variable extends AbstractMarshaller<Variable> {
     private AbstractMarshaller<?> defaultValue;
 
     @Override
-    protected Variable marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append("variable ")

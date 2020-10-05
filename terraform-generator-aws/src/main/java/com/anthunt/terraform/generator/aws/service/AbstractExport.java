@@ -35,6 +35,10 @@ public abstract class AbstractExport<T extends SdkClient> {
                         .region(this.region)
                         .build().getClient(t), commonArgs, extraArgs);
 
+        if(commonArgs.isDeleteOutputDirectory()) {
+            IOUtils.emptyDir(commonArgs.getOutputDirPath());
+        }
+
         if(commonArgs.isExplicit()) {
             Terraform provider = Terraform.builder()
                     .providers(providers)
@@ -45,13 +49,15 @@ public abstract class AbstractExport<T extends SdkClient> {
                 log.info("result=>'{}'", providerString);
             }
 
-            Terraform resource = Terraform.builder()
-                    .resources(resources)
-                    .build();
-            String resourceString = resource.unmarshall();
-            IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getResourceFileName(), resourceString, commonArgs.isSilence());
-            if(!commonArgs.isSilence()) {
-                log.info("result=>'{}'", resourceString);
+            if(!resources.isEmpty()) {
+                Terraform resource = Terraform.builder()
+                        .resources(resources)
+                        .build();
+                String resourceString = resource.unmarshall();
+                IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getResourceFileName(), resourceString, commonArgs.isSilence());
+                if (!commonArgs.isSilence()) {
+                    log.info("result=>'{}'", resourceString);
+                }
             }
         } else {
             Terraform terraform = Terraform.builder()

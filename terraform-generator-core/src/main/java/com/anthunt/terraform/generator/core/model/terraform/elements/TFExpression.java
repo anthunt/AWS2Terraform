@@ -15,11 +15,6 @@ public class TFExpression extends AbstractMarshaller<TFExpression> {
     }
 
     @Override
-    protected TFExpression marshalling(String source) {
-        return TFExpression.builder().expression(source).build();
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append(this.expression)

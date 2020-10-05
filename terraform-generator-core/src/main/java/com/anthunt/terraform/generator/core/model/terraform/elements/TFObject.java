@@ -12,11 +12,6 @@ public class TFObject extends AbstractMarshaller<TFObject> {
     @Singular private Map<String, AbstractMarshaller<?>> members;
 
     @Override
-    protected TFObject marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;
