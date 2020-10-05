@@ -1,7 +1,5 @@
 package com.anthunt.terraform.generator.core.model.terraform;
 
-import java.lang.reflect.ParameterizedType;
-
 public abstract class AbstractMarshaller<T> {
 
     protected abstract T marshalling(String source);
