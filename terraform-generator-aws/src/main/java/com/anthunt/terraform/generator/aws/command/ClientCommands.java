@@ -2,20 +2,19 @@ package com.anthunt.terraform.generator.aws.command;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import software.amazon.awssdk.regions.Region;
 
 @Slf4j
 @ShellComponent
-public class ClientCommands {
+public class ClientCommands extends AbstractCommands {
 
-    private AmazonClients clients;
-
-    public ClientCommands(AmazonClients clients) {
-        this.clients = clients;
-    }
+    @Autowired
+    protected AmazonClients clients;
 
     @ShellMethod(key = "get-profile", value = "Get Profile Name.")
     public void getProfileName() {

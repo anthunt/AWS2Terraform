@@ -11,6 +11,7 @@ bootRun {
 }
 
 bootJar {
+    mainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
     archiveClassifier = 'boot'
     enabled = true
 }

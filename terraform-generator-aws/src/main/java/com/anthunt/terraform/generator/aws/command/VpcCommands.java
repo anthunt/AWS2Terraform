@@ -10,10 +10,6 @@ import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 @ShellComponent
 public class VpcCommands extends AbstractCommands {
 
-    public VpcCommands(AmazonClients clients) {
-        super(clients);
-    }
-
     @ShellMethod("Export terraform resources of vpcs")
     public void exportVpcs() {
         DescribeVpcsResponse response = clients.getEc2Client().describeVpcs();

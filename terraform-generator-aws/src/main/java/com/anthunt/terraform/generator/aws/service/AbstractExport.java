@@ -5,7 +5,6 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Provider;
 import com.anthunt.terraform.generator.core.model.terraform.types.ProviderType;
-import lombok.Builder;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
 
@@ -17,6 +16,7 @@ public abstract class AbstractExport<T extends SdkClient> {
     public void exportTerraform(String profileName, Region region, T client) {
         this.profileName = profileName;
         this.region = region;
+        this.exportProvider();
         this.export(client);
     }
 

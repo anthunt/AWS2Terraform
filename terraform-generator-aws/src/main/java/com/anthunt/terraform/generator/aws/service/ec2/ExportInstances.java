@@ -5,10 +5,8 @@ import com.anthunt.terraform.generator.core.model.terraform.Terraform;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
@@ -19,10 +17,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ExportInstances extends AbstractExport<Ec2Client> {
-
-    public static String getTag(List<Tag> tags, String keyName) {
-        return tags.stream().filter(tag->keyName.equals(tag.key())).findFirst().get().value();
-    }
 
     @Override
     protected void export(Ec2Client client) {

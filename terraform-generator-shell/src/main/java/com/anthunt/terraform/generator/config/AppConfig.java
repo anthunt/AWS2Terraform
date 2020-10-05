@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.config;
+package com.anthunt.terraform.generator.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.CommandRegistry;

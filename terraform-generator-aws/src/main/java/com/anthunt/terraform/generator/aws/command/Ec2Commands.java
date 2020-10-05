@@ -13,10 +13,6 @@ import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 @ShellComponent
 public class Ec2Commands extends AbstractCommands {
 
-    public Ec2Commands(AmazonClients clients) {
-        super(clients);
-    }
-
     @Autowired
     private ExportInstances exportInstances;
 
