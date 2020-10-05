@@ -1,5 +1,6 @@
 package com.anthunt.terraform.generator.aws.client;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,17 +24,14 @@ import software.amazon.awssdk.services.route53.Route53Client;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 @Slf4j
-@Getter
-@Setter
-@Component
+@Builder
 public class AmazonClients {
 
-    @Value("${amazon-clients.region:#{null}}")
     private Region region;
-
-    @Value("${amazon-clients.profile-name:#{null}}")
     private String profileName;
 
     private ProfileCredentialsProvider getCredentialsProvider() {
@@ -48,6 +46,22 @@ public class AmazonClients {
     void init() {
         log.debug("region => '{}'", region );
         log.debug("profileName => '{}'", profileName );
+    }
+
+    public <T> T getClient(Class<T> clazz) {
+        Method[] methods = this.getClass().getDeclaredMethods();
+        for(Method method : methods) {
+            if(clazz.isNestmateOf(method.getReturnType())) {
+                try {
+                    return (T) method.invoke(this, new Object[0]);
+                } catch (IllegalAccessException e) {
+                    return null;
+                } catch (InvocationTargetException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 
     public Ec2Client getEc2Client() {
@@ -146,35 +160,6 @@ public class AmazonClients {
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
-    }
-
-    public static final class AmazonClientsBuilder {
-        private Region region;
-        private String profileName;
-
-        private AmazonClientsBuilder() {
-        }
-
-        public static AmazonClientsBuilder builder() {
-            return new AmazonClientsBuilder();
-        }
-
-        public AmazonClientsBuilder region(Region region) {
-            this.region = region;
-            return this;
-        }
-
-        public AmazonClientsBuilder profileName(String profileName) {
-            this.profileName = profileName;
-            return this;
-        }
-
-        public AmazonClients build() {
-            AmazonClients amazonClients = new AmazonClients();
-            amazonClients.region = this.region;
-            amazonClients.profileName = this.profileName;
-            return amazonClients;
-        }
     }
 
 }

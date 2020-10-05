@@ -1,7 +1,8 @@
 package com.anthunt.terraform.generator.aws.service.ec2;
 
+import com.anthunt.terraform.generator.aws.command.CommonArgs;
+import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.core.model.terraform.Terraform;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -11,7 +12,6 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.Base64;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ExportInstances extends AbstractExport<Ec2Client> {
 
     @Override
-    protected void export(Ec2Client client) {
+    protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
@@ -134,11 +134,7 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
             }
         }
 
-        Terraform instance = Terraform.builder()
-                .resources(resourceMapsBuilder.build())
-                .build();
-
-        log.info("result=>'{}'", instance.unmarshall());
+        return resourceMapsBuilder.build();
 
     }
 
