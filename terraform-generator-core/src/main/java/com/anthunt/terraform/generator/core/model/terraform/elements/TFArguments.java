@@ -12,11 +12,6 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
     @Singular private Map<String, AbstractMarshaller<?>> arguments;
 
     @Override
-    protected TFArguments marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;

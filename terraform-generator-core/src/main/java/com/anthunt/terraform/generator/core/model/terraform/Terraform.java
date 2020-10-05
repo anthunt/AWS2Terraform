@@ -14,11 +14,6 @@ public class Terraform extends AbstractMarshaller<Terraform> {
     private Maps<Output> outputs;
 
     @Override
-    protected Terraform marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append(this.providers == null ? "" : this.providers.unmarshall() + "\n")

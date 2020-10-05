@@ -34,4 +34,7 @@ public class CommonArgs {
     @Parameter(names = {"-S", "--silence"}, description = "no stdout.")
     private boolean isSilence = true;
 
+    @Parameter(names = {"-D", "--delete-output-directory"}, description = "delete output directory before generate.")
+    private boolean isDeleteOutputDirectory = true;
+
 }

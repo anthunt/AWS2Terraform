@@ -12,11 +12,6 @@ public class Locals extends AbstractMarshaller<Locals> {
     @Singular private Map<String, AbstractMarshaller<?>> locals;
 
     @Override
-    protected Locals marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
 

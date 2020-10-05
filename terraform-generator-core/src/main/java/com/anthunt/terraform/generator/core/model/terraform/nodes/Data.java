@@ -12,11 +12,6 @@ public class Data extends AbstractMarshaller<Data> {
     private TFArguments arguments;
 
     @Override
-    protected Data marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append("data ")

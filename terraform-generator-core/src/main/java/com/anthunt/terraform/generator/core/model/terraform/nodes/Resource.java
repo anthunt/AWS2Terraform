@@ -12,11 +12,6 @@ public class Resource extends AbstractMarshaller<Resource> {
     private TFArguments arguments;
 
     @Override
-    protected Resource marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append("resource ")

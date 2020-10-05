@@ -15,11 +15,6 @@ public class TFBool extends AbstractMarshaller<TFBool> {
     }
 
     @Override
-    protected TFBool marshalling(String source) {
-        return TFBool.builder().bool(Boolean.parseBoolean(source)).build();
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return new StringBuffer()
                 .append(this.bool == null ? null : this.bool.toString())

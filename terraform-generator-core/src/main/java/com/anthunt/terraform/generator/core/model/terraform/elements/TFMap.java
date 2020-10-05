@@ -16,11 +16,6 @@ public class TFMap extends AbstractMarshaller<TFMap> {
     }
 
     @Override
-    protected TFMap marshalling(String source) {
-        throw new RuntimeException("NotImplemented");
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;

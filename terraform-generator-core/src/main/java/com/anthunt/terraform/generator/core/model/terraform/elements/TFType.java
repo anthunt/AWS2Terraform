@@ -10,11 +10,6 @@ public class TFType extends AbstractMarshaller<TFType> {
     private VariableType type;
 
     @Override
-    protected TFType marshalling(String source) {
-        return null;
-    }
-
-    @Override
     protected String unmarshalling(int tabSize) {
         return null;
     }
