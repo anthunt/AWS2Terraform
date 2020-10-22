@@ -58,7 +58,7 @@ project(':terraform-generator-aws') {
         compile 'com.beust:jcommander:1.78'
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
-        implementation 'software.amazon.awssdk:aws-sdk-java:2.15.11'
+        implementation 'software.amazon.awssdk:aws-sdk-java:2.15.12'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 }
