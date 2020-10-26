@@ -1,5 +1,7 @@
 package com.anthunt.terraform.generator.aws.command;
 
+import com.anthunt.terraform.generator.aws.service.vpc.ExportInternetGateways;
+import com.anthunt.terraform.generator.aws.service.vpc.ExportNatGateways;
 import com.anthunt.terraform.generator.aws.service.vpc.ExportVpcs;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,25 @@ public class VpcCommands extends AbstractCommands {
     @Autowired
     private ExportVpcs exportVpcs;
 
+    @Autowired
+    private ExportInternetGateways exportInternetGateways;
+
+    @Autowired
+    private ExportNatGateways exportNatGateways;
+
     @ShellMethod("Export terraform resources of vpcs")
     public void exportVpcs(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportVpcs.exportTerraform(Ec2Client.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of InternetGateways")
+    public void exportInternetGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportInternetGateways.exportTerraform(Ec2Client.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of NatGateways")
+    public void exportNatGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportNatGateways.exportTerraform(Ec2Client.class, commonArgs);
     }
 
 }

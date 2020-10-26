@@ -27,3 +27,7 @@ jobs:
         with:
           name: terraform-generator
           path: terraform-generator-shell/build/libs
+      - name: Download launch4j
+        run: wget https://sourceforge.net/projects/launch4j/files/launch4j-3/3.12
+      - name: Make exe
+        run: launch4j ./launch4j/config.xml

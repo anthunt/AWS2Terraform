@@ -1,0 +1,59 @@
+package com.anthunt.terraform.generator.aws.service.vpc;
+
+import com.anthunt.terraform.generator.aws.command.CommonArgs;
+import com.anthunt.terraform.generator.aws.command.ExtraArgs;
+import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
+import software.amazon.awssdk.services.ec2.model.Tag;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ExportInternetGateways extends AbstractExport<Ec2Client> {
+
+    @Override
+    protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+
+        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+
+        DescribeInternetGatewaysResponse describeInternetGatewaysResponse = client.describeInternetGateways();
+        List<InternetGateway> internetGateways = describeInternetGatewaysResponse.internetGateways ();
+
+        int i = 0;
+        for(InternetGateway internetGateway : internetGateways) {
+
+            List<InternetGatewayAttachment> internetGatewayAttachments = internetGateway.attachments();
+
+            for(InternetGatewayAttachment internetGatewayAttachment : internetGatewayAttachments) {
+                resourceMapsBuilder.map(
+                        Resource.builder()
+                                .api("aws_internet_gateway")
+                                .name("internet_gateway" + i)
+                                .arguments(
+                                        TFArguments.builder()
+                                                .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
+                                                .argument("tags", TFMap.build(
+                                                        internetGateway.tags().stream()
+                                                                .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                                ))
+                                                .build()
+                                )
+                                .build()
+                );
+            }
+            i++;
+
+        }
+
+        return resourceMapsBuilder.build();
+    }
+
+}
