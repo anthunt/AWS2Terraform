@@ -7,9 +7,8 @@ import lombok.Data;
 public class CommonArgs {
 
     private static final String DEFAULT_PROFILE = "default";
-    private static final String PROFILE_HELP = "aws profile name by ~/.aws/credentials and config - default: " + DEFAULT_PROFILE;
-    private static final String DEFAULT_REGION = "ap-northeast-2";
-    private static final String REGION_HELP = "aws region id - default: " + DEFAULT_REGION;
+    private static final String PROFILE_HELP = "aws profile name by ~/.aws/credentials and config ex) default";
+    private static final String REGION_HELP = "aws region id ex) us-east-1";
     private static final boolean DEFAULT_EXPLICIT = true;
     private static final String EXPLICIT_HELP = "explicit output files by terraform types. - default: " + DEFAULT_EXPLICIT;
 
