@@ -78,8 +78,7 @@ Usage: <command> [options]
   * -R, --region
       aws region id ex) us-east-1
     --resource-file-name
-      terraform resources file name will be generate with name <resource file 
-      name>.tf 
+      terraform resources file name will be generate with name <resource file name>.tf 
       Default: main.tf
     -S, --silence
       no stdout.
