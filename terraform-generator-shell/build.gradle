@@ -1,3 +1,20 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "edu.sc.seis.launch4j:launch4j:2.4.8"
+    }
+}
+
+plugins {
+    id "edu.sc.seis.launch4j" version "2.4.8"
+}
+
+apply plugin: "edu.sc.seis.launch4j"
+
 group = 'com.anthunt.terraform'
 archivesBaseName = 'terraform-generator-shell'
 
@@ -12,6 +29,9 @@ bootRun {
 
 bootJar {
     mainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
-    archiveClassifier = 'boot'
     enabled = true
+}
+
+launch4j {
+
 }
