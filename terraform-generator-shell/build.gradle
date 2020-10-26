@@ -32,6 +32,4 @@ bootJar {
     enabled = true
 }
 
-launch4j {
-
-}
+createExe {}
