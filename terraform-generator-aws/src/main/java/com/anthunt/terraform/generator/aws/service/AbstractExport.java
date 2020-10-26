@@ -11,6 +11,7 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Provider;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import com.anthunt.terraform.generator.core.model.terraform.types.ProviderType;
+import com.beust.jcommander.JCommander;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
@@ -26,6 +27,10 @@ public abstract class AbstractExport<T extends SdkClient> {
     }
 
     public void exportTerraform(Class<T> t, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        if(commonArgs.isHelp()) {
+            new JCommander(new CommonArgs()).usage();
+            return;
+        }
         this.profileName = commonArgs.getProfile();
         this.region = Region.of(commonArgs.getRegion());
         Maps<Provider> providers = this.exportProvider();
@@ -35,21 +40,21 @@ public abstract class AbstractExport<T extends SdkClient> {
                         .region(this.region)
                         .build().getClient(t), commonArgs, extraArgs);
 
-        if(commonArgs.isDeleteOutputDirectory()) {
+        if (commonArgs.isDeleteOutputDirectory()) {
             IOUtils.emptyDir(commonArgs.getOutputDirPath());
         }
 
-        if(commonArgs.isExplicit()) {
+        if (commonArgs.isExplicit()) {
             Terraform provider = Terraform.builder()
                     .providers(providers)
                     .build();
             String providerString = provider.unmarshall();
             IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getProviderFileName(), providerString, commonArgs.isSilence());
-            if(!commonArgs.isSilence()) {
+            if (!commonArgs.isSilence()) {
                 log.info("result=>'{}'", providerString);
             }
 
-            if(!resources.isEmpty()) {
+            if (!resources.isEmpty()) {
                 Terraform resource = Terraform.builder()
                         .resources(resources)
                         .build();
@@ -66,7 +71,7 @@ public abstract class AbstractExport<T extends SdkClient> {
                     .build();
             String terraformString = terraform.unmarshall();
             IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getResourceFileName(), terraformString, commonArgs.isSilence());
-            if(!commonArgs.isSilence()) {
+            if (!commonArgs.isSilence()) {
                 log.info("result=>'{}'", terraformString);
             }
         }

@@ -8,6 +8,8 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.InternetGateway;
@@ -17,6 +19,8 @@ import software.amazon.awssdk.services.ec2.model.Tag;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
+@Service
 public class ExportInternetGateways extends AbstractExport<Ec2Client> {
 
     @Override

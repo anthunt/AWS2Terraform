@@ -13,11 +13,14 @@ public class CommonArgs {
     private static final boolean DEFAULT_EXPLICIT = true;
     private static final String EXPLICIT_HELP = "explicit output files by terraform types. - default: " + DEFAULT_EXPLICIT;
 
-    @Parameter(names = {"-P", "--profile"}, description = CommonArgs.PROFILE_HELP)
-    private String profile = CommonArgs.DEFAULT_PROFILE;
+    @Parameter(names = {"help"}, description = "display usage informations.", help = true)
+    private boolean isHelp = false;
 
-    @Parameter(names = {"-R", "--region"}, description = CommonArgs.REGION_HELP)
-    private String region = CommonArgs.DEFAULT_REGION;
+    @Parameter(names = {"-P", "--profile"}, description = CommonArgs.PROFILE_HELP, required = true)
+    private String profile;
+
+    @Parameter(names = {"-R", "--region"}, description = CommonArgs.REGION_HELP, required = true)
+    private String region;
 
     @Parameter(names = {"-E", "--explicit"}, description = CommonArgs.EXPLICIT_HELP)
     private boolean isExplicit = CommonArgs.DEFAULT_EXPLICIT;
