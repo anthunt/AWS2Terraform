@@ -6,12 +6,16 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.DescribeNatGatewaysResponse;
 import software.amazon.awssdk.services.ec2.model.NatGateway;
 
 import java.util.List;
 
+@Slf4j
+@Service
 public class ExportNatGateways extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {

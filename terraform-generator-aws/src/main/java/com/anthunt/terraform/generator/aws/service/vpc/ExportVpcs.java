@@ -33,7 +33,9 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
         for (Vpc vpc : vpcs) {
 
             DescribeVpcAttributeResponse describeVpcAttributeResponse = client.describeVpcAttribute(
-                    DescribeVpcAttributeRequest.builder().build()
+                    DescribeVpcAttributeRequest.builder()
+                            .vpcId(vpc.vpcId())
+                            .build()
             );
 
             resourceMapsBuilder.map(
