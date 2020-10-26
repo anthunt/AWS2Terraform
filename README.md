@@ -27,7 +27,7 @@ How to check Spring Shell CLI Builtin option.
 [https://docs.spring.io/spring-shell/docs/2.0.1.BUILD-SNAPSHOT/reference/htmlsingle/#built-in-commands](https://docs.spring.io/spring-shell/docs/2.0.1.BUILD-SNAPSHOT/reference/htmlsingle/#built-in-commands)
 
 ```
-export>help
+export:>help
 ```
 ```
 AVAILABLE COMMANDS
@@ -55,7 +55,7 @@ Vpc Commands
 How to check command-specific options.
 
 ```
-export><command> help
+export:><command> help
 ```
 
 ```
