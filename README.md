@@ -41,12 +41,12 @@ Built-In Commands
         stacktrace: Display the full stacktrace of the last error.
 
 Ec2Commands
-        export-ec2instances: Export terraform resources of ec2 instances.
+        ec2instances: Export terraform resources of ec2 instances.
 
 Vpc Commands
-        export-internet-gateways: Export terraform resources of InternetGateways
-        export-nat-gateways: Export terraform resources of NatGateways
-        export-vpcs: Export terraform resources of vpcs
+        internet-gateways: Export terraform resources of InternetGateways
+        nat-gateways: Export terraform resources of NatGateways
+        vpcs: Export terraform resources of vpcs
 ```
 
 ## Common Options

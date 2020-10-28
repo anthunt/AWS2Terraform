@@ -18,7 +18,7 @@ public class Ec2Commands extends AbstractCommands {
     private ExportInstances exportInstances;
 
     @ShellMethod("Export terraform resources of ec2 instances.")
-    public void exportEc2Instances(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void ec2Instances(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportInstances.exportTerraform(Ec2Client.class, commonArgs);
     }
 
