@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,10 +36,13 @@ public class IOUtils {
 
     public static void emptyDir(String outputDirPath) {
         try {
-            Files.walk(Path.of(new File(outputDirPath).toURI()))
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            URI outputDirURI = new File(outputDirPath).toURI();
+            if(Files.exists(Path.of(outputDirURI))) {
+                Files.walk(Path.of(outputDirURI))
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
         } catch (IOException e) {
             log.error("cannot delete directory - {} [{}]", outputDirPath, e.getMessage());
         }

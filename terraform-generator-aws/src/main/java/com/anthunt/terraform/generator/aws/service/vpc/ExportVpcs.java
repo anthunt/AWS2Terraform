@@ -32,9 +32,17 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
         int i = 0;
         for (Vpc vpc : vpcs) {
 
-            DescribeVpcAttributeResponse describeVpcAttributeResponse = client.describeVpcAttribute(
+            DescribeVpcAttributeResponse enableDnsSupportResponse = client.describeVpcAttribute(
                     DescribeVpcAttributeRequest.builder()
                             .vpcId(vpc.vpcId())
+                            .attribute(VpcAttributeName.ENABLE_DNS_SUPPORT)
+                            .build()
+            );
+
+            DescribeVpcAttributeResponse enableDnsHostNamesResponse = client.describeVpcAttribute(
+                    DescribeVpcAttributeRequest.builder()
+                            .vpcId(vpc.vpcId())
+                            .attribute(VpcAttributeName.ENABLE_DNS_HOSTNAMES)
                             .build()
             );
 
@@ -46,8 +54,8 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
                                 TFArguments.builder()
                                         .argument("cidr_block", TFString.build(vpc.cidrBlock()))
                                         .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
-                                        .argument("enable_dns_support", TFBool.build(describeVpcAttributeResponse.enableDnsSupport().value()))
-                                        .argument("enable_dns_hostnames", TFBool.build(describeVpcAttributeResponse.enableDnsHostnames().value()))
+                                        .argument("enable_dns_support", TFBool.build(enableDnsSupportResponse.enableDnsSupport().value()))
+                                        .argument("enable_dns_hostnames", TFBool.build(enableDnsHostNamesResponse.enableDnsHostnames().value()))
                                         .argument("enable_classiclink", TFBool.build(false))
                                         .argument("assign_generated_ipv6_block", TFBool.build(vpc.hasIpv6CidrBlockAssociationSet()))
                                         .argument("tags", TFMap.build(
