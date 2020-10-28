@@ -25,7 +25,7 @@ public class CommonArgs {
     private boolean isExplicit = CommonArgs.DEFAULT_EXPLICIT;
 
     @Parameter(names = {"--dir"}, description = "output terraform file directory path")
-    private String outputDirPath = "./output";
+    private String outputDirPath = "output";
 
     @Parameter(names = {"--provider-file-name"}, description = "provider.tf will be generate with name <provider file name>.tf")
     private String providerFileName = "provider.tf";

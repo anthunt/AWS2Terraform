@@ -11,6 +11,7 @@ buildscript {
 
 plugins {
     id "edu.sc.seis.launch4j" version "2.4.8"
+    id "com.dorongold.task-tree" version "1.5"
 }
 
 apply plugin: "edu.sc.seis.launch4j"
@@ -32,4 +33,18 @@ bootJar {
     enabled = true
 }
 
-createExe {}
+createExe.dependsOn bootJar
+
+createExe {
+    headerType      = "console"
+    outfile         = "${project.name}-${project.version}.exe"
+    jar             = "../libs/${project.name}-${project.version}.jar"
+    dontWrapJar     = false
+    bundledJrePath  = "../../jdk-11.0.9+11-jre"
+    bundledJre64Bit = true
+    jdkPreference   = "jdkOnly"
+    jreRuntimeBits  = "64"
+    jreMinVersion   = "11"
+    jreMaxVersion   = "11.0.9"
+    copyright       = "github.com/anthunt"
+}
