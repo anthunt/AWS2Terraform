@@ -26,17 +26,17 @@ public class VpcCommands extends AbstractCommands {
     private ExportNatGateways exportNatGateways;
 
     @ShellMethod("Export terraform resources of vpcs")
-    public void exportVpcs(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void vpcs(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportVpcs.exportTerraform(Ec2Client.class, commonArgs);
     }
 
     @ShellMethod("Export terraform resources of InternetGateways")
-    public void exportInternetGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void internetGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportInternetGateways.exportTerraform(Ec2Client.class, commonArgs);
     }
 
     @ShellMethod("Export terraform resources of NatGateways")
-    public void exportNatGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void natGateways(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportNatGateways.exportTerraform(Ec2Client.class, commonArgs);
     }
 
