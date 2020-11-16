@@ -65,7 +65,7 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:directory:2.15.20'
         implementation 'software.amazon.awssdk:directconnect:2.15.17'
         implementation 'software.amazon.awssdk:iam:2.15.15'
-        implementation 'software.amazon.awssdk:apigateway:2.15.20'
+        implementation 'software.amazon.awssdk:apigateway:2.15.28'
         implementation 'software.amazon.awssdk:lambda:2.15.17'
         implementation 'software.amazon.awssdk:s3:2.15.19'
         implementation 'software.amazon.awssdk:acm:2.15.15'
