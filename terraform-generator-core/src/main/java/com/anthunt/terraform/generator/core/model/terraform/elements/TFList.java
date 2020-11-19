@@ -11,6 +11,10 @@ public class TFList extends AbstractMarshaller<TFList> {
 
     @Singular private List<AbstractMarshaller<?>> lists;
 
+    public static TFList build(List<AbstractMarshaller<?>> lists) {
+        return TFList.builder().lists(lists).build();
+    }
+
     @Override
     protected String unmarshalling(int tabSize) {
         StringBuffer stringBuffer = new StringBuffer();

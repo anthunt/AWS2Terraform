@@ -92,6 +92,9 @@ Usage: <command> [options]
 
 1. EC2 Instances
 2. VPCs
-3. Internet Gateways
-4. NAT Gateways
-5. ... It will be added gradually.
+3. Subnets
+4. RouteTables
+5. Internet Gateways
+6. Egress Only Internet Gateways
+7. NAT Gateways
+8. ... It will be added gradually.
