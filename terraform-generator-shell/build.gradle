@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "edu.sc.seis.launch4j" version "2.4.8"
+    id "edu.sc.seis.launch4j" version "2.4.9"
     id "com.dorongold.task-tree" version "1.5"
 }
 
