@@ -61,7 +61,7 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:sts:2.15.15'
         implementation 'software.amazon.awssdk:ec2:2.15.35'
         implementation 'software.amazon.awssdk:rds:2.15.35'
-        implementation 'software.amazon.awssdk:route53:2.15.33'
+        implementation 'software.amazon.awssdk:route53:2.15.45'
         implementation 'software.amazon.awssdk:directory:2.15.40'
         implementation 'software.amazon.awssdk:directconnect:2.15.35'
         implementation 'software.amazon.awssdk:iam:2.15.15'
