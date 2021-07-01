@@ -53,13 +53,13 @@ createExe {
 
 tasks.register('makeJreDirectory') {
     doLast {
-        mkdir "$buildDir/launch4j/jdk-11.0.9+11-jre"
+        mkdir layout.buildDirectory.dir("launch4j/jdk-11.0.9+11-jre")
     }
 }
 
 tasks.register('addJreToDistributable', Copy) {
-    from "../../jdk-11.0.9+11-jre"        
-    into "$buildDir/launch4j/jdk-11.0.9+11-jre"
+    from layout.buildDirectory.dir("../../jdk-11.0.9+11-jre")
+    into layout.buildDirectory.dir("launch4j/jdk-11.0.9+11-jre")
 }   
 
 addJreToDistributable.dependsOn makeJreDirectory
