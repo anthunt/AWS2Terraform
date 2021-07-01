@@ -48,7 +48,7 @@ subprojects {
 project(':terraform-generator-core') {}
 project(':terraform-generator-shell') {
     dependencies {
-        compile project(':terraform-generator-aws')
+        implementation project(':terraform-generator-aws')
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -56,8 +56,8 @@ project(':terraform-generator-shell') {
 }
 project(':terraform-generator-aws') {
     dependencies {
-        compile project(':terraform-generator-core')
-        compile 'com.beust:jcommander:1.81'
+        implementation project(':terraform-generator-core')
+        implementation 'com.beust:jcommander:1.81'
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
         implementation 'software.amazon.awssdk:sts:2.16.92'
