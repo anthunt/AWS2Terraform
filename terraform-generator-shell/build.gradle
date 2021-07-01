@@ -5,12 +5,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath "edu.sc.seis.launch4j:launch4j:2.4.8"
+        classpath "edu.sc.seis.launch4j:launch4j:2.5.0"
     }
 }
 
 plugins {
-    id "edu.sc.seis.launch4j" version "2.4.8"
+    id "edu.sc.seis.launch4j" version "2.5.0"
     id "com.dorongold.task-tree" version "1.5"
 }
 
