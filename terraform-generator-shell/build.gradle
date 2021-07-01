@@ -54,4 +54,4 @@ createExe {
 tasks.register('addJreToDistributable', Copy) {
     from "../../jdk-11.0.9+11-jre"        
     into "$buildDir/launch4j/jdk-11.0.9+11-jre"
-}
+}   
