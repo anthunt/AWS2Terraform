@@ -42,11 +42,18 @@ createExe {
     libraryDir      = "libs"
     copyConfigurable= project.tasks.bootJar.outputs.files
     dontWrapJar     = false
-    bundledJrePath  = "../../jdk-11.0.9+11-jre"
+    bundledJrePath  = "jdk-11.0.9+11-jre"
     bundledJre64Bit = true
     jdkPreference   = "jdkOnly"
     jreRuntimeBits  = "64"
     jreMinVersion   = "11"
     jreMaxVersion   = "11.0.9"
     copyright       = "github.com/anthunt"
+}
+
+task addJreToDistributable(type: Copy) {
+    from ("../../jdk-11.0.9+11-jre") {
+        include '**/*.*'
+    }
+    destinationDir(new file("$buildDir/launch4j/jdk-11.0.9+11-jre"))
 }
