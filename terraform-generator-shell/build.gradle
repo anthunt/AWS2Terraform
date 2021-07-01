@@ -55,5 +55,5 @@ task addJreToDistributable(type: Copy) {
     from ("../../jdk-11.0.9+11-jre") {
         include '**/*.*'
     }
-    destinationDir(new file("$buildDir/launch4j/jdk-11.0.9+11-jre"))
+    destinationDir = new file("$buildDir/launch4j/jdk-11.0.9+11-jre")
 }
