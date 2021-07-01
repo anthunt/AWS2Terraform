@@ -51,9 +51,10 @@ createExe {
     copyright       = "github.com/anthunt"
 }
 
-task addJreToDistributable(type: Copy) {
-    from ("../../jdk-11.0.9+11-jre") {
-        include '**/*.*'
+task addJreToDistributable << {
+    copy {
+        from "../../jdk-11.0.9+11-jre"
+        
+        into = "$buildDir/launch4j/jdk-11.0.9+11-jre"
     }
-    destinationDir = new file("$buildDir/launch4j/jdk-11.0.9+11-jre")
 }
