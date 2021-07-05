@@ -73,7 +73,7 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:acm:2.15.33'
         implementation 'software.amazon.awssdk:kms:2.16.92'
         implementation 'software.amazon.awssdk:elasticache:2.16.92'
-        implementation 'software.amazon.awssdk:elasticloadbalancing:2.15.40'
+        implementation 'software.amazon.awssdk:elasticloadbalancing:2.16.95'
         implementation 'software.amazon.awssdk:elasticloadbalancingv2:2.16.92'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
