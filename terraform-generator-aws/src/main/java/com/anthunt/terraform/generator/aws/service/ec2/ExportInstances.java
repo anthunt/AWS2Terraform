@@ -3,6 +3,9 @@ package com.anthunt.terraform.generator.aws.service.ec2;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.ec2.dto.CustomDescribeInstancesResponse;
+import com.anthunt.terraform.generator.aws.service.ec2.dto.CustomInstance;
+import com.anthunt.terraform.generator.aws.service.ec2.dto.CustomReservation;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -11,7 +14,9 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,28 +26,59 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+        CustomDescribeInstancesResponse customDescribeInstancesResponse = getDescribeInstancesResponse(client);
 
-        int i = 0;
+        return getResourceMaps(customDescribeInstancesResponse);
+
+    }
+
+    protected CustomDescribeInstancesResponse getDescribeInstancesResponse(Ec2Client client) {
+
+        CustomDescribeInstancesResponse customDescribeInstancesResponse = new CustomDescribeInstancesResponse();
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
+        List<CustomReservation> customReservations = new ArrayList<CustomReservation>();
+        customDescribeInstancesResponse.setReservations(customReservations);
+
         for(Reservation reservation : describeInstancesResponse.reservations()) {
-            for(Instance instance : reservation.instances()) {
+            CustomReservation customReservation = new CustomReservation();
+            customReservations.add(customReservation);
+
+            for (Instance instance : reservation.instances()) {
+                CustomInstance customInstance = new CustomInstance();
+                customInstance.setInstance(instance);
+                customReservation.add(customInstance);
 
                 DescribeInstanceAttributeResponse disableApiTerminationAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
                         .build());
+                customInstance.setDisableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
 
                 DescribeInstanceAttributeResponse shutdownBehaviorAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
                         .build());
+                customInstance.setShutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
 
                 DescribeInstanceAttributeResponse userDataAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.USER_DATA)
                         .build());
+                customInstance.setUserData(userDataAttribute.userData().value());
 
+            }
+        }
+
+        return customDescribeInstancesResponse;
+    }
+
+    private Maps<Resource> getResourceMaps(CustomDescribeInstancesResponse describeInstancesResponse) {
+        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+
+        int i = 0;
+        for(CustomReservation reservation : describeInstancesResponse.getReservations()) {
+            for(CustomInstance customInstance : reservation.getInstances()) {
+                Instance instance = customInstance.getInstance();
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_instance")
@@ -56,8 +92,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                 .argument("cpu_core_count", TFNumber.build(instance.cpuOptions().coreCount().toString()))
                                                 .argument("cpu_threads_per_core", TFNumber.build(instance.cpuOptions().threadsPerCore().toString()))
                                                 .argument("ebs_optimized", TFBool.build(instance.ebsOptimized()))
-                                                .argument("disable_api_termination", TFBool.build(disableApiTerminationAttribute.disableApiTermination().value()))
-                                                .argument("instance_initiated_shutdown_behavior", TFString.build(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value()))
+                                                .argument("disable_api_termination", TFBool.build(customInstance.getDisableApiTermination()))
+                                                .argument("instance_initiated_shutdown_behavior", TFString.build(customInstance.getShutdownBehavior()))
                                                 .argument("instance_type", TFString.build(instance.instanceType().toString()))
                                                 .argument("key_name", TFString.build(instance.keyName()))
                                                 //.argument("get_password_data", TFBool.build(instance.pass))
@@ -81,8 +117,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                         .build())
                                                 .argument("source_dest_check", TFBool.build(instance.sourceDestCheck()))
                                                 .argument("user_data", TFString.builder().isMultiline(true).value(
-                                                        userDataAttribute.userData().value() != null ?
-                                                                new String(Base64.getDecoder().decode(userDataAttribute.userData().value())).replaceAll("[$]", "\\$\\$")
+                                                        customInstance.getUserData() != null ?
+                                                                new String(Base64.getDecoder().decode(customInstance.getUserData())).replaceAll("[$]", "\\$\\$")
                                                                 : ""
                                                 ).build())
                                                 .argument("iam_instance_profile", TFString.build(
@@ -135,7 +171,6 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
         }
 
         return resourceMapsBuilder.build();
-
     }
 
 }
