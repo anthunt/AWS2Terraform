@@ -15,9 +15,6 @@ import com.beust.jcommander.JCommander;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-
-import java.util.List;
 
 @Slf4j
 public abstract class AbstractExport<T extends SdkClient> {

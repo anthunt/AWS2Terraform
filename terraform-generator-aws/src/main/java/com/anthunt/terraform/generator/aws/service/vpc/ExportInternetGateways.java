@@ -11,7 +11,10 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.*;
+import software.amazon.awssdk.services.ec2.model.DescribeInternetGatewaysResponse;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
+import software.amazon.awssdk.services.ec2.model.Tag;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,17 +26,11 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<InternetGateway> internetGateways = getInternetGateways(client);
-        return getResourceMaps(internetGateways);
-    }
-
-    protected List<InternetGateway> getInternetGateways(Ec2Client client) {
-        DescribeInternetGatewaysResponse describeInternetGatewaysResponse = client.describeInternetGateways();
-        return describeInternetGatewaysResponse.internetGateways();
-    }
-
-    protected Maps<Resource> getResourceMaps(List<InternetGateway> internetGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+
+        DescribeInternetGatewaysResponse describeInternetGatewaysResponse = client.describeInternetGateways();
+        List<InternetGateway> internetGateways = describeInternetGatewaysResponse.internetGateways ();
+
         int i = 0;
         for(InternetGateway internetGateway : internetGateways) {
 

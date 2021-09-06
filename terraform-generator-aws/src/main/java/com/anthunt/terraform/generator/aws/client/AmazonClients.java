@@ -1,11 +1,8 @@
 package com.anthunt.terraform.generator.aws.client;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
-import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.acm.AcmClient;
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
@@ -28,8 +25,6 @@ import java.lang.reflect.Method;
 
 @Slf4j
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class AmazonClients {
 
     private Region region;
@@ -49,7 +44,7 @@ public class AmazonClients {
         log.debug("profileName => '{}'", profileName );
     }
 
-    public <T extends SdkClient> T getClient(Class<T> clazz) {
+    public <T> T getClient(Class<T> clazz) {
         Method[] methods = this.getClass().getDeclaredMethods();
         for(Method method : methods) {
             if(clazz.isNestmateOf(method.getReturnType())) {

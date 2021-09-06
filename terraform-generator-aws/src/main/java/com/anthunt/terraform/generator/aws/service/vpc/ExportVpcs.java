@@ -24,17 +24,11 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<Vpc> vpcs = getVpcs(client);
-        return getResourceMaps(client, vpcs);
-    }
-
-    protected List<Vpc> getVpcs(Ec2Client client) {
-        DescribeVpcsResponse response = client.describeVpcs();
-        return response.vpcs();
-    }
-
-    protected Maps<Resource> getResourceMaps(Ec2Client client, List<Vpc> vpcs) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+
+        DescribeVpcsResponse response = client.describeVpcs();
+        List<Vpc> vpcs = response.vpcs();
+
         int i = 0;
         for (Vpc vpc : vpcs) {
 
