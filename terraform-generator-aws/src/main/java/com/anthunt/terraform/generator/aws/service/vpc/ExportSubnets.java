@@ -25,11 +25,17 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+        List<Subnet> subnets = getSubnets(client);
+        return getResourceMaps(subnets);
+    }
 
+    protected List<Subnet> getSubnets(Ec2Client client) {
         DescribeSubnetsResponse describeSubnetsResponse = client.describeSubnets();
-        List<Subnet> subnets = describeSubnetsResponse.subnets();
+        return describeSubnetsResponse.subnets();
+    }
 
+    protected Maps<Resource> getResourceMaps(List<Subnet> subnets) {
+        Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int i = 0;
         for(Subnet subnet : subnets) {
 
