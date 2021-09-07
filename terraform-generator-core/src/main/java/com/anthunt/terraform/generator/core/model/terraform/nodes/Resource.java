@@ -3,8 +3,10 @@ package com.anthunt.terraform.generator.core.model.terraform.nodes;
 import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import lombok.Builder;
+import lombok.ToString;
 
 @Builder
+@ToString
 public class Resource extends AbstractMarshaller<Resource> {
 
     private String api;
