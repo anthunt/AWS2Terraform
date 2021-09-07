@@ -3,10 +3,12 @@ package com.anthunt.terraform.generator.core.model.terraform.nodes;
 import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import lombok.Builder;
 import lombok.Singular;
+import lombok.ToString;
 
 import java.util.List;
 
 @Builder
+@ToString
 public class Maps<T extends AbstractMarshaller<T>> extends AbstractMarshaller<Maps> {
 
     @Singular private List<AbstractMarshaller<T>> maps;
