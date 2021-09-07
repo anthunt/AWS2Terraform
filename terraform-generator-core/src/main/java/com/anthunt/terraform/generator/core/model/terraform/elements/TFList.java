@@ -6,6 +6,7 @@ import lombok.Singular;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Builder
 @ToString
@@ -22,32 +23,15 @@ public class TFList extends AbstractMarshaller<TFList> {
 
     @Override
     protected String unmarshalling(int tabSize) {
-        StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;
 
-        stringBuffer.append("[").append(lists.size() > 1 && isLineIndent ? "\n" : "");
-
-        for (int inx=0; inx < lists.size(); inx++) {
-            AbstractMarshaller<?> o = lists.get(inx);
-            stringBuffer
-                    .append( lists.size() > 1 && isLineIndent ? "\t".repeat(tabSize + 1) : "")
-                    .append( o.unmarshall(nextTabSize) )
-                    .append( lists.size() > 1 && inx < lists.size() - 1 ? ", " : "" )
-                    .append( lists.size() > 1 && isLineIndent ? "\n" : "");
+        String indent = "\t".repeat(tabSize + 1);
+        if (isLineIndent && lists.size() > 1) {
+            return lists.stream().map(o -> o.unmarshall(nextTabSize)).collect(Collectors.joining(",\n" + indent, "[\n" + indent, "\n" + "\t".repeat(tabSize) + "]\n"));
+        } else if (!isLineIndent && lists.size() > 1) {
+            return lists.stream().map(o -> o.unmarshall(nextTabSize)).collect(Collectors.joining(", ", "[", "]"));
+        } else {
+            return lists.stream().map(o -> o.unmarshall(nextTabSize)).collect(Collectors.joining(", ", "[", "]\n"));
         }
-
-//        lists.forEach(o ->{
-//            stringBuffer
-//                    .append( lists.size() > 1 && isLineIndent ? "\t".repeat(tabSize + 1) : "")
-//                    .append( o.unmarshall(nextTabSize) )
-//                    .append( lists.size() > 1 ? ", " : "" )
-//                    .append( lists.size() > 1 && isLineIndent ? "\n" : "");
-//        });
-        stringBuffer
-                .append( lists.size() > 1 && isLineIndent ? "\t".repeat(tabSize) : "")
-                .append("]")
-                .append( isLineIndent ? "\n" : "" );
-
-        return stringBuffer.toString();
     }
 }
