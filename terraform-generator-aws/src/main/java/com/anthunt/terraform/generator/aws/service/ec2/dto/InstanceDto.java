@@ -6,7 +6,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 
 @Data
 @ToString
-public class CustomInstance {
+public class InstanceDto {
     private Instance instance;
     private Boolean disableApiTermination;
     private String shutdownBehavior;

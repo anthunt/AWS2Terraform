@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.ec2;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.CustomDescribeInstancesResponse;
+import com.anthunt.terraform.generator.aws.service.ec2.dto.ReservationDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
+
+import java.util.List;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class},
@@ -36,8 +38,8 @@ class ExportInstancesTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        CustomDescribeInstancesResponse customDescribeInstancesResponse = exportInstances.getDescribeInstancesResponse(ec2Client);
-        log.debug("customDescribeInstancesResponse => " + customDescribeInstancesResponse);
+        List<ReservationDto> reservations = exportInstances.getReservations(ec2Client);
+        log.debug("reservations => " + reservations);
     }
 
 }
