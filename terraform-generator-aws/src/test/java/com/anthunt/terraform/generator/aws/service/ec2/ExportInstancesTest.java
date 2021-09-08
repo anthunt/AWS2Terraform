@@ -15,9 +15,7 @@ import software.amazon.awssdk.services.ec2.model.*;
 import java.util.List;
 
 @Slf4j
-@SpringBootTest(classes = {AmazonClients.class},
-        properties = { "logging.level.com.anthunt.terraform.generator.aws=DEBUG" }
-)
+@SpringBootTest(classes = {AmazonClients.class})
 class ExportInstancesTest {
 
     private static ExportInstances exportInstances;
