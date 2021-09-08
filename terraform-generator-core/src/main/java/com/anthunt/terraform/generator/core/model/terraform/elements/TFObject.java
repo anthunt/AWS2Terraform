@@ -27,7 +27,7 @@ public class TFObject extends AbstractMarshaller<TFObject> {
         });
         stringBuffer
                 .append("\t".repeat(tabSize))
-                .append("}\n");
+                .append("}");
         return stringBuffer.toString();
     }
 
