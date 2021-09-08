@@ -35,6 +35,7 @@ subprojects {
     }
 
     dependencies {
+        compileOnly 'org.slf4j:slf4j-api:1.7.31'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.projectlombok:lombok'
@@ -67,7 +68,7 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:directory:2.16.95'
         implementation 'software.amazon.awssdk:directconnect:2.16.92'
         implementation 'software.amazon.awssdk:iam:2.16.92'
-        implementation 'software.amazon.awssdk:apigateway:2.16.92'
+        implementation 'software.amazon.awssdk:apigateway:2.17.35'
         implementation 'software.amazon.awssdk:lambda:2.16.95'
         implementation 'software.amazon.awssdk:s3:2.16.92'
         implementation 'software.amazon.awssdk:acm:2.15.33'
