@@ -17,7 +17,7 @@ public class Provider extends AbstractMarshaller<Provider> {
                 .append("provider ")
                 .append(this.providerType.provider())
                 .append(" {\n")
-                .append(this.arguments.unmarshall(tabSize++))
+                .append(this.arguments.unmarshall(tabSize))
                 .append("}\n\n")
                 .toString();
     }

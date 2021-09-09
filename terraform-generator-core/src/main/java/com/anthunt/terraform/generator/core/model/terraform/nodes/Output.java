@@ -15,7 +15,7 @@ public class Output extends AbstractMarshaller<Output> {
                 .append("output ")
                 .append(name)
                 .append(" {\n")
-                .append("\tvalue = ").append(value.unmarshall(tabSize++))
+                .append("\tvalue = ").append(value.unmarshall(tabSize))
                 .append("}\n\n")
                 .toString();
     }

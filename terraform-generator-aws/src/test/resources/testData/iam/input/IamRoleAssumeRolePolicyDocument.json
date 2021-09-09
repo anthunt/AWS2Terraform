@@ -1,8 +1,3 @@
-resource aws_iam_role testRole {
-	name = "testRole"
-	path = "/"
-	description = "test description"
-	policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -20,6 +15,3 @@ resource aws_iam_role testRole {
     }
   ]
 }
-EOF
-}
-
