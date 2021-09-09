@@ -18,7 +18,7 @@ public class Variable extends AbstractMarshaller<Variable> {
                 .append(name)
                 .append(" {\n")
                 .append(type != null ? "\t" + type.unmarshall(tabSize++) : "")
-                .append(defaultValue != null ? "\tdefault = " + defaultValue.unmarshall(tabSize++) : "")
+                .append(defaultValue != null ? "\tdefault = " + defaultValue.unmarshall(tabSize) : "")
                 .append("}\n\n")
                 .toString();
     }

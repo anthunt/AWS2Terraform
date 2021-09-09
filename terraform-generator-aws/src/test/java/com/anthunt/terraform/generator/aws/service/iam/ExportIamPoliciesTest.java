@@ -11,15 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.ResourceUtils;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.Policy;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +34,7 @@ class ExportIamPoliciesTest {
 
     @Test
     public void getPolices() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("ulsp-dev").region(Region.AWS_GLOBAL).build();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         IamClient client = amazonClients.getIamClient();
 
         List<PolicyDto> polices = exportIamPolicies.getPolices(client);
@@ -47,7 +42,7 @@ class ExportIamPoliciesTest {
     }
 
     @Test
-    public void getResourceMaps() throws IOException {
+    public void getResourceMaps() {
         //given
         List<PolicyDto> policeDtos = List.of(
                 PolicyDto.builder().policy(
