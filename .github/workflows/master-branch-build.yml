@@ -22,7 +22,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew createExe
+        run: ./gradlew test createExe
 #        run: ./gradlew createExe -x test
       - uses: actions/upload-artifact@v2.1.4
         with:
