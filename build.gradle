@@ -34,6 +34,11 @@ subprojects {
         mavenCentral()
     }
 
+    test {
+        reports.html.required = false
+        reports.junitXml.required = true
+    }
+
     dependencies {
         compileOnly 'org.slf4j:slf4j-api:1.7.31'
         compileOnly 'org.projectlombok:lombok'
