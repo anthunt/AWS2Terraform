@@ -37,14 +37,6 @@ class ExportInstancesTest {
 
     @Test
     @DisabledOnNoAwsCredentials
-    public void describeInstancesResponse() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
-        DescribeInstancesResponse describeInstancesResponse = ec2Client.describeInstances();
-        log.debug("describeInstancesResponse => {}", describeInstancesResponse);
-    }
-
-    @Test
     public void getDescribeInstancesResponse() {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
