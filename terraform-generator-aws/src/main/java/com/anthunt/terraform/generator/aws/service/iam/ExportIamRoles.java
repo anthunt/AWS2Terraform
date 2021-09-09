@@ -55,7 +55,7 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
                                             .argument("name", TFString.build(role.roleName()))
                                             .argument("path", TFString.build(role.path()))
                                             .argument("description", TFString.build(role.description()))
-                                            .argument("policy", TFString.builder().isMultiline(true).value(
+                                            .argument("assume_role_policy", TFString.builder().isMultiline(true).value(
                                                             URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8)
                                             ).build())
                                             .build()
