@@ -24,6 +24,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew test createExe
 #        run: ./gradlew createExe -x test
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: test-results/**/*.xml
       - uses: actions/upload-artifact@v2.1.4
         with:
           name: terraform-generator-boot-jar
