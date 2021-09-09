@@ -15,10 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@SpringBootTest(classes = {AmazonClients.class},
-        properties = {
-        }
-)
+@SpringBootTest(classes = {AmazonClients.class})
 class ExportSecurityGroupsTest {
 
     private static ExportSecurityGroups exportSecurityGroups;

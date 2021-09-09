@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.core.model.terraform.types;
 public enum ProviderType {
     AWS("aws");
 
-    private String provider;
+    private final String provider;
 
     ProviderType(String provider) {
         this.provider = provider;

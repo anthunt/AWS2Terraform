@@ -18,6 +18,10 @@ public class ReservationDto {
         return instances;
     }
 
+    public void setInstances(List<InstanceDto> instances) {
+        this.instances = instances;
+    }
+
     public void add(InstanceDto instanceDto) {
         instances.add(instanceDto);
     }
