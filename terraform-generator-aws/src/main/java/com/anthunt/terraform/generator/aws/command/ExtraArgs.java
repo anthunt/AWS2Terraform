@@ -12,6 +12,7 @@ public class ExtraArgs {
     private Map<String, Object> args;
 
     public <T> T get(String key, Class<T> t) {
+        //noinspection unchecked
         return ((T) args.get(key).getClass());
     }
 }

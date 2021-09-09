@@ -14,8 +14,11 @@ import javax.validation.Valid;
 @ShellComponent
 public class Ec2Commands extends AbstractCommands {
 
-    @Autowired
     private ExportInstances exportInstances;
+
+    public Ec2Commands(ExportInstances exportInstances) {
+        this.exportInstances = exportInstances;
+    }
 
     @ShellMethod("Export terraform resources of ec2 instances.")
     public void ec2Instances(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {

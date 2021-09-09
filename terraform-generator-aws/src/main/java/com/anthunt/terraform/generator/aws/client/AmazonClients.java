@@ -54,6 +54,7 @@ public class AmazonClients {
         for(Method method : methods) {
             if(clazz.isNestmateOf(method.getReturnType())) {
                 try {
+                    //noinspection unchecked
                     return (T) method.invoke(this, new Object[0]);
                 } catch (IllegalAccessException e) {
                     return null;
