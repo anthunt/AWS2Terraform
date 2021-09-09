@@ -22,7 +22,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew createExe -x test
+        run: ./gradlew createExe
+#        run: ./gradlew createExe -x test
       - uses: actions/upload-artifact@v2.1.4
         with:
           name: terraform-generator-boot-jar

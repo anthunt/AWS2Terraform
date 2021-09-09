@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.service.iam;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.service.iam.dto.PolicyDto;
+import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -33,6 +34,7 @@ class ExportIamPoliciesTest {
     }
 
     @Test
+    @DisabledOnNoAwsCredentials
     public void getPolices() {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         IamClient client = amazonClients.getIamClient();

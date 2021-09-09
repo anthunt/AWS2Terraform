@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ class ExportSecurityGroupsTest {
     }
 
     @Test
+    @DisabledOnNoAwsCredentials
     void export() {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
@@ -36,6 +38,7 @@ class ExportSecurityGroupsTest {
     }
 
     @Test
+    @DisabledOnNoAwsCredentials
     void getSecurityGroups() {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
