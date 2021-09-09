@@ -25,6 +25,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew test createExe
 #        run: ./gradlew createExe -x test
+      - run: ls -alR
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
