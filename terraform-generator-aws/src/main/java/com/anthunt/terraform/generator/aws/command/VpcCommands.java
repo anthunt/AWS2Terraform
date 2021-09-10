@@ -14,23 +14,29 @@ import javax.validation.Valid;
 @ShellComponent
 public class VpcCommands extends AbstractCommands {
 
-    @Autowired
-    private ExportVpcs exportVpcs;
+    private final ExportVpcs exportVpcs;
 
-    @Autowired
-    private ExportInternetGateways exportInternetGateways;
+    private final ExportInternetGateways exportInternetGateways;
 
-    @Autowired
-    private ExportNatGateways exportNatGateways;
+    private final ExportNatGateways exportNatGateways;
 
-    @Autowired
-    private ExportEgressOnlyInternetGateways exportEgressOnlyInternetGateways;
+    private final ExportEgressOnlyInternetGateways exportEgressOnlyInternetGateways;
 
-    @Autowired
-    private ExportSubnets exportSubnets;
+    private final ExportSubnets exportSubnets;
 
-    @Autowired
-    private ExportRouteTables exportRouteTables;
+    private final ExportRouteTables exportRouteTables;
+
+    private final ExportSecurityGroups exportSecurityGroups;
+
+    public VpcCommands(ExportVpcs exportVpcs, ExportInternetGateways exportInternetGateways, ExportNatGateways exportNatGateways, ExportEgressOnlyInternetGateways exportEgressOnlyInternetGateways, ExportSubnets exportSubnets, ExportRouteTables exportRouteTables, ExportSecurityGroups exportSecurityGroups) {
+        this.exportVpcs = exportVpcs;
+        this.exportInternetGateways = exportInternetGateways;
+        this.exportNatGateways = exportNatGateways;
+        this.exportEgressOnlyInternetGateways = exportEgressOnlyInternetGateways;
+        this.exportSubnets = exportSubnets;
+        this.exportRouteTables = exportRouteTables;
+        this.exportSecurityGroups = exportSecurityGroups;
+    }
 
     @ShellMethod("Export terraform resources of vpcs")
     public void vpcs(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
@@ -60,5 +66,10 @@ public class VpcCommands extends AbstractCommands {
     @ShellMethod("Export terraform resources of RouteTables")
     public void RouteTables(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         this.exportRouteTables.exportTerraform(Ec2Client.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of SecurityGroups")
+    public void SecurityGroups(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        this.exportSecurityGroups.exportTerraform(Ec2Client.class, commonArgs);
     }
 }

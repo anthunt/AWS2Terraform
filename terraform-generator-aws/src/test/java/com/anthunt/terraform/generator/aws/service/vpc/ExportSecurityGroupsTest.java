@@ -2,12 +2,15 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
+import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
@@ -15,11 +18,16 @@ import software.amazon.awssdk.services.ec2.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
 class ExportSecurityGroupsTest {
 
     private static ExportSecurityGroups exportSecurityGroups;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
 
     @BeforeAll
     public static void beforeAll() {
@@ -96,6 +104,9 @@ class ExportSecurityGroupsTest {
         securityGroups.add(securityGroup);
 
         Maps<Resource> resourceMaps = exportSecurityGroups.getResourceMaps(securityGroups);
-        log.debug("resourceMaps => \n{}", resourceMaps.unmarshall());
+        String actual = resourceMaps.unmarshall();
+        log.debug("resourceMaps => \n{}", actual);
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/iam/expected/SecurityGroup.tf"));
+        assertEquals(expected, actual);
     }
 }
