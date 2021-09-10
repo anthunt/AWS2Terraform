@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
+import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.Role;
 
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -43,8 +45,17 @@ class ExportIamRolesTest {
 
         List<Role> roles = exportIamRoles.getRoles(client);
 
-        log.debug("roles => \n{}", roles);
-
+        roles.stream()
+                .map(role ->
+                        Role.builder()
+                                .arn(role.arn())
+                                .arn(role.roleName())
+                                .arn(role.description())
+                                .arn(role.path())
+                                .assumeRolePolicyDocument(JsonUtils.toPrettyFormat(
+                                        URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8)))
+                                .build())
+                .forEach(role -> log.debug("role => {}", role.toString()));
     }
 
     @Test

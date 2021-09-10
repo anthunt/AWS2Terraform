@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.dto.PolicyDto;
+import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -56,7 +57,7 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
                                             .argument("path", TFString.build(role.path()))
                                             .argument("description", TFString.build(role.description()))
                                             .argument("assume_role_policy", TFString.builder().isMultiline(true).value(
-                                                            URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8)
+                                                    JsonUtils.toPrettyFormat(URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8))
                                             ).build())
                                             .build()
                             ).build()
