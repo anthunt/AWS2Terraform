@@ -25,8 +25,8 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --info test createExe
 #        run: ./gradlew createExe -x test
-      - if: always()
-        run: ls -alR --ignore=.git
+#      - if: always()
+#        run: ls -alR --ignore=.git
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
