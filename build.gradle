@@ -69,7 +69,7 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:sts:2.16.95'
         implementation 'software.amazon.awssdk:ec2:2.16.92'
         implementation 'software.amazon.awssdk:rds:2.16.95'
-        implementation 'software.amazon.awssdk:route53:2.16.92'
+        implementation 'software.amazon.awssdk:route53:2.17.37'
         implementation 'software.amazon.awssdk:directory:2.16.95'
         implementation 'software.amazon.awssdk:directconnect:2.16.92'
         implementation 'software.amazon.awssdk:iam:2.16.92'
@@ -81,6 +81,9 @@ project(':terraform-generator-aws') {
         implementation 'software.amazon.awssdk:elasticache:2.16.92'
         implementation 'software.amazon.awssdk:elasticloadbalancing:2.16.95'
         implementation 'software.amazon.awssdk:elasticloadbalancingv2:2.16.92'
+        implementation 'com.google.code.gson:gson:2.8.8'
+
+
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 }
