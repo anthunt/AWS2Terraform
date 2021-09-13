@@ -37,7 +37,7 @@ public class TFString extends AbstractMarshaller<TFString> {
 
         if (currentValue == null) {
             return new StringBuffer()
-                    .append(this.value)
+                    .append("null")
                     .append(this.isLineIndent ? "\n" : "")
                     .toString();
         } else {
