@@ -31,45 +31,46 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
 
     }
 
-    protected List<ReservationDto> getReservations(Ec2Client client) {
+    List<ReservationDto> getReservations(Ec2Client client) {
 
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
         List<ReservationDto> reservations = new ArrayList<>();
 
         for(Reservation reservation : describeInstancesResponse.reservations()) {
-            ReservationDto reservationDto = new ReservationDto();
-            reservations.add(reservationDto);
-
+            ReservationDto.ReservationDtoBuilder reservationDtoBuilder = ReservationDto.builder();
             for (Instance instance : reservation.instances()) {
-                InstanceDto instanceDto = new InstanceDto();
-                instanceDto.setInstance(instance);
-                reservationDto.add(instanceDto);
+                InstanceDto.InstanceDtoBuilder instanceDtoBuilder = InstanceDto.builder();
+                instanceDtoBuilder.instance(instance);
 
                 DescribeInstanceAttributeResponse disableApiTerminationAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
                         .build());
-                instanceDto.setDisableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
+                instanceDtoBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
 
                 DescribeInstanceAttributeResponse shutdownBehaviorAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
                         .build());
-                instanceDto.setShutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
+                instanceDtoBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
 
                 DescribeInstanceAttributeResponse userDataAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.USER_DATA)
                         .build());
-                instanceDto.setUserData(userDataAttribute.userData().value());
+                instanceDtoBuilder.userData(userDataAttribute.userData().value());
 
+
+                reservationDtoBuilder.instance(instanceDtoBuilder.build());
             }
+            reservations.add(reservationDtoBuilder.build());
+
         }
 
         return reservations;
     }
 
-    private Maps<Resource> getResourceMaps(List<ReservationDto> reservationDtos) {
+    Maps<Resource> getResourceMaps(List<ReservationDto> reservationDtos) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
         int i = 0;
@@ -85,7 +86,7 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                 .argument("ami", TFString.build(instance.imageId()))
                                                 .argument("placement_group", TFString.build(instance.placement().groupName()))
                                                 .argument("tenancy", TFString.build(instance.placement().tenancyAsString()))
-                                                .argument("host_id", TFString.build(instance.placement().hostId()))
+                                                .argument("host_id", TFString.builder().isEmptyStringToNull(true).value(instance.placement().hostId()).build())
                                                 .argument("cpu_core_count", TFNumber.build(instance.cpuOptions().coreCount().toString()))
                                                 .argument("cpu_threads_per_core", TFNumber.build(instance.cpuOptions().threadsPerCore().toString()))
                                                 .argument("ebs_optimized", TFBool.build(instance.ebsOptimized()))
@@ -95,8 +96,11 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                 .argument("key_name", TFString.build(instance.keyName()))
                                                 //.argument("get_password_data", TFBool.build(instance.pass))
                                                 .argument("monitoring", TFBool.build(instance.monitoring().state() == MonitoringState.ENABLED))
-                                                .argument("vpc_security_group_ids", TFList.builder()
-                                                        .lists(instance.securityGroups().stream().map(sg->TFString.build(sg.groupId())).collect(Collectors.toList()))
+                                                .argument("vpc_security_group_ids", TFList.builder().isLineIndent(false)
+                                                        .lists(instance.securityGroups().stream().map(sg->TFString.builder()
+                                                                .isLineIndent(false)
+                                                                .value(sg.groupId()).build())
+                                                                .collect(Collectors.toList()))
                                                         .build())
                                                 .argument("subnet_id", TFString.build(instance.subnetId()))
                                                 //.argument("associate_public_ip_address", TFBool.build(instance.))
