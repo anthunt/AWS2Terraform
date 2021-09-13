@@ -41,7 +41,7 @@ class ExportIamRolePolicesTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getRolePolices() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("ulsp-dev").region(Region.AWS_GLOBAL).build();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         IamClient client = amazonClients.getIamClient();
 
         List<GetRolePolicyResponse> rolePolices = exportIamRolePolices.getRolePolices(client);
