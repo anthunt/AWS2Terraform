@@ -40,7 +40,7 @@ class ExportIamRolesTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getRoles() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("ulsp-dev").region(Region.AWS_GLOBAL).build();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         IamClient client = amazonClients.getIamClient();
 
         List<Role> roles = exportIamRoles.getRoles(client);

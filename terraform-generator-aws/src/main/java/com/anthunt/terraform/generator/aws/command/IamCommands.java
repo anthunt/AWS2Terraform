@@ -21,10 +21,13 @@ public class IamCommands {
 
     private ExportIamPolicies exportIamPolicies;
 
-    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies) {
+    private ExportIamPolicies exportIamPolicyAttachment;
+
+    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamPolicies exportIamPolicyAttachment) {
         this.exportIamRoles = exportIamRoles;
         this.exportIamRolePolicies = exportIamRolePolicies;
         this.exportIamPolicies = exportIamPolicies;
+        this.exportIamPolicyAttachment = exportIamPolicyAttachment;
     }
 
     @ShellMethod("Export terraform resources of iamRoles.")
@@ -40,5 +43,10 @@ public class IamCommands {
     @ShellMethod("Export terraform resources of iamPolicies.")
     public void iamPolicies(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportIamPolicies.exportTerraform(IamClient.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of iamPolicyAttachment.")
+    public void iamPolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportIamPolicyAttachment.exportTerraform(IamClient.class, commonArgs);
     }
 }
