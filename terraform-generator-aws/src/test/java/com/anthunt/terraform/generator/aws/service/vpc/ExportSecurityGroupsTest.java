@@ -106,7 +106,7 @@ class ExportSecurityGroupsTest {
         Maps<Resource> resourceMaps = exportSecurityGroups.getResourceMaps(securityGroups);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/iam/expected/SecurityGroup.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/SecurityGroup.tf"));
         assertEquals(expected, actual);
     }
 }
