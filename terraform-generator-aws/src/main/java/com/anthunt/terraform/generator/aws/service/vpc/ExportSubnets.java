@@ -29,21 +29,21 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
         return getResourceMaps(subnets);
     }
 
-    protected List<Subnet> getSubnets(Ec2Client client) {
+    List<Subnet> getSubnets(Ec2Client client) {
         DescribeSubnetsResponse describeSubnetsResponse = client.describeSubnets();
         return describeSubnetsResponse.subnets();
     }
 
-    protected Maps<Resource> getResourceMaps(List<Subnet> subnets) {
+    Maps<Resource> getResourceMaps(List<Subnet> subnets) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int i = 0;
         for(Subnet subnet : subnets) {
-
+            log.debug("subnet => {}", subnet);
             TFArguments.TFArgumentsBuilder tfArgumentsBuilder = TFArguments.builder();
 
             tfArgumentsBuilder.argument("availability_zone_id", TFString.build(subnet.availabilityZoneId()));
             tfArgumentsBuilder.argument("cidr_block", TFString.build(subnet.cidrBlock()));
-            if(subnet.hasIpv6CidrBlockAssociationSet()) {
+            if(!subnet.ipv6CidrBlockAssociationSet().isEmpty()) {
                 tfArgumentsBuilder.argument("ipv6_cidr_block", TFString.build(subnet.ipv6CidrBlockAssociationSet().get(0).ipv6CidrBlock()));
             }
             tfArgumentsBuilder.argument("map_public_ip_on_launch", TFBool.build(subnet.mapPublicIpOnLaunch()));
