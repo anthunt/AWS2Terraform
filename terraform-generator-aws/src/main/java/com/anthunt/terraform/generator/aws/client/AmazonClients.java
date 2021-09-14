@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.directconnect.DirectConnectClient;
 import software.amazon.awssdk.services.directory.DirectoryClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ecr.EcrClient;
+import software.amazon.awssdk.services.efs.EfsClient;
 import software.amazon.awssdk.services.elasticache.ElastiCacheClient;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
@@ -172,4 +173,10 @@ public class AmazonClients {
                 .build();
     }
 
+    public EfsClient getEfsClient() {
+        return EfsClient.builder()
+                .region(region)
+                .credentialsProvider(getCredentialsProvider())
+                .build();
+    }
 }
