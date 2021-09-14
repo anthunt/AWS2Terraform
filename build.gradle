@@ -41,7 +41,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly 'org.slf4j:slf4j-api:1.7.31'
+        compileOnly 'org.slf4j:slf4j-api:1.7.32'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.projectlombok:lombok'
@@ -83,6 +83,7 @@ project(':terraform-generator-aws') {
         implementation "software.amazon.awssdk:elasticloadbalancing:${awsSdkVersion}"
         implementation "software.amazon.awssdk:elasticloadbalancingv2:${awsSdkVersion}"
         implementation "software.amazon.awssdk:ecr:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:efs:${awsSdkVersion}"
         implementation "com.google.code.gson:gson:2.8.8"
 
 
