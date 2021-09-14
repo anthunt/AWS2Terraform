@@ -1,5 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
+import com.anthunt.terraform.generator.aws.service.iam.ExportIamInstanceProfiles;
 import com.anthunt.terraform.generator.aws.service.iam.ExportIamPolicies;
 import com.anthunt.terraform.generator.aws.service.iam.ExportIamRolePolicies;
 import com.anthunt.terraform.generator.aws.service.iam.ExportIamRoles;
@@ -23,11 +24,14 @@ public class IamCommands {
 
     private ExportIamPolicies exportIamPolicyAttachment;
 
-    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamPolicies exportIamPolicyAttachment) {
+    private ExportIamInstanceProfiles exportIamInstanceProfiles;
+
+    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamPolicies exportIamPolicyAttachment, ExportIamInstanceProfiles exportIamInstanceProfiles) {
         this.exportIamRoles = exportIamRoles;
         this.exportIamRolePolicies = exportIamRolePolicies;
         this.exportIamPolicies = exportIamPolicies;
         this.exportIamPolicyAttachment = exportIamPolicyAttachment;
+        this.exportIamInstanceProfiles = exportIamInstanceProfiles;
     }
 
     @ShellMethod("Export terraform resources of iamRoles.")
@@ -48,5 +52,10 @@ public class IamCommands {
     @ShellMethod("Export terraform resources of iamPolicyAttachment.")
     public void iamPolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportIamPolicyAttachment.exportTerraform(IamClient.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of iamInstanceProfiles.")
+    public void iamInstanceProfiles(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportIamInstanceProfiles.exportTerraform(IamClient.class, commonArgs);
     }
 }

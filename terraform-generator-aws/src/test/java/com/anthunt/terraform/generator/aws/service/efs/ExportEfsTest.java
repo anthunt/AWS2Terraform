@@ -39,7 +39,7 @@ class ExportEfsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("ulsp-dev").region(Region.AP_NORTHEAST_2).build();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         EfsClient efsClient = amazonClients.getEfsClient();
         Maps<Resource> export = exportEfs.export(efsClient, null, null);
         log.debug("export => \n{}", export.unmarshall());
