@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
 import software.amazon.awssdk.services.directconnect.DirectConnectClient;
 import software.amazon.awssdk.services.directory.DirectoryClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ecr.EcrClient;
 import software.amazon.awssdk.services.elasticache.ElastiCacheClient;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
@@ -159,6 +160,13 @@ public class AmazonClients {
 
     public Route53Client getRoute53Client() {
         return Route53Client.builder()
+                .region(region)
+                .credentialsProvider(getCredentialsProvider())
+                .build();
+    }
+
+    public EcrClient getEcrClient() {
+        return EcrClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
