@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        springBootVersion = '2.5.2'
+        springBootVersion = '2.5.4'
         springGradlePluginVersion = '1.0.11.RELEASE'
-        awsSdkVersion = '2.17.38'
+        awsSdkVersion = '2.17.39'
     }
     repositories {
         mavenCentral()
@@ -41,13 +41,13 @@ subprojects {
     }
 
     dependencies {
-        compileOnly 'org.slf4j:slf4j-api:1.7.31'
+        compileOnly 'org.slf4j:slf4j-api:1.7.32'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
         // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.2'
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.0'
         //testCompile group: 'junit', name: 'junit', version: '4.+'
     }
 }
