@@ -2,6 +2,7 @@ buildscript {
     ext {
         springBootVersion = '2.5.2'
         springGradlePluginVersion = '1.0.11.RELEASE'
+        awsSdkVersion = '2.17.39'
     }
     repositories {
         mavenCentral()
@@ -66,22 +67,23 @@ project(':terraform-generator-aws') {
         implementation 'com.beust:jcommander:1.48'
         implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
-        implementation 'software.amazon.awssdk:sts:2.16.95'
-        implementation 'software.amazon.awssdk:ec2:2.16.92'
-        implementation 'software.amazon.awssdk:rds:2.16.95'
-        implementation 'software.amazon.awssdk:route53:2.16.92'
-        implementation 'software.amazon.awssdk:directory:2.16.95'
-        implementation 'software.amazon.awssdk:directconnect:2.16.92'
-        implementation 'software.amazon.awssdk:iam:2.16.92'
-        implementation 'software.amazon.awssdk:apigateway:2.16.92'
-        implementation 'software.amazon.awssdk:lambda:2.16.95'
-        implementation 'software.amazon.awssdk:s3:2.16.92'
-        implementation 'software.amazon.awssdk:acm:2.15.33'
-        implementation 'software.amazon.awssdk:kms:2.16.92'
-        implementation 'software.amazon.awssdk:elasticache:2.16.92'
-        implementation 'software.amazon.awssdk:elasticloadbalancing:2.16.95'
-        implementation 'software.amazon.awssdk:elasticloadbalancingv2:2.16.92'
-        implementation 'com.google.code.gson:gson:2.8.8'
+        implementation "software.amazon.awssdk:sts:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:ec2:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:rds:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:route53:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:directory:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:directconnect:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:iam:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:apigateway:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:lambda:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:s3:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:acm:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:kms:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:elasticache:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:elasticloadbalancing:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:elasticloadbalancingv2:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:ecr:${awsSdkVersion}"
+        implementation "com.google.code.gson:gson:2.8.8"
 
 
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
