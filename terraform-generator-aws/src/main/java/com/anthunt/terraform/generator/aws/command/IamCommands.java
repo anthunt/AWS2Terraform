@@ -1,9 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamPolicies;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamRolePolicies;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamRolePolicyAttachment;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamRoles;
+import com.anthunt.terraform.generator.aws.service.iam.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -24,11 +21,14 @@ public class IamCommands {
 
     private ExportIamRolePolicyAttachment exportIamRolePolicyAttachment;
 
-    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamRolePolicyAttachment exportIamRolePolicyAttachment) {
+    private ExportIamInstanceProfiles exportIamInstanceProfiles;
+
+    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamRolePolicyAttachment exportIamRolePolicyAttachment, ExportIamInstanceProfiles exportIamInstanceProfiles) {
         this.exportIamRoles = exportIamRoles;
         this.exportIamRolePolicies = exportIamRolePolicies;
         this.exportIamPolicies = exportIamPolicies;
         this.exportIamRolePolicyAttachment = exportIamRolePolicyAttachment;
+        this.exportIamInstanceProfiles = exportIamInstanceProfiles;
     }
 
     @ShellMethod("Export terraform resources of iamRoles.")
@@ -49,5 +49,10 @@ public class IamCommands {
     @ShellMethod("Export terraform resources of iamRolePolicyAttachment.")
     public void iamRolePolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportIamRolePolicyAttachment.exportTerraform(IamClient.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of iamInstanceProfiles.")
+    public void iamInstanceProfiles(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportIamInstanceProfiles.exportTerraform(IamClient.class, commonArgs);
     }
 }
