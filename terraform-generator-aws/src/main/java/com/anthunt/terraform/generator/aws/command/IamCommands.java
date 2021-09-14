@@ -1,9 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamInstanceProfiles;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamPolicies;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamRolePolicies;
-import com.anthunt.terraform.generator.aws.service.iam.ExportIamRoles;
+import com.anthunt.terraform.generator.aws.service.iam.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -22,15 +19,15 @@ public class IamCommands {
 
     private ExportIamPolicies exportIamPolicies;
 
-    private ExportIamPolicies exportIamPolicyAttachment;
+    private ExportIamRolePolicyAttachment exportIamRolePolicyAttachment;
 
     private ExportIamInstanceProfiles exportIamInstanceProfiles;
 
-    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamPolicies exportIamPolicyAttachment, ExportIamInstanceProfiles exportIamInstanceProfiles) {
+    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamRolePolicyAttachment exportIamRolePolicyAttachment, ExportIamInstanceProfiles exportIamInstanceProfiles) {
         this.exportIamRoles = exportIamRoles;
         this.exportIamRolePolicies = exportIamRolePolicies;
         this.exportIamPolicies = exportIamPolicies;
-        this.exportIamPolicyAttachment = exportIamPolicyAttachment;
+        this.exportIamRolePolicyAttachment = exportIamRolePolicyAttachment;
         this.exportIamInstanceProfiles = exportIamInstanceProfiles;
     }
 
@@ -49,9 +46,9 @@ public class IamCommands {
         exportIamPolicies.exportTerraform(IamClient.class, commonArgs);
     }
 
-    @ShellMethod("Export terraform resources of iamPolicyAttachment.")
-    public void iamPolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
-        exportIamPolicyAttachment.exportTerraform(IamClient.class, commonArgs);
+    @ShellMethod("Export terraform resources of iamRolePolicyAttachment.")
+    public void iamRolePolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportIamRolePolicyAttachment.exportTerraform(IamClient.class, commonArgs);
     }
 
     @ShellMethod("Export terraform resources of iamInstanceProfiles.")
