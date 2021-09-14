@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.core.model.terraform.nodes;
 import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import lombok.Builder;
+import lombok.Singular;
 import lombok.ToString;
 
 @Builder
