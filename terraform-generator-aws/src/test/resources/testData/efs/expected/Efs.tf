@@ -10,6 +10,16 @@ resource aws_efs_file_system efs-test-app {
 	}
 }
 
+resource aws_efs_mount_target fsmt-01020304 {
+	file_system_id = aws_efs_file_system.efs-test-app.id
+	subnet_id = aws_subnet.subnet-0f58e2bf1ada4d5c0.id
+}
+
+resource aws_efs_mount_target fsmt-02030405 {
+	file_system_id = aws_efs_file_system.efs-test-app.id
+	subnet_id = aws_subnet.subnet-003e5f077d31b5163.id
+}
+
 resource aws_efs_file_system_policy efs-test-app-policy {
 	file_system_id = aws_efs_file_system.efs-test-app.id
 	policy = <<EOF

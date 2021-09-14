@@ -15,10 +15,9 @@ import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.efs.EfsClient;
 import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.efs.model.MountTargetDescription;
 import software.amazon.awssdk.services.efs.model.Tag;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,11 +55,21 @@ class ExportEfsTest {
                                 .throughputMode("bursting")
                                 .provisionedThroughputInMibps(null)
                                 .tags(Tag.builder().key("Name").value("efs-test-app").build(),
-                                      Tag.builder().key("aws:elasticfilesystem:default-backup").value("enabled").build())
+                                        Tag.builder().key("aws:elasticfilesystem:default-backup").value("enabled").build())
                                 .build())
                         .backupPolicyStatus("ENABLED")
                         .fileSystemPolicy(TestDataFileUtils.asString(
-                                        resourceLoader.getResource("testData/efs/input/FileSystemPolicyDocument.json")))
+                                resourceLoader.getResource("testData/efs/input/FileSystemPolicyDocument.json")))
+                        .mountTargets(List.of(
+                                MountTargetDescription.builder()
+                                        .mountTargetId("fsmt-01020304")
+                                        .subnetId("subnet-0f58e2bf1ada4d5c0")
+                                        .build(),
+                                MountTargetDescription.builder()
+                                        .mountTargetId("fsmt-02030405")
+                                        .subnetId("subnet-003e5f077d31b5163")
+                                        .build()
+                        ))
                         .build(),
                 EfsDto.builder().fileSystemDescription(FileSystemDescription.builder()
                                 .encrypted(false)
