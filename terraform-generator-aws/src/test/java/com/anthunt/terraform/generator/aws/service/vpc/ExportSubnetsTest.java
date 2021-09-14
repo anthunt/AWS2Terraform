@@ -50,6 +50,7 @@ class ExportSubnetsTest {
         // given
         List<Subnet> subnets = List.of(
                 Subnet.builder()
+                        .subnetId("subnet-01020304")
                         .availabilityZoneId("apne2-az2")
                         .cidrBlock("172.31.16.0/20")
                         .mapPublicIpOnLaunch(true)
@@ -57,6 +58,7 @@ class ExportSubnetsTest {
                         .vpcId("vpc-7931b212")
                         .build(),
                 Subnet.builder()
+                        .subnetId("subnet-02020304")
                         .availabilityZoneId("apne2-az1")
                         .cidrBlock("172.31.0.0/20")
                         .mapPublicIpOnLaunch(true)
@@ -64,6 +66,7 @@ class ExportSubnetsTest {
                         .vpcId("vpc-7931b212")
                         .build(),
                 Subnet.builder()
+                        .subnetId("subnet-03020304")
                         .availabilityZoneId("apne2-az3")
                         .cidrBlock("172.31.32.0/20")
                         .mapPublicIpOnLaunch(true)

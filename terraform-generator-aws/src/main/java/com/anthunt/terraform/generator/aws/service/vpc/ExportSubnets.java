@@ -12,6 +12,7 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
@@ -60,12 +61,10 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_subnet")
-                            .name("subnet" + i)
+                            .name(subnet.subnetId())
                             .arguments(tfArgumentsBuilder.build())
                             .build()
             );
-
-            i++;
         }
 
         return resourceMapsBuilder.build();
