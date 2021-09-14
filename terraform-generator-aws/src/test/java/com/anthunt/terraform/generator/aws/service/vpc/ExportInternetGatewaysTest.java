@@ -13,8 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.NatGateway;
-import software.amazon.awssdk.services.ec2.model.NatGatewayAddress;
+import software.amazon.awssdk.services.ec2.model.InternetGateway;
+import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
 import java.util.List;
@@ -23,16 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportNatGatewaysTest {
+class ExportInternetGatewaysTest {
 
-    private static ExportNatGateways exportNatGateways;
+    private static ExportInternetGateways exportInternetGateways;
 
     @Autowired
     private ResourceLoader resourceLoader;
 
     @BeforeAll
     public static void beforeAll() {
-        exportNatGateways = new ExportNatGateways();
+        exportInternetGateways = new ExportInternetGateways();
     }
 
     @Test
@@ -41,7 +41,7 @@ class ExportNatGatewaysTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        Maps<Resource> export = exportNatGateways.export(ec2Client, null, null);
+        Maps<Resource> export = exportInternetGateways.export(ec2Client, null, null);
 
         log.debug("result => \n{}", export.unmarshall());
     }
@@ -49,18 +49,17 @@ class ExportNatGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<NatGateway> natGateways = List.of(
-                NatGateway.builder()
-                        .natGatewayAddresses(NatGatewayAddress.builder().allocationId("eipalloc-00233be7c04412bd6").build())
-                        .subnetId("subnet-0c70ad21c05c0c464")
+        List<InternetGateway> internetGateways = List.of(
+                InternetGateway.builder()
+                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
                         .tags(Tag.builder().key("Name").value("test").build())
                         .build()
             );
 
-        Maps<Resource> resourceMaps = exportNatGateways.getResourceMaps(natGateways);
+        Maps<Resource> resourceMaps = exportInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/NatGateway.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/InternetGateway.tf"));
         assertEquals(expected, actual);
     }
 }
