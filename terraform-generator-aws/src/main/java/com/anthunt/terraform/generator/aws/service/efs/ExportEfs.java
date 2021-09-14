@@ -41,6 +41,7 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                         .fileSystemDescription(fileSystem)
                         .backupPolicyStatus(getBackupPolicyStatus(client, fileSystem.fileSystemId()))
                         .fileSystemPolicy(getFileSystemPolicy(client, fileSystem.fileSystemId()))
+                        .mountTargets(getMountTargets(client, fileSystem.fileSystemId()))
                         .build())
                 .peek(efsDto -> log.debug("fileSystemPolicy => {}", efsDto.getFileSystemPolicy()))
                 .collect(Collectors.toList());
@@ -69,6 +70,17 @@ public class ExportEfs extends AbstractExport<EfsClient> {
         }
     }
 
+    private List<MountTargetDescription> getMountTargets(EfsClient client, String fileSystemId) {
+        try {
+            return client.describeMountTargets(DescribeMountTargetsRequest.builder()
+                    .fileSystemId(fileSystemId)
+                    .build()).mountTargets();
+        } catch (MountTargetNotFoundException e) {
+            // normal case
+            return null;
+        }
+    }
+
     Maps<Resource> getResourceMaps(List<EfsDto> efsDtos) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int index = 0;
@@ -80,25 +92,44 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                     .map(tag -> tag.value()).orElse("aws_efs_file_system-" + index++);
 
             resourceMapsBuilder.map(
-                    Resource.builder()
-                            .api("aws_efs_file_system")
-                            .name(fileSystemName)
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("encrypted", TFBool.build(fileSystem.encrypted()))
-                                            .argument("kms_key_id", TFString.build(fileSystem.kmsKeyId()))
-                                            .argument("performance_mode", TFString.build(fileSystem.performanceModeAsString()))
-                                            .argument("throughput_mode", TFString.build(fileSystem.throughputModeAsString()))
-                                            .argument("provisioned_throughput_in_mibps",
-                                                    Optional.ofNullable(fileSystem.provisionedThroughputInMibps())
-                                                            .map(v -> TFNumber.build(v.toString())).orElse(TFNumber.build(null)))
-                                            .argument("tags", TFMap.build(
-                                                    fileSystem.tags().stream()
-                                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                            ))
-                                            .build())
-                            .build())
+                            Resource.builder()
+                                    .api("aws_efs_file_system")
+                                    .name(fileSystemName)
+                                    .arguments(
+                                            TFArguments.builder()
+                                                    .argument("encrypted", TFBool.build(fileSystem.encrypted()))
+                                                    .argument("kms_key_id", TFString.build(fileSystem.kmsKeyId()))
+                                                    .argument("performance_mode", TFString.build(fileSystem.performanceModeAsString()))
+                                                    .argument("throughput_mode", TFString.build(fileSystem.throughputModeAsString()))
+                                                    .argument("provisioned_throughput_in_mibps",
+                                                            Optional.ofNullable(fileSystem.provisionedThroughputInMibps())
+                                                                    .map(v -> TFNumber.build(v.toString())).orElse(TFNumber.build(null)))
+                                                    .argument("tags", TFMap.build(
+                                                            fileSystem.tags().stream()
+                                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                                    ))
+                                                    .build())
+                                    .build())
                     .build();
+            if (efsDto.getMountTargets() != null) {
+                efsDto.getMountTargets().stream().forEach(mountTarget ->
+                        resourceMapsBuilder.map(
+                                        Resource.builder()
+                                                .api("aws_efs_mount_target")
+                                                .name(mountTarget.mountTargetId())
+                                                .arguments(TFArguments.builder()
+                                                        .argument("file_system_id", TFExpression.builder()
+                                                                .expression(MessageFormat.format("aws_efs_file_system.{0}.id", fileSystemName))
+                                                                .build())
+                                                        .argument("subnet_id", TFExpression.builder()
+                                                                .expression(MessageFormat.format("aws_subnet.{0}.id", mountTarget.subnetId()))
+                                                                .build())
+                                                        .build())
+                                                .build())
+                                .build()
+                );
+
+            }
             if (efsDto.getFileSystemPolicy() != null) {
                 resourceMapsBuilder.map(
                                 Resource.builder()
