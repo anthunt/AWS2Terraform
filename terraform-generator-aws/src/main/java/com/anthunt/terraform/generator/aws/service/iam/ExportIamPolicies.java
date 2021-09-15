@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.iam.dto.PolicyDto;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSPolicy;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -28,17 +28,17 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<PolicyDto> policies = getPolices(client);
+        List<AWSPolicy> policies = getPolices(client);
 
         return getResourceMaps(policies);
 
     }
 
-    List<PolicyDto> getPolices(IamClient client) {
+    List<AWSPolicy> getPolices(IamClient client) {
         ListPoliciesResponse listPoliciesResponse = client.listPolicies(ListPoliciesRequest.builder().build());
         return listPoliciesResponse.policies().stream()
                 .filter(policy -> !policy.arn().startsWith("arn:aws:iam::aws:policy/"))
-                .map(policy -> PolicyDto.builder().policy(policy)
+                .map(policy -> AWSPolicy.builder().policy(policy)
                         .document(
                                 decodeURL(
                                     client.getPolicyVersion(
@@ -53,11 +53,11 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<PolicyDto> policyDtos) {
+    Maps<Resource> getResourceMaps(List<AWSPolicy> awsPolicies) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (PolicyDto policyDto:policyDtos) {
-            Policy policy = policyDto.getPolicy();
-            String document = policyDto.getDocument();
+        for (AWSPolicy awsPolicy : awsPolicies) {
+            Policy policy = awsPolicy.getPolicy();
+            String document = awsPolicy.getDocument();
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_iam_policy")

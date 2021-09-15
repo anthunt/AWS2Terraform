@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.elb;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.elb.model.LoadBalancerDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSLoadBalancer;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -23,17 +23,17 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<LoadBalancerDto> loadBalancerDtos = getLoadBalancers(client);
+        List<AWSLoadBalancer> AWSLoadBalancers = getLoadBalancers(client);
 
-        return getResourceMaps(loadBalancerDtos);
+        return getResourceMaps(AWSLoadBalancers);
 
     }
 
-    List<LoadBalancerDto> getLoadBalancers(ElasticLoadBalancingV2Client client) {
+    List<AWSLoadBalancer> getLoadBalancers(ElasticLoadBalancingV2Client client) {
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         return describeLoadBalancersResponse.loadBalancers().stream()
-                .map(loadBalancer -> LoadBalancerDto.builder()
+                .map(loadBalancer -> AWSLoadBalancer.builder()
                         .loadBalancer(loadBalancer)
                         .loadBalancerAttributes(
                                 client.describeLoadBalancerAttributes(DescribeLoadBalancerAttributesRequest.builder()
@@ -53,12 +53,12 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<LoadBalancerDto> loadBalancerDtos) {
+    Maps<Resource> getResourceMaps(List<AWSLoadBalancer> AWSLoadBalancers) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (LoadBalancerDto loadBalancerDto : loadBalancerDtos) {
-            LoadBalancer loadBalancer = loadBalancerDto.getLoadBalancer();
-            List<LoadBalancerAttribute> attributes = loadBalancerDto.getLoadBalancerAttributes();
-            List<Tag> tags = loadBalancerDto.getTags();
+        for (AWSLoadBalancer AWSLoadBalancer : AWSLoadBalancers) {
+            LoadBalancer loadBalancer = AWSLoadBalancer.getLoadBalancer();
+            List<LoadBalancerAttribute> attributes = AWSLoadBalancer.getLoadBalancerAttributes();
+            List<Tag> tags = AWSLoadBalancer.getTags();
             int blockIndex = 0;
             resourceMapsBuilder.map(
                             Resource.builder()

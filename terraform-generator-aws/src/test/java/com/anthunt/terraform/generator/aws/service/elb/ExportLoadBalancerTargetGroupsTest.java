@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.elb;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.elb.model.TargetGroupDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -14,7 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.*;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
 
 import java.util.List;
 
@@ -47,14 +50,14 @@ class ExportLoadBalancerTargetGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getTargetGroups() {
-        List<TargetGroupDto> loadBalancerDtos = exportLoadBalancerTargetGroups.getTagetGroups(client);
-        log.debug("loadBalancerDtos => {}", loadBalancerDtos);
+        List<AWSTargetGroup> awsTargetGroups = exportLoadBalancerTargetGroups.getTagetGroups(client);
+        log.debug("awsTargetGroups => {}", awsTargetGroups);
     }
 
     @Test
     public void getResourceMaps() {
-        List<TargetGroupDto> targetGroupDto = List.of(
-                TargetGroupDto.builder()
+        List<AWSTargetGroup> awsTargetGroups = List.of(
+                AWSTargetGroup.builder()
                         .targetGroup(TargetGroup.builder()
                                 .targetGroupName("k8s-ingressn-ingressn-1dab2d3f88")
                                 .port(30832)
@@ -74,7 +77,7 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .value("300")
                                 .build())
                         .build(),
-                TargetGroupDto.builder()
+                AWSTargetGroup.builder()
                         .targetGroup(TargetGroup.builder()
                                 .targetGroupName("tg-dev-service-was")
                                 .port(8080)
@@ -96,7 +99,7 @@ class ExportLoadBalancerTargetGroupsTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportLoadBalancerTargetGroups.getResourceMaps(targetGroupDto);
+        Maps<Resource> resourceMaps = exportLoadBalancerTargetGroups.getResourceMaps(awsTargetGroups);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.service.efs.dto;
+package com.anthunt.terraform.generator.aws.service.efs.model;
 
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class EfsDto {
+public class AWSEfs {
     private FileSystemDescription fileSystemDescription;
     private String backupPolicyStatus;
     private String fileSystemPolicy;

@@ -1,8 +1,8 @@
 package com.anthunt.terraform.generator.aws.service.ec2;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.InstanceDto;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.ReservationDto;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSInstance;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSReservation;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -50,15 +50,15 @@ class ExportInstancesTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        List<ReservationDto> reservationDtos = exportInstances.getReservations(ec2Client);
-        log.debug("reservationDtos => {}", reservationDtos);
+        List<AWSReservation> awsReservations = exportInstances.getReservations(ec2Client);
+        log.debug("awsReservations => {}", awsReservations);
     }
 
     @Test
     public void getResourceMaps() {
-        List<ReservationDto> reservationDtos = List.of(
-                ReservationDto.builder()
-                        .instance(InstanceDto.builder()
+        List<AWSReservation> awsReservations = List.of(
+                AWSReservation.builder()
+                        .instance(AWSInstance.builder()
                                 .instance(Instance.builder()
                                         .amiLaunchIndex(0)
                                         .imageId("ami-0685efd12a23690f5")
@@ -88,7 +88,7 @@ class ExportInstancesTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportInstances.getResourceMaps(reservationDtos);
+        Maps<Resource> resourceMaps = exportInstances.getResourceMaps(awsReservations);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.vpc.dto.VpcDto;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Vpc;
 
 import java.util.List;
@@ -49,8 +48,8 @@ class ExportVpcsTest {
     @Test
     void getResourceMaps() {
         // given
-        List<VpcDto> vpcs = List.of(
-                VpcDto.builder()
+        List<AWSVpc> vpcs = List.of(
+                AWSVpc.builder()
                         .vpc(Vpc.builder()
                                 .cidrBlock("172.31.0.0/16")
                                 .instanceTenancy("default")

@@ -3,14 +3,17 @@ package com.anthunt.terraform.generator.aws.service.elb;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.elb.model.TargetGroupDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.*;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupAttributesRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -23,18 +26,18 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<TargetGroupDto> loadBalancerDtos = getTagetGroups(client);
-        return getResourceMaps(loadBalancerDtos);
+        List<AWSTargetGroup> awsLoadBalancers = getTagetGroups(client);
+        return getResourceMaps(awsLoadBalancers);
 
     }
 
-    List<TargetGroupDto> getTagetGroups(ElasticLoadBalancingV2Client client) {
+    List<AWSTargetGroup> getTagetGroups(ElasticLoadBalancingV2Client client) {
 
         DescribeTargetGroupsResponse describeTargetGroupsResponse = client.describeTargetGroups();
         return describeTargetGroupsResponse.targetGroups()
                 .stream()
                 .peek(targetGroup -> log.debug("targetGroup => {}", targetGroup))
-                .map(targetGroup -> TargetGroupDto.builder()
+                .map(targetGroup -> AWSTargetGroup.builder()
                         .targetGroup(targetGroup)
                         .targetGroupAttributes(
                                 client.describeTargetGroupAttributes(DescribeTargetGroupAttributesRequest.builder()
@@ -45,12 +48,12 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<TargetGroupDto> targetGroupDtos) {
+    Maps<Resource> getResourceMaps(List<AWSTargetGroup> awsTargetGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
-        for (TargetGroupDto targetGroupDto : targetGroupDtos) {
-            TargetGroup targetGroup = targetGroupDto.getTargetGroup();
-            List<TargetGroupAttribute> attributes = targetGroupDto.getTargetGroupAttributes();
+        for (AWSTargetGroup awsTargetGroup : awsTargetGroups) {
+            TargetGroup targetGroup = awsTargetGroup.getTargetGroup();
+            List<TargetGroupAttribute> attributes = awsTargetGroup.getTargetGroupAttributes();
 
             resourceMapsBuilder.map(
                     Resource.builder()

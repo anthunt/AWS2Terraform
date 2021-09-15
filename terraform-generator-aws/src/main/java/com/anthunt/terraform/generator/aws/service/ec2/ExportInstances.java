@@ -3,8 +3,8 @@ package com.anthunt.terraform.generator.aws.service.ec2;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.InstanceDto;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.ReservationDto;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSInstance;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSReservation;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -25,58 +25,58 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<ReservationDto> reservations = getReservations(client);
+        List<AWSReservation> reservations = getReservations(client);
 
         return getResourceMaps(reservations);
 
     }
 
-    List<ReservationDto> getReservations(Ec2Client client) {
+    List<AWSReservation> getReservations(Ec2Client client) {
 
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
-        List<ReservationDto> reservations = new ArrayList<>();
+        List<AWSReservation> reservations = new ArrayList<>();
 
         for(Reservation reservation : describeInstancesResponse.reservations()) {
-            ReservationDto.ReservationDtoBuilder reservationDtoBuilder = ReservationDto.builder();
+            AWSReservation.AWSReservationBuilder awsReservationBuilder = AWSReservation.builder();
             for (Instance instance : reservation.instances()) {
-                InstanceDto.InstanceDtoBuilder instanceDtoBuilder = InstanceDto.builder();
-                instanceDtoBuilder.instance(instance);
+                AWSInstance.AWSInstanceBuilder awsInstanceBuilder = AWSInstance.builder();
+                awsInstanceBuilder.instance(instance);
 
                 DescribeInstanceAttributeResponse disableApiTerminationAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
                         .build());
-                instanceDtoBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
+                awsInstanceBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
 
                 DescribeInstanceAttributeResponse shutdownBehaviorAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
                         .build());
-                instanceDtoBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
+                awsInstanceBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
 
                 DescribeInstanceAttributeResponse userDataAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.USER_DATA)
                         .build());
-                instanceDtoBuilder.userData(userDataAttribute.userData().value());
+                awsInstanceBuilder.userData(userDataAttribute.userData().value());
 
 
-                reservationDtoBuilder.instance(instanceDtoBuilder.build());
+                awsReservationBuilder.instance(awsInstanceBuilder.build());
             }
-            reservations.add(reservationDtoBuilder.build());
+            reservations.add(awsReservationBuilder.build());
 
         }
 
         return reservations;
     }
 
-    Maps<Resource> getResourceMaps(List<ReservationDto> reservationDtos) {
+    Maps<Resource> getResourceMaps(List<AWSReservation> awsReservations) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
         int i = 0;
-        for(ReservationDto reservation : reservationDtos) {
-            for(InstanceDto instanceDto : reservation.getInstances()) {
-                Instance instance = instanceDto.getInstance();
+        for(AWSReservation reservation : awsReservations) {
+            for(AWSInstance AWSInstance : reservation.getInstances()) {
+                Instance instance = AWSInstance.getInstance();
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_instance")
@@ -90,8 +90,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                 .argument("cpu_core_count", TFNumber.build(instance.cpuOptions().coreCount().toString()))
                                                 .argument("cpu_threads_per_core", TFNumber.build(instance.cpuOptions().threadsPerCore().toString()))
                                                 .argument("ebs_optimized", TFBool.build(instance.ebsOptimized()))
-                                                .argument("disable_api_termination", TFBool.build(instanceDto.getDisableApiTermination()))
-                                                .argument("instance_initiated_shutdown_behavior", TFString.build(instanceDto.getShutdownBehavior()))
+                                                .argument("disable_api_termination", TFBool.build(AWSInstance.getDisableApiTermination()))
+                                                .argument("instance_initiated_shutdown_behavior", TFString.build(AWSInstance.getShutdownBehavior()))
                                                 .argument("instance_type", TFString.build(instance.instanceType().toString()))
                                                 .argument("key_name", TFString.build(instance.keyName()))
                                                 //.argument("get_password_data", TFBool.build(instance.pass))
@@ -118,8 +118,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                         .build())
                                                 .argument("source_dest_check", TFBool.build(instance.sourceDestCheck()))
                                                 .argument("user_data", TFString.builder().isMultiline(true).value(
-                                                        instanceDto.getUserData() != null ?
-                                                                new String(Base64.getDecoder().decode(instanceDto.getUserData())).replaceAll("[$]", "\\$\\$")
+                                                        AWSInstance.getUserData() != null ?
+                                                                new String(Base64.getDecoder().decode(AWSInstance.getUserData())).replaceAll("[$]", "\\$\\$")
                                                                 : ""
                                                 ).build())
                                                 .argument("iam_instance_profile", TFString.build(

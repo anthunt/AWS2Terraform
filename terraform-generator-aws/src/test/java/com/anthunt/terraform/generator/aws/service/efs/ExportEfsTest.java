@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.efs;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.efs.dto.EfsDto;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSEfs;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -47,8 +47,8 @@ class ExportEfsTest {
 
     @Test
     public void getResourceMaps() {
-        List<EfsDto> efsDtos = List.of(
-                EfsDto.builder().fileSystemDescription(FileSystemDescription.builder()
+        List<AWSEfs> awsEfs = List.of(
+                AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
                                 .encrypted(true)
                                 .kmsKeyId("arn:aws:kms:ap-northeast-2:100020003000:key/1000ffff-2210-472f-ad29-2c2f4ef0c4e2")
                                 .performanceMode("generalPurpose")
@@ -71,7 +71,7 @@ class ExportEfsTest {
                                         .build()
                         ))
                         .build(),
-                EfsDto.builder().fileSystemDescription(FileSystemDescription.builder()
+                AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
                                 .encrypted(false)
                                 .kmsKeyId(null)
                                 .performanceMode("generalPurpose")
@@ -81,7 +81,7 @@ class ExportEfsTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportEfs.getResourceMaps(efsDtos);
+        Maps<Resource> resourceMaps = exportEfs.getResourceMaps(awsEfs);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
