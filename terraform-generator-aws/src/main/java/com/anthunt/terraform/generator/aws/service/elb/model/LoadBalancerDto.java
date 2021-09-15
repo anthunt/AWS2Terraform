@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.service.elb.dto;
+package com.anthunt.terraform.generator.aws.service.elb.model;
 
 import lombok.Builder;
 import lombok.Data;

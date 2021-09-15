@@ -1,5 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
+import com.anthunt.terraform.generator.aws.service.elb.ExportLoadBalancerListeners;
 import com.anthunt.terraform.generator.aws.service.elb.ExportLoadBalancerTargetGroups;
 import com.anthunt.terraform.generator.aws.service.elb.ExportLoadBalancers;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +19,12 @@ public class ElbCommands extends AbstractCommands {
 
     private ExportLoadBalancerTargetGroups exportLoadBalancerTargetGroups;
 
-    public ElbCommands(ExportLoadBalancers exportLoadBalancers, ExportLoadBalancerTargetGroups exportLoadBalancerTargetGroups) {
+    private ExportLoadBalancerListeners exportLoadBalancerListeners;
+
+    public ElbCommands(ExportLoadBalancers exportLoadBalancers, ExportLoadBalancerTargetGroups exportLoadBalancerTargetGroups, ExportLoadBalancerListeners exportLoadBalancerListeners) {
         this.exportLoadBalancers = exportLoadBalancers;
         this.exportLoadBalancerTargetGroups = exportLoadBalancerTargetGroups;
+        this.exportLoadBalancerListeners = exportLoadBalancerListeners;
     }
 
     @ShellMethod("Export terraform resources of LoadBalancers.")
@@ -33,4 +37,9 @@ public class ElbCommands extends AbstractCommands {
         exportLoadBalancerTargetGroups.exportTerraform(ElasticLoadBalancingV2Client.class, commonArgs);
     }
 
+    @ShellMethod("Export terraform resources of LoadBalancerListeners.")
+    public void loadBalancerListeners(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportLoadBalancerListeners.exportTerraform(ElasticLoadBalancingV2Client.class, commonArgs);
+    }
 }
+
