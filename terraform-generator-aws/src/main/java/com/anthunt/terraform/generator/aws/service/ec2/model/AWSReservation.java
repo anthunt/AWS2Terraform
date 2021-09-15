@@ -1,19 +1,18 @@
-package com.anthunt.terraform.generator.aws.service.ec2.dto;
+package com.anthunt.terraform.generator.aws.service.ec2.model;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
 import lombok.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @ToString
 @Builder
-public class ReservationDto {
+public class AWSReservation {
 
     @Singular
-    private List<InstanceDto> instances;
+    private List<AWSInstance> instances;
 
 }

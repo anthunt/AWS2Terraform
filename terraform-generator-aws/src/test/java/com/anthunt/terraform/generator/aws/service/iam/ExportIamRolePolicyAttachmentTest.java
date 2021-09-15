@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.iam;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.iam.dto.RolePolicyAttachmentDto;
+import com.anthunt.terraform.generator.aws.service.iam.model.RolePolicyAttachmentDto;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;

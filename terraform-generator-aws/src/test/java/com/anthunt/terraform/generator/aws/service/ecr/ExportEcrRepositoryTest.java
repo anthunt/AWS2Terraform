@@ -1,9 +1,6 @@
 package com.anthunt.terraform.generator.aws.service.ecr;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.ec2.ExportInstances;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.InstanceDto;
-import com.anthunt.terraform.generator.aws.service.ec2.dto.ReservationDto;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -15,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.*;
 import software.amazon.awssdk.services.ecr.EcrClient;
 import software.amazon.awssdk.services.ecr.model.EncryptionConfiguration;
 import software.amazon.awssdk.services.ecr.model.ImageScanningConfiguration;

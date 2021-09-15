@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.service.ec2.dto;
+package com.anthunt.terraform.generator.aws.service.ec2.model;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 @Data
 @ToString
 @Builder
-public class InstanceDto {
+public class AWSInstance {
     private Instance instance;
     private Boolean disableApiTermination;
     private String shutdownBehavior;

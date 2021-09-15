@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.service.vpc.dto;
+package com.anthunt.terraform.generator.aws.service.vpc.model;
 
 import lombok.Builder;
 import lombok.Data;

@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.efs;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.efs.dto.EfsDto;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSEfs;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -27,23 +27,23 @@ public class ExportEfs extends AbstractExport<EfsClient> {
     @Override
     protected Maps<Resource> export(EfsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<EfsDto> fileSystems = getEfs(client);
+        List<AWSEfs> fileSystems = getEfs(client);
 
         return getResourceMaps(fileSystems);
 
     }
 
-    List<EfsDto> getEfs(EfsClient client) {
+    List<AWSEfs> getEfs(EfsClient client) {
         DescribeFileSystemsResponse describeFileSystems = client.describeFileSystems();
         return describeFileSystems.fileSystems().stream()
 //                .peek(fileSystem -> log.debug("fileSystem => {}", fileSystem))
-                .map(fileSystem -> EfsDto.builder()
+                .map(fileSystem -> AWSEfs.builder()
                         .fileSystemDescription(fileSystem)
                         .backupPolicyStatus(getBackupPolicyStatus(client, fileSystem.fileSystemId()))
                         .fileSystemPolicy(getFileSystemPolicy(client, fileSystem.fileSystemId()))
                         .mountTargets(getMountTargets(client, fileSystem.fileSystemId()))
                         .build())
-                .peek(efsDto -> log.debug("fileSystemPolicy => {}", efsDto.getFileSystemPolicy()))
+                .peek(AWSEfs -> log.debug("fileSystemPolicy => {}", AWSEfs.getFileSystemPolicy()))
                 .collect(Collectors.toList());
 
     }
@@ -81,11 +81,11 @@ public class ExportEfs extends AbstractExport<EfsClient> {
         }
     }
 
-    Maps<Resource> getResourceMaps(List<EfsDto> efsDtos) {
+    Maps<Resource> getResourceMaps(List<AWSEfs> awsEfses) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int index = 0;
-        for (EfsDto efsDto : efsDtos) {
-            FileSystemDescription fileSystem = efsDto.getFileSystemDescription();
+        for (AWSEfs awsEfs : awsEfses) {
+            FileSystemDescription fileSystem = awsEfs.getFileSystemDescription();
             String fileSystemName = fileSystem.tags().stream()
                     .filter(tag -> tag.key().equals("Name"))
                     .findFirst()
@@ -111,8 +111,8 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                                                     .build())
                                     .build())
                     .build();
-            if (efsDto.getMountTargets() != null) {
-                efsDto.getMountTargets().stream().forEach(mountTarget ->
+            if (awsEfs.getMountTargets() != null) {
+                awsEfs.getMountTargets().stream().forEach(mountTarget ->
                         resourceMapsBuilder.map(
                                         Resource.builder()
                                                 .api("aws_efs_mount_target")
@@ -130,7 +130,7 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                 );
 
             }
-            if (efsDto.getFileSystemPolicy() != null) {
+            if (awsEfs.getFileSystemPolicy() != null) {
                 resourceMapsBuilder.map(
                                 Resource.builder()
                                         .api("aws_efs_file_system_policy")
@@ -140,14 +140,14 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                                                         .expression(MessageFormat.format("aws_efs_file_system.{0}.id", fileSystemName))
                                                         .build())
                                                 .argument("policy", TFString.builder().isMultiline(true).value(
-                                                                JsonUtils.toPrettyFormat(efsDto.getFileSystemPolicy()))
+                                                                JsonUtils.toPrettyFormat(awsEfs.getFileSystemPolicy()))
                                                         .build())
                                                 .build())
                                         .build())
                         .build();
             }
 
-            if (efsDto.getBackupPolicyStatus() != null) {
+            if (awsEfs.getBackupPolicyStatus() != null) {
                 resourceMapsBuilder.map(
                                 Resource.builder()
                                         .api("aws_efs_backup_policy")
@@ -157,7 +157,7 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                                                         .expression(MessageFormat.format("aws_efs_file_system.{0}.id", fileSystemName))
                                                         .build())
                                                 .argument("backup_policy", TFMap.builder()
-                                                        .map("status", TFString.build(efsDto.getBackupPolicyStatus()))
+                                                        .map("status", TFString.build(awsEfs.getBackupPolicyStatus()))
                                                         .build())
                                                 .build())
                                         .build())
