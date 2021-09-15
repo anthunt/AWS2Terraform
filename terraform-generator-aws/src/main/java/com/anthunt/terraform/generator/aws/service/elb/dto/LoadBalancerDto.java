@@ -7,7 +7,6 @@ import lombok.ToString;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancer;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.LoadBalancerAttribute;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 
 import java.util.List;
 
