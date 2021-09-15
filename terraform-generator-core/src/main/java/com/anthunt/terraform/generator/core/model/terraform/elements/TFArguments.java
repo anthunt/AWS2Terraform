@@ -8,13 +8,16 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 @Builder
 @ToString
 public class TFArguments extends AbstractMarshaller<TFArguments> {
 
     @Singular private Map<String, AbstractMarshaller<?>> arguments;
+
+    Map<String, AbstractMarshaller<?>> getArguments() {
+        return arguments;
+    }
 
     @Override
     protected String unmarshalling(int tabSize) {
