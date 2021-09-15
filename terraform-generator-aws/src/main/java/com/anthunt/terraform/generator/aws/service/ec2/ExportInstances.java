@@ -37,33 +37,33 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
         List<AWSReservation> reservations = new ArrayList<>();
 
         for(Reservation reservation : describeInstancesResponse.reservations()) {
-            AWSReservation.AWSReservationBuilder reservationDtoBuilder = AWSReservation.builder();
+            AWSReservation.AWSReservationBuilder awsReservationBuilder = AWSReservation.builder();
             for (Instance instance : reservation.instances()) {
-                AWSInstance.AWSInstanceBuilder instanceDtoBuilder = AWSInstance.builder();
-                instanceDtoBuilder.instance(instance);
+                AWSInstance.AWSInstanceBuilder awsInstanceBuilder = AWSInstance.builder();
+                awsInstanceBuilder.instance(instance);
 
                 DescribeInstanceAttributeResponse disableApiTerminationAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
                         .build());
-                instanceDtoBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
+                awsInstanceBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
 
                 DescribeInstanceAttributeResponse shutdownBehaviorAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
                         .build());
-                instanceDtoBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
+                awsInstanceBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
 
                 DescribeInstanceAttributeResponse userDataAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
                         .instanceId(instance.instanceId())
                         .attribute(InstanceAttributeName.USER_DATA)
                         .build());
-                instanceDtoBuilder.userData(userDataAttribute.userData().value());
+                awsInstanceBuilder.userData(userDataAttribute.userData().value());
 
 
-                reservationDtoBuilder.instance(instanceDtoBuilder.build());
+                awsReservationBuilder.instance(awsInstanceBuilder.build());
             }
-            reservations.add(reservationDtoBuilder.build());
+            reservations.add(awsReservationBuilder.build());
 
         }
 

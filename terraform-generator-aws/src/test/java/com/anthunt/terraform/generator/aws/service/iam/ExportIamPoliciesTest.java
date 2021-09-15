@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.iam;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.iam.model.PolicyDto;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSPolicy;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -39,15 +39,15 @@ class ExportIamPoliciesTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         IamClient client = amazonClients.getIamClient();
 
-        List<PolicyDto> polices = exportIamPolicies.getPolices(client);
+        List<AWSPolicy> polices = exportIamPolicies.getPolices(client);
         log.debug("polices => {}", polices);
     }
 
     @Test
     public void getResourceMaps() {
         //given
-        List<PolicyDto> policeDtos = List.of(
-                PolicyDto.builder().policy(
+        List<AWSPolicy> awsPolicy = List.of(
+                AWSPolicy.builder().policy(
                     Policy.builder()
                     .policyName("AWSLoadBalancerControllerIAMPolicy")
                             .policyId("ANPATNPDYKVFHJVH2URK4")
@@ -59,7 +59,7 @@ class ExportIamPoliciesTest {
                 ).build()
         );
 
-        Maps<Resource> resourceMaps = exportIamPolicies.getResourceMaps(policeDtos);
+        Maps<Resource> resourceMaps = exportIamPolicies.getResourceMaps(awsPolicy);
 
         String actual = resourceMaps.unmarshall();
         log.debug("actual => \n{}", actual);

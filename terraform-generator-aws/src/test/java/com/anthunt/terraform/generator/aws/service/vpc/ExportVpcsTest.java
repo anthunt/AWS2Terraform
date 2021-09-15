@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.vpc.model.VpcDto;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -48,8 +48,8 @@ class ExportVpcsTest {
     @Test
     void getResourceMaps() {
         // given
-        List<VpcDto> vpcs = List.of(
-                VpcDto.builder()
+        List<AWSVpc> vpcs = List.of(
+                AWSVpc.builder()
                         .vpc(Vpc.builder()
                                 .cidrBlock("172.31.0.0/16")
                                 .instanceTenancy("default")

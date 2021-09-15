@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.iam.model.Policy;
 @Data
 @ToString
 @Builder
-public class PolicyDto {
+public class AWSPolicy {
     private Policy policy;
     private String document;
 

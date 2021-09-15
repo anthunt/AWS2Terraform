@@ -26,8 +26,8 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSTargetGroup> loadBalancerDtos = getTagetGroups(client);
-        return getResourceMaps(loadBalancerDtos);
+        List<AWSTargetGroup> awsLoadBalancers = getTagetGroups(client);
+        return getResourceMaps(awsLoadBalancers);
 
     }
 

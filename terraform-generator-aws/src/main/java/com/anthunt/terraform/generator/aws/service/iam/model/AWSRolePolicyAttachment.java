@@ -7,7 +7,7 @@ import lombok.ToString;
 @Data
 @ToString
 @Builder
-public class RolePolicyAttachmentDto {
+public class AWSRolePolicyAttachment {
     String roleName;
     String policyName;
 }

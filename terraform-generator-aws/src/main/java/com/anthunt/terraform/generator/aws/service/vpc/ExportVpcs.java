@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.vpc.model.VpcDto;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
@@ -25,14 +25,14 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<VpcDto> vpcDtos = getVpcs(client);
-        return getResourceMaps(vpcDtos);
+        List<AWSVpc> awsVpcs = getVpcs(client);
+        return getResourceMaps(awsVpcs);
     }
 
-    List<VpcDto> getVpcs(Ec2Client client) {
+    List<AWSVpc> getVpcs(Ec2Client client) {
         DescribeVpcsResponse response = client.describeVpcs();
         return response.vpcs().stream().map(vpc ->
-            VpcDto.builder()
+            AWSVpc.builder()
                     .vpc(vpc)
                     .enableDnsSupport(client.describeVpcAttribute(
                             DescribeVpcAttributeRequest.builder()
@@ -49,11 +49,11 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
 
     }
 
-    Maps<Resource> getResourceMaps(List<VpcDto> vpcDtos) {
+    Maps<Resource> getResourceMaps(List<AWSVpc> awsVpcs) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int i = 0;
-        for (VpcDto vpcDto : vpcDtos) {
-            Vpc vpc = vpcDto.getVpc();
+        for (AWSVpc awsVpc : awsVpcs) {
+            Vpc vpc = awsVpc.getVpc();
             resourceMapsBuilder.map(
                     Resource.builder()
                         .api("aws_vpc")
@@ -62,8 +62,8 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
                                 TFArguments.builder()
                                         .argument("cidr_block", TFString.build(vpc.cidrBlock()))
                                         .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
-                                        .argument("enable_dns_support", TFBool.build(vpcDto.isEnableDnsSupport()))
-                                        .argument("enable_dns_hostnames", TFBool.build(vpcDto.isEnableDnsHostnames()))
+                                        .argument("enable_dns_support", TFBool.build(awsVpc.isEnableDnsSupport()))
+                                        .argument("enable_dns_hostnames", TFBool.build(awsVpc.isEnableDnsHostnames()))
                                         .argument("enable_classiclink", TFBool.build(false))
                                         .argument("assign_generated_ipv6_block", TFBool.build(vpc.hasIpv6CidrBlockAssociationSet()))
                                         .argument("tags", TFMap.build(
