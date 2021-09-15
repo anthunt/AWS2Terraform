@@ -5,7 +5,10 @@ import lombok.Builder;
 import lombok.Singular;
 import lombok.ToString;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 @Builder
 @ToString
@@ -22,7 +25,7 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
                 stringBuffer
                         .append("\n")
                         .append("\t".repeat(tabSize + 1))
-                        .append(key)
+                        .append(key.split("\\$")[0])
                         .append(" {\n")
                         .append(val.unmarshall(nextTabSize))
                         .append("\t".repeat(tabSize + 1))
@@ -38,4 +41,25 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
         return stringBuffer.toString();
     }
 
+    public static class TFArgumentsBuilder {
+
+        public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValue);
+            } else {
+                return this;
+            }
+        }
+
+        public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            int inx = 0;
+            if (booleanSupplier.getAsBoolean()) {
+                for (AbstractMarshaller<?> argumentValue : argumentValues) {
+                    this.argument(argumentKey + "$" + inx, argumentValue);
+                    inx++;
+                }
+            }
+            return this;
+        }
+    }
 }

@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
     id "edu.sc.seis.launch4j" version "2.5.0"
-    id "com.dorongold.task-tree" version "1.5"
+    id "com.dorongold.task-tree" version "2.1.0"
 }
 
 apply plugin: "edu.sc.seis.launch4j"
