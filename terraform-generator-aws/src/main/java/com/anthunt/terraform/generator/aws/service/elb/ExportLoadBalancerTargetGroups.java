@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.elb;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.elb.dto.TargetGroupDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.TargetGroupDto;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;

@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.elb;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.elb.dto.LoadBalancerDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.LoadBalancerDto;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;

@@ -13,7 +13,8 @@ import java.util.function.BooleanSupplier;
 @ToString
 public class TFArguments extends AbstractMarshaller<TFArguments> {
 
-    @Singular private Map<String, AbstractMarshaller<?>> arguments;
+    @Singular
+    private Map<String, AbstractMarshaller<?>> arguments;
 
     Map<String, AbstractMarshaller<?>> getArguments() {
         return arguments;
@@ -24,7 +25,7 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
         StringBuffer stringBuffer = new StringBuffer();
         int nextTabSize = tabSize + 1;
         arguments.forEach((key, val) -> {
-            if(val instanceof TFBlock) {
+            if (val instanceof TFBlock) {
                 stringBuffer
                         .append("\n")
                         .append("\t".repeat(tabSize + 1))
@@ -46,6 +47,14 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
 
     public static class TFArgumentsBuilder {
 
+        public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            return argumentIf(() -> condition, argumentKey, argumentValue);
+        }
+
+        public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            return argumentIf(() -> condition, argumentKey, argumentValues);
+        }
+
         public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
             if (booleanSupplier.getAsBoolean()) {
                 return this.argument(argumentKey, argumentValue);
@@ -56,11 +65,9 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
 
         public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             int inx = 0;
-            if (booleanSupplier.getAsBoolean()) {
-                for (AbstractMarshaller<?> argumentValue : argumentValues) {
-                    this.argument(argumentKey + "$" + inx, argumentValue);
-                    inx++;
-                }
+            for (AbstractMarshaller<?> argumentValue : argumentValues) {
+                this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
+                inx++;
             }
             return this;
         }
