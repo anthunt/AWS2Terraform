@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class TargetGroupDto {
+public class AWSTargetGroup {
     private TargetGroup targetGroup;
     @Singular
     private List<TargetGroupAttribute> targetGroupAttributes;

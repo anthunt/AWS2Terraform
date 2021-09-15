@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class LoadBalancerDto {
+public class AWSLoadBalancer {
     private LoadBalancer loadBalancer;
     @Singular
     private List<LoadBalancerAttribute> loadBalancerAttributes;

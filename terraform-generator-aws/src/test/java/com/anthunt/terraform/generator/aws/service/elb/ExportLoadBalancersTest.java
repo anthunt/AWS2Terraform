@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.elb;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.elb.model.LoadBalancerDto;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSLoadBalancer;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -47,14 +47,14 @@ class ExportLoadBalancersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getLoadBalancers() {
-        List<LoadBalancerDto> loadBalancers = exportLoadBalancers.getLoadBalancers(client);
+        List<AWSLoadBalancer> loadBalancers = exportLoadBalancers.getLoadBalancers(client);
         log.debug("polices => {}", loadBalancers);
     }
 
     @Test
     public void getResourceMaps() {
-        List<LoadBalancerDto> loadBalancerDtos = List.of(
-                LoadBalancerDto.builder().loadBalancer(LoadBalancer.builder()
+        List<AWSLoadBalancer> AWSLoadBalancers = List.of(
+                AWSLoadBalancer.builder().loadBalancer(LoadBalancer.builder()
                                 .loadBalancerName("a000567db2d1f4d02b7493427dc88888")
                                 .scheme(LoadBalancerSchemeEnum.INTERNET_FACING)
                                 .type(LoadBalancerTypeEnum.NETWORK)
@@ -75,7 +75,7 @@ class ExportLoadBalancersTest {
                         .tag(Tag.builder().key("kubernetes.io/cluster/eks-dev-app-cluster").value("owned")
                                 .build())
                         .build(),
-                LoadBalancerDto.builder().loadBalancer(LoadBalancer.builder()
+                AWSLoadBalancer.builder().loadBalancer(LoadBalancer.builder()
                                 .loadBalancerName("b000567db2d1f4d02b7493427dc88888")
                                 .scheme(LoadBalancerSchemeEnum.INTERNET_FACING)
                                 .type(LoadBalancerTypeEnum.APPLICATION)
@@ -92,7 +92,7 @@ class ExportLoadBalancersTest {
                                 .value("false")
                                 .build())
                         .build(),
-                LoadBalancerDto.builder().loadBalancer(LoadBalancer.builder()
+                AWSLoadBalancer.builder().loadBalancer(LoadBalancer.builder()
                                 .loadBalancerName("c000567db2d1f4d02b7493427dc88888")
                                 .scheme(LoadBalancerSchemeEnum.INTERNET_FACING)
                                 .type(LoadBalancerTypeEnum.APPLICATION)
@@ -117,7 +117,7 @@ class ExportLoadBalancersTest {
                                 .value("false")
                                 .build())
                         .build(),
-                LoadBalancerDto.builder().loadBalancer(LoadBalancer.builder()
+                AWSLoadBalancer.builder().loadBalancer(LoadBalancer.builder()
                                 .loadBalancerName("d000567db2d1f4d02b7493427dc88888")
                                 .scheme(LoadBalancerSchemeEnum.INTERNET_FACING)
                                 .type(LoadBalancerTypeEnum.APPLICATION)
@@ -144,7 +144,7 @@ class ExportLoadBalancersTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportLoadBalancers.getResourceMaps(loadBalancerDtos);
+        Maps<Resource> resourceMaps = exportLoadBalancers.getResourceMaps(AWSLoadBalancers);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
