@@ -1,4 +1,4 @@
-resource aws_instance instance0 {
+resource aws_instance i-00025ef3e99e66157 {
 	ami = "ami-0685efd12a23690f5"
 	placement_group = null
 	tenancy = "default"
