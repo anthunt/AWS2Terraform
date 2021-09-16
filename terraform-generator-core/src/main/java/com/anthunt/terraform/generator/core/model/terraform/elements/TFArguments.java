@@ -16,7 +16,7 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
     @Singular
     private Map<String, AbstractMarshaller<?>> arguments;
 
-    Map<String, AbstractMarshaller<?>> getArguments() {
+    public Map<String, AbstractMarshaller<?>> getArguments() {
         return arguments;
     }
 
