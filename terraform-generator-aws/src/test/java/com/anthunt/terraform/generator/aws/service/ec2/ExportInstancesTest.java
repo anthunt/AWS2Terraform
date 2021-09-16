@@ -61,6 +61,7 @@ class ExportInstancesTest {
                         .instance(AWSInstance.builder()
                                 .instance(Instance.builder()
                                         .amiLaunchIndex(0)
+                                        .instanceId("i-00025ef3e99e66157")
                                         .imageId("ami-0685efd12a23690f5")
                                         .placement(Placement.builder().groupName("").tenancy("default").build())
                                         .cpuOptions(CpuOptions.builder().coreCount(1).threadsPerCore(2).build())
