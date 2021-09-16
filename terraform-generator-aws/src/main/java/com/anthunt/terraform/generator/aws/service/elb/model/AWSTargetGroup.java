@@ -15,4 +15,7 @@ public class AWSTargetGroup {
     private TargetGroup targetGroup;
     @Singular
     private List<TargetGroupAttribute> targetGroupAttributes;
+    @Singular
+    private List<TargetDescription> targetDescriptions;
+
 }
