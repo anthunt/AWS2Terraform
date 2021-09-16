@@ -14,10 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroup;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupAttribute;
-import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetTypeEnum;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.*;
 
 import java.util.List;
 
@@ -76,6 +73,14 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .key("deregistration_delay.timeout_seconds")
                                 .value("300")
                                 .build())
+                        .targetDescription(TargetDescription.builder()
+                                .id("i-00015ef3e99e66157")
+                                .port(30832)
+                                .build())
+                        .targetDescription(TargetDescription.builder()
+                                .id("i-00025ef3e99e66157")
+                                .port(30832)
+                                .build())
                         .build(),
                 AWSTargetGroup.builder()
                         .targetGroup(TargetGroup.builder()
@@ -83,7 +88,7 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .port(8080)
                                 .protocol(ProtocolEnum.HTTP)
                                 .vpcId("vpc-00015ad4b3a1ecefb")
-                                .targetType(TargetTypeEnum.INSTANCE)
+                                .targetType(TargetTypeEnum.IP)
                                 .healthCheckEnabled(true)
                                 .healthCheckPort("traffic-port")
                                 .healthCheckProtocol(ProtocolEnum.HTTP)
@@ -95,6 +100,10 @@ class ExportLoadBalancerTargetGroupsTest {
                         .targetGroupAttribute(TargetGroupAttribute.builder()
                                 .key("deregistration_delay.timeout_seconds")
                                 .value("300")
+                                .build())
+                        .targetDescription(TargetDescription.builder()
+                                .id("10.100.1.10")
+                                .port(8080)
                                 .build())
                         .build()
         );

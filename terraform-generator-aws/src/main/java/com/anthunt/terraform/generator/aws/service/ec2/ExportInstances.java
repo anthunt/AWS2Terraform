@@ -80,7 +80,7 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_instance")
-                                .name("instance" + i)
+                                .name(instance.instanceId())
                                 .arguments(
                                         TFArguments.builder()
                                                 .argument("ami", TFString.build(instance.imageId()))
