@@ -67,48 +67,27 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
             List<Route> routes = routeTable.routes();
             int j = 0;
             for(Route route : routes) {
-                TFArguments.TFArgumentsBuilder tfArgumentsBuilder = TFArguments.builder();
-
-                tfArgumentsBuilder.argument("route_table_id", TFString.build(routeTable.routeTableId()));
-                if(route.destinationCidrBlock() != null) {
-                    tfArgumentsBuilder.argument("destination_cidr_block", TFString.build(route.destinationCidrBlock()));
-                }
-                if(route.destinationIpv6CidrBlock() != null) {
-                    tfArgumentsBuilder.argument("destination_ipv6_cidr_block", TFString.build(route.destinationIpv6CidrBlock()));
-                }
-                if(route.egressOnlyInternetGatewayId() != null) {
-                    tfArgumentsBuilder.argument("egress_only_gateway_id", TFString.build(route.egressOnlyInternetGatewayId()));
-                }
-                if(route.gatewayId() != null) {
-                    tfArgumentsBuilder.argument("gateway_id", TFString.build(route.gatewayId()));
-                }
-                if(route.instanceId() != null) {
-                    tfArgumentsBuilder.argument("instance_id", TFString.build(route.instanceId()));
-                }
-                if(route.natGatewayId() != null) {
-                    tfArgumentsBuilder.argument("nat_gateway_id", TFString.build(route.natGatewayId()));
-                }
-                if(route.localGatewayId() != null) {
-                    tfArgumentsBuilder.argument("local_gateway_id", TFString.build(route.localGatewayId()));
-                }
-                if(route.networkInterfaceId() != null) {
-                    tfArgumentsBuilder.argument("network_interface_id", TFString.build(route.networkInterfaceId()));
-                }
-                if(route.transitGatewayId() != null) {
-                    tfArgumentsBuilder.argument("transit_gateway_id", TFString.build(route.transitGatewayId()));
-                }
-                if(route.destinationPrefixListId() != null) {
-                    tfArgumentsBuilder.argument("vpc_endpoint_id", TFString.build(route.destinationPrefixListId()));
-                }
-                if(route.vpcPeeringConnectionId() != null) {
-                    tfArgumentsBuilder.argument("vpc_peering_connection_id", TFString.build(route.vpcPeeringConnectionId()));
-                }
 
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_route")
                                 .name("route_table" + i + ".route" + j)
-                                .arguments(tfArgumentsBuilder.build())
+                                .arguments(
+                                        TFArguments.builder()
+                                                .argument("route_table_id", TFString.build(routeTable.routeTableId()))
+                                                .argumentIf(route.destinationCidrBlock() != null, "destination_cidr_block", TFString.build(route.destinationCidrBlock()))
+                                                .argumentIf(route.destinationIpv6CidrBlock() != null, "destination_ipv6_cidr_block", TFString.build(route.destinationIpv6CidrBlock()))
+                                                .argumentIf(route.egressOnlyInternetGatewayId() != null, "egress_only_gateway_id", TFString.build(route.egressOnlyInternetGatewayId()))
+                                                .argumentIf(route.gatewayId() != null, "gateway_id", TFString.build(route.gatewayId()))
+                                                .argumentIf(route.instanceId() != null, "instance_id", TFString.build(route.instanceId()))
+                                                .argumentIf(route.natGatewayId() != null, "nat_gateway_id", TFString.build(route.natGatewayId()))
+                                                .argumentIf(route.localGatewayId() != null, "local_gateway_id", TFString.build(route.localGatewayId()))
+                                                .argumentIf(route.networkInterfaceId() != null, "network_interface_id", TFString.build(route.networkInterfaceId()))
+                                                .argumentIf(route.transitGatewayId() != null, "transit_gateway_id", TFString.build(route.transitGatewayId()))
+                                                .argumentIf(route.destinationPrefixListId() != null, "vpc_endpoint_id", TFString.build(route.destinationPrefixListId()))
+                                                .argumentIf(route.vpcPeeringConnectionId() != null, "vpc_peering_connection_id", TFString.build(route.vpcPeeringConnectionId()))
+                                                .build()
+                                )
                                 .build()
                 );
 
