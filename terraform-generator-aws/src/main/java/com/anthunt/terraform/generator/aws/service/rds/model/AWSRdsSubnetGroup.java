@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class AWSDBSubnetGroup {
+public class AWSRdsSubnetGroup {
     private DBSubnetGroup dbSubnetGroup;
     @Singular
     private List<Tag> tags;

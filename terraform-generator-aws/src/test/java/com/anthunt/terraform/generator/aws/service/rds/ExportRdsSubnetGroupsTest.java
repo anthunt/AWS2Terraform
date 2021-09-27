@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.rds;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.rds.model.AWSDBSubnetGroup;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsSubnetGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -49,14 +49,14 @@ class ExportRdsSubnetGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getDBSubnetGroups() {
-        List<AWSDBSubnetGroup> awsDbClusterParameterGroups = exportRdsSubnetGroups.getDBSubnetGroups(client);
+        List<AWSRdsSubnetGroup> awsDbClusterParameterGroups = exportRdsSubnetGroups.getDBSubnetGroups(client);
         log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
     }
 
     @Test
     public void getResourceMaps() {
-        List<AWSDBSubnetGroup> dbSubnetGroups = List.of(
-                AWSDBSubnetGroup.builder()
+        List<AWSRdsSubnetGroup> awsRdsSubnetGroup = List.of(
+                AWSRdsSubnetGroup.builder()
                         .dbSubnetGroup(
                                 DBSubnetGroup.builder()
                                         .dbSubnetGroupName("rds-dev-subnetgrp")
@@ -68,7 +68,7 @@ class ExportRdsSubnetGroupsTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportRdsSubnetGroups.getResourceMaps(dbSubnetGroups);
+        Maps<Resource> resourceMaps = exportRdsSubnetGroups.getResourceMaps(awsRdsSubnetGroup);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

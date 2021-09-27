@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.rds;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.rds.model.AWSDBSubnetGroup;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsSubnetGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
@@ -29,18 +29,18 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSDBSubnetGroup> dbSubnetGroups = getDBSubnetGroups(client);
+        List<AWSRdsSubnetGroup> dbSubnetGroups = getDBSubnetGroups(client);
 
         return getResourceMaps(dbSubnetGroups);
 
     }
 
-    List<AWSDBSubnetGroup> getDBSubnetGroups(RdsClient client) {
+    List<AWSRdsSubnetGroup> getDBSubnetGroups(RdsClient client) {
 
         DescribeDbSubnetGroupsResponse describeDbSubnetGroupsResponse = client.describeDBSubnetGroups();
         return describeDbSubnetGroupsResponse.dbSubnetGroups().stream()
                 .peek(dbSubnetGroup -> log.debug("dbSubnetGroup => {}", dbSubnetGroup))
-                .map(dbSubnetGroup -> AWSDBSubnetGroup.builder()
+                .map(dbSubnetGroup -> AWSRdsSubnetGroup.builder()
                         .dbSubnetGroup(dbSubnetGroup)
                         .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
                                 .resourceName(dbSubnetGroup.dbSubnetGroupArn()).build()).tagList())
@@ -48,11 +48,11 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<AWSDBSubnetGroup> awsdbSubnetGroups) {
+    Maps<Resource> getResourceMaps(List<AWSRdsSubnetGroup> awsRdsSubnetGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsdbSubnetGroups.forEach(awsdbSubnetGroup -> {
-            DBSubnetGroup dbSubnetGroup = awsdbSubnetGroup.getDbSubnetGroup();
-            List<Tag> tags = awsdbSubnetGroup.getTags();
+        awsRdsSubnetGroups.forEach(awsRdsSubnetGroup -> {
+            DBSubnetGroup dbSubnetGroup = awsRdsSubnetGroup.getDbSubnetGroup();
+            List<Tag> tags = awsRdsSubnetGroup.getTags();
             resourceMapsBuilder.map(
                             Resource.builder()
                                     .api("aws_db_subnet_group")
