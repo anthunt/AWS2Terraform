@@ -5,7 +5,6 @@ resource aws_lb_target_group k8s-ingressn-ingressn-1dab2d3f88 {
 	vpc_id = aws_vpc.vpc-00015ad4b3a1ecefb.id
 	target_type = "instance"
 	deregistration_delay = 300
-
 	health_check {
 		enabled = true
 		port = 30035
@@ -15,7 +14,6 @@ resource aws_lb_target_group k8s-ingressn-ingressn-1dab2d3f88 {
 		unhealthy_threshold = 2
 		interval = 10
 	}
-
 }
 
 resource aws_lb_target_group_attachment k8s-ingressn-ingressn-1dab2d3f88-i-00015ef3e99e66157 {
@@ -37,7 +35,6 @@ resource aws_lb_target_group tg-dev-service-was {
 	vpc_id = aws_vpc.vpc-00015ad4b3a1ecefb.id
 	target_type = "ip"
 	deregistration_delay = 300
-
 	health_check {
 		enabled = true
 		port = traffic-port
@@ -47,7 +44,6 @@ resource aws_lb_target_group tg-dev-service-was {
 		unhealthy_threshold = 2
 		interval = 30
 	}
-
 }
 
 resource aws_lb_target_group_attachment tg-dev-service-was-10-100-1-10 {

@@ -4,6 +4,9 @@ import com.anthunt.terraform.generator.core.model.terraform.AbstractMarshaller;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import lombok.ToString;
 
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
 @ToString
 public class Resource extends AbstractMarshaller<Resource> {
 
@@ -58,6 +61,31 @@ public class Resource extends AbstractMarshaller<Resource> {
                 tfArgumentsBuilder = TFArguments.builder();
             }
             tfArgumentsBuilder.argument(argumentKey, argumentValue);
+            return this;
+        }
+
+        public ResourceBuilder argumentIf(boolean condition, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            return argumentIf(() -> condition, argumentKey, argumentValue);
+        }
+
+        public ResourceBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            return argumentIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public ResourceBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValue);
+            } else {
+                return this;
+            }
+        }
+
+        public ResourceBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            int inx = 0;
+            for (AbstractMarshaller<?> argumentValue : argumentValues) {
+                this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
+                inx++;
+            }
             return this;
         }
 
