@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.rds;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.rds.model.AWSDBCluster;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -47,14 +47,14 @@ class ExportRdsClustersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getDBClusters() {
-        List<AWSDBCluster> awsdbClusters = exportRdsClusters.getDBClusters(client);
-        log.debug("awsdbClusters => {}", awsdbClusters);
+        List<AWSRdsCluster> awsRdsClusters = exportRdsClusters.getDBClusters(client);
+        log.debug("awsdbClusters => {}", awsRdsClusters);
     }
 
     @Test
     public void getResourceMaps() {
-        List<AWSDBCluster> awsTargetGroups = List.of(
-                AWSDBCluster.builder()
+        List<AWSRdsCluster> awsTargetGroups = List.of(
+                AWSRdsCluster.builder()
                         .dbCluster(DBCluster.builder()
                                 .databaseName("rds-dev")
                                 .dbClusterIdentifier("rds-dev-cluster")

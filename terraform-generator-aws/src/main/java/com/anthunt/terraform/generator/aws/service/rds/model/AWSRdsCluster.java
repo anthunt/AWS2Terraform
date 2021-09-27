@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @Builder
 @ToString
-public class AWSDBCluster {
+public class AWSRdsCluster {
     private DBCluster dbCluster;
     private List<DBInstance> dbClusterInstances;
 //    private List<String> securityGroupNames;
