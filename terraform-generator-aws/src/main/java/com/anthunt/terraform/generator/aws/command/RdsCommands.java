@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.command;
 
 import com.anthunt.terraform.generator.aws.service.rds.ExportRdsClusterParameterGroups;
 import com.anthunt.terraform.generator.aws.service.rds.ExportRdsClusters;
+import com.anthunt.terraform.generator.aws.service.rds.ExportRdsOptionGroups;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -18,9 +19,12 @@ public class RdsCommands extends AbstractCommands {
 
     private ExportRdsClusterParameterGroups exportRdsClusterParameterGroups;
 
-    public RdsCommands(ExportRdsClusters exportRdsClusters, ExportRdsClusterParameterGroups exportRdsClusterParameterGroups) {
+    private ExportRdsOptionGroups exportRdsOptionGroups;
+
+    public RdsCommands(ExportRdsClusters exportRdsClusters, ExportRdsClusterParameterGroups exportRdsClusterParameterGroups, ExportRdsOptionGroups exportRdsOptionGroups) {
         this.exportRdsClusters = exportRdsClusters;
         this.exportRdsClusterParameterGroups = exportRdsClusterParameterGroups;
+        this.exportRdsOptionGroups = exportRdsOptionGroups;
     }
 
     @ShellMethod("Export terraform resources of rds clusters.")
@@ -31,6 +35,11 @@ public class RdsCommands extends AbstractCommands {
     @ShellMethod("Export terraform resources of rds clusters parameter groups.")
     public void rdsClusterParameterGroups(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportRdsClusterParameterGroups.exportTerraform(RdsClient.class, commonArgs);
+    }
+
+    @ShellMethod("Export terraform resources of rds option groups.")
+    public void rdsOptionGroups(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+        exportRdsOptionGroups.exportTerraform(RdsClient.class, commonArgs);
     }
 
 }
