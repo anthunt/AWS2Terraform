@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
 import software.amazon.awssdk.services.rds.model.DBCluster;
+import software.amazon.awssdk.services.rds.model.DBInstance;
 
 import java.util.List;
 
@@ -12,5 +13,6 @@ import java.util.List;
 @ToString
 public class AWSDBCluster {
     private DBCluster dbCluster;
-    private List<String> securityGroupNames;
+    private List<DBInstance> dbClusterInstances;
+//    private List<String> securityGroupNames;
 }
