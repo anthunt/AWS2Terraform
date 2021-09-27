@@ -6,14 +6,17 @@ import lombok.Singular;
 import lombok.ToString;
 import software.amazon.awssdk.services.rds.model.DBClusterParameterGroup;
 import software.amazon.awssdk.services.rds.model.Parameter;
+import software.amazon.awssdk.services.rds.model.Tag;
 
 import java.util.List;
 
 @Data
 @Builder
 @ToString
-public class AWSDBClusterParameterGroup {
+public class AWSRdsClusterParameterGroup {
     private DBClusterParameterGroup dbClusterParameterGroup;
     @Singular
     private List<Parameter> parameters;
+    @Singular
+    private List<Tag> tags;
 }
