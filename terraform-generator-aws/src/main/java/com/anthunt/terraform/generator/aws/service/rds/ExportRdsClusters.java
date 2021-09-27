@@ -3,7 +3,7 @@ package com.anthunt.terraform.generator.aws.service.rds;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.rds.model.AWSDBCluster;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -24,18 +24,18 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSDBCluster> awsDbClusters = getDBClusters(client);
+        List<AWSRdsCluster> awsDbClusters = getDBClusters(client);
 
         return getResourceMaps(awsDbClusters);
 
     }
 
-    List<AWSDBCluster> getDBClusters(RdsClient client) {
+    List<AWSRdsCluster> getDBClusters(RdsClient client) {
 
         DescribeDbClustersResponse describeDbClustersResponse = client.describeDBClusters();
         return describeDbClustersResponse.dbClusters().stream()
                 .peek(dbCuster -> log.debug("dbCuster => {}", dbCuster))
-                .map(dbCuster -> AWSDBCluster.builder()
+                .map(dbCuster -> AWSRdsCluster.builder()
                         .dbCluster(dbCuster)
                         .dbClusterInstances(client.describeDBInstances(DescribeDbInstancesRequest.builder()
                                 .filters(f -> f.name("db-cluster-id").values(dbCuster.dbClusterArn()))
@@ -44,7 +44,7 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<AWSDBCluster> awsDbClusters) {
+    Maps<Resource> getResourceMaps(List<AWSRdsCluster> awsDbClusters) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         awsDbClusters.stream().forEach(awsDbCluster -> {
             DBCluster dbCluster = awsDbCluster.getDbCluster();
