@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.rds;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.rds.model.AWSDBClusterParameterGroup;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsClusterParameterGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -48,14 +48,14 @@ class ExportRdsClusterParameterGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getDBClusterParameterGroups() {
-        List<AWSDBClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.getDBClusterParameterGroups(client);
+        List<AWSRdsClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.getDBClusterParameterGroups(client);
         log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
     }
 
     @Test
     public void getResourceMaps() {
-        List<AWSDBClusterParameterGroup> awsdbClusterParameterGroups = List.of(
-                AWSDBClusterParameterGroup.builder()
+        List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups = List.of(
+                AWSRdsClusterParameterGroup.builder()
                         .dbClusterParameterGroup(DBClusterParameterGroup.builder()
                                 .dbClusterParameterGroupName("rds-dev-paramgrp")
                                 .dbParameterGroupFamily("aurora-mysql5.7")
@@ -81,7 +81,7 @@ class ExportRdsClusterParameterGroupsTest {
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportRdsClusterParameterGroups.getResourceMaps(awsdbClusterParameterGroups);
+        Maps<Resource> resourceMaps = exportRdsClusterParameterGroups.getResourceMaps(awsRdsClusterParameterGroups);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

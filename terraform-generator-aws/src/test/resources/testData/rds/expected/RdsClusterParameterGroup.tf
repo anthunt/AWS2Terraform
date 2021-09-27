@@ -10,5 +10,7 @@ resource aws_rds_cluster_parameter_group rds-dev-paramgrp {
 		name = "character_set_connection"
 		value = "utf8"
 	}
+	tags = {
+	}
 }
 
