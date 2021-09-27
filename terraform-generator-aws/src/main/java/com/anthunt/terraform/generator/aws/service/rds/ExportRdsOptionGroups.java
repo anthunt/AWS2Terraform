@@ -3,8 +3,9 @@ package com.anthunt.terraform.generator.aws.service.rds;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsOptionGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -12,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DescribeOptionGroupsResponse;
+import software.amazon.awssdk.services.rds.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.rds.model.OptionGroup;
+import software.amazon.awssdk.services.rds.model.Tag;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,23 +28,30 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<OptionGroup> optionGroups = getOptionGroups(client);
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = getOptionGroups(client);
 
-        return getResourceMaps(optionGroups);
+        return getResourceMaps(awsRdsOptionGroups);
 
     }
 
-    List<OptionGroup> getOptionGroups(RdsClient client) {
+    List<AWSRdsOptionGroup> getOptionGroups(RdsClient client) {
 
         DescribeOptionGroupsResponse describeOptionGroupsResponse = client.describeOptionGroups();
         return describeOptionGroupsResponse.optionGroupsList().stream()
                 .peek(optionGroup -> log.debug("optionGroup => {}", optionGroup))
+                .map(optionGroup -> AWSRdsOptionGroup.builder()
+                        .optionGroup(optionGroup)
+                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                .resourceName(optionGroup.optionGroupArn()).build()).tagList())
+                        .build())
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<OptionGroup> optionGroups) {
+    Maps<Resource> getResourceMaps(List<AWSRdsOptionGroup> awsRdsOptionGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        optionGroups.forEach(optionGroup -> {
+        awsRdsOptionGroups.forEach(awsRdsOptionGroup -> {
+            OptionGroup optionGroup = awsRdsOptionGroup.getOptionGroup();
+            List<Tag> tags = awsRdsOptionGroup.getTags();
 
             resourceMapsBuilder.map(
                             Resource.builder()
@@ -65,6 +75,10 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
                                                                             ).collect(Collectors.toList()))
                                                             .build())
                                                     .collect(Collectors.toList()))
+                                    .argument("tags", TFMap.build(
+                                            tags.stream()
+                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                    ))
                                     .build()
                     )
                     .build();
