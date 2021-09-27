@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.rds;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsOptionGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.Option;
 import software.amazon.awssdk.services.rds.model.OptionGroup;
 import software.amazon.awssdk.services.rds.model.OptionSetting;
+import software.amazon.awssdk.services.rds.model.Tag;
 
 import java.util.List;
 
@@ -48,38 +50,42 @@ class ExportRdsOptionGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getOptionGroups() {
-        List<OptionGroup> optionGroups = exportRdsOptionGroups.getOptionGroups(client);
-        log.debug("optionGroups => {}", optionGroups);
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = exportRdsOptionGroups.getOptionGroups(client);
+        log.debug("awsRdsOptionGroups => {}", awsRdsOptionGroups);
     }
 
     @Test
     public void getResourceMaps() {
-        List<OptionGroup> optionGroups = List.of(
-                OptionGroup.builder()
-                        .optionGroupName("test")
-                        .engineName("mysql")
-                        .majorEngineVersion("5.6")
-                        .optionGroupDescription("test desc")
-                        .options(Option.builder()
-                                .optionName("MARIADB_AUDIT_PLUGIN")
-                                .optionSettings(OptionSetting.builder()
-                                                .name("SERVER_AUDIT_EXCL_USERS")
-                                                .value(null)
-                                                .build(),
-                                        OptionSetting.builder()
-                                                .name("SERVER_AUDIT_EVENTS")
-                                                .value("CONNECT,QUERY")
-                                                .build(),
-                                        OptionSetting.builder()
-                                                .name("SERVER_AUDIT_FILE_PATH")
-                                                .value("/rdsdbdata/log/audit/")
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = List.of(
+                AWSRdsOptionGroup.builder()
+                        .optionGroup(
+                                OptionGroup.builder()
+                                        .optionGroupName("test")
+                                        .engineName("mysql")
+                                        .majorEngineVersion("5.6")
+                                        .optionGroupDescription("test desc")
+                                        .options(Option.builder()
+                                                .optionName("MARIADB_AUDIT_PLUGIN")
+                                                .optionSettings(OptionSetting.builder()
+                                                                .name("SERVER_AUDIT_EXCL_USERS")
+                                                                .value(null)
+                                                                .build(),
+                                                        OptionSetting.builder()
+                                                                .name("SERVER_AUDIT_EVENTS")
+                                                                .value("CONNECT,QUERY")
+                                                                .build(),
+                                                        OptionSetting.builder()
+                                                                .name("SERVER_AUDIT_FILE_PATH")
+                                                                .value("/rdsdbdata/log/audit/")
+                                                                .build())
                                                 .build())
-                                .build())
+                                        .build()
+                        )
+                        .tag(Tag.builder().key("Name").value("rds-dev-optiongrp").build())
                         .build()
-
         );
 
-        Maps<Resource> resourceMaps = exportRdsOptionGroups.getResourceMaps(optionGroups);
+        Maps<Resource> resourceMaps = exportRdsOptionGroups.getResourceMaps(awsRdsOptionGroups);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

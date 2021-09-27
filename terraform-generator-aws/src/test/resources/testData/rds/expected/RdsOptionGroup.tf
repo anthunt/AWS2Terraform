@@ -18,5 +18,8 @@ resource aws_db_option_group test {
 			value = "/rdsdbdata/log/audit/"
 		}
 	}
+	tags = {
+		"Name" = "rds-dev-optiongrp"
+	}
 }
 
