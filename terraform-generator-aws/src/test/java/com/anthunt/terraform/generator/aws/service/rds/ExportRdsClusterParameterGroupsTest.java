@@ -47,8 +47,8 @@ class ExportRdsClusterParameterGroupsTest {
 
     @Test
     @DisabledOnNoAwsCredentials
-    public void getDbParameterGroups() {
-        List<AWSDBClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.getDbParameterGroups(client);
+    public void getDBClusterParameterGroups() {
+        List<AWSDBClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.getDBClusterParameterGroups(client);
         log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
     }
 

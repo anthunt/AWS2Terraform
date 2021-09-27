@@ -27,13 +27,13 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSDBClusterParameterGroup> awsdbClusterParameterGroups = getDbParameterGroups(client);
+        List<AWSDBClusterParameterGroup> awsdbClusterParameterGroups = getDBClusterParameterGroups(client);
 
         return getResourceMaps(awsdbClusterParameterGroups);
 
     }
 
-    List<AWSDBClusterParameterGroup> getDbParameterGroups(RdsClient client) {
+    List<AWSDBClusterParameterGroup> getDBClusterParameterGroups(RdsClient client) {
 
         DescribeDbClusterParameterGroupsResponse describeDbClustersResponse = client.describeDBClusterParameterGroups();
         return describeDbClustersResponse.dbClusterParameterGroups().stream()
