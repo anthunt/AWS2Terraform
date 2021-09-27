@@ -22,12 +22,10 @@ resource aws_instance i-00025ef3e99e66157 {
 		"Name" = "windows-desktop"
 	}
 	hibernation = null
-
 	metadata_options {
 		http_endpoint = "enabled"
 		http_tokens = "optional"
 		http_put_response_hop_limit = 1
 	}
-
 }
 
