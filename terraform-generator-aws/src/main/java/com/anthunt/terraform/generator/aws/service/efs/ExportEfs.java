@@ -103,7 +103,7 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                                                     .argument("throughput_mode", TFString.build(fileSystem.throughputModeAsString()))
                                                     .argument("provisioned_throughput_in_mibps",
                                                             Optional.ofNullable(fileSystem.provisionedThroughputInMibps())
-                                                                    .map(v -> TFNumber.build(v.toString())).orElse(TFNumber.build(null)))
+                                                                    .map(v -> TFNumber.build(v)).orElse(TFNumber.build(null)))
                                                     .argument("tags", TFMap.build(
                                                             fileSystem.tags().stream()
                                                                     .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
