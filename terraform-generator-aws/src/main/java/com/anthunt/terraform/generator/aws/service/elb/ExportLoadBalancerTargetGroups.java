@@ -66,7 +66,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                             .arguments(
                                     TFArguments.builder()
                                             .argument("name", TFString.build(targetGroup.targetGroupName()))
-                                            .argument("port", TFNumber.build(targetGroup.port().toString()))
+                                            .argument("port", TFNumber.build(targetGroup.port()))
                                             .argument("protocol", TFString.build(targetGroup.protocolAsString()))
                                             .argument("vpc_id", TFExpression.build(
                                                     MessageFormat.format("aws_vpc.{0}.id", targetGroup.vpcId())))
@@ -82,9 +82,9 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                                     .argument("port", TFNumber.build(targetGroup.healthCheckPort()))
                                                     .argument("protocol", TFString.build(targetGroup.protocolAsString()))
                                                     .argument("path", TFString.build(targetGroup.healthCheckPath()))
-                                                    .argument("healthy_threshold", TFNumber.build(targetGroup.healthyThresholdCount().toString()))
-                                                    .argument("unhealthy_threshold", TFNumber.build(targetGroup.unhealthyThresholdCount().toString()))
-                                                    .argument("interval", TFNumber.build(targetGroup.healthCheckIntervalSeconds().toString()))
+                                                    .argument("healthy_threshold", TFNumber.build(targetGroup.healthyThresholdCount()))
+                                                    .argument("unhealthy_threshold", TFNumber.build(targetGroup.unhealthyThresholdCount()))
+                                                    .argument("interval", TFNumber.build(targetGroup.healthCheckIntervalSeconds()))
                                                     .build()
                                             ).build()
                             ).build()
@@ -112,7 +112,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                                                     MessageFormat.format("aws_lambda_function.{0}.arn",
                                                                             targetDescription.id())))
                                                     .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
-                                                            "port", TFNumber.build(targetDescription.port().toString()))
+                                                            "port", TFNumber.build(targetDescription.port()))
                                                     //Todo: not implemented
                                                     .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
                                                             "depends_on", TFExpression.build(
