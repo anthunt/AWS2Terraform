@@ -61,7 +61,7 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
                                     .argument("engine_name", TFString.build(optionGroup.engineName()))
                                     .argument("major_engine_version", TFString.build(optionGroup.majorEngineVersion()))
                                     .argument("option_group_description", TFString.build(optionGroup.optionGroupDescription()))
-                                    .argumentIf(Optional.ofNullable(optionGroup.options()).isPresent(),
+                                    .argumentsIf(Optional.ofNullable(optionGroup.options()).isPresent(),
                                             "option",
                                             optionGroup.options().stream()
                                                     .map(option -> TFBlock.builder()
