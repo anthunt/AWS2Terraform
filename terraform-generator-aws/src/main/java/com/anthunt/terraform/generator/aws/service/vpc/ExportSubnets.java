@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,29 +41,30 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
         int i = 0;
         for(Subnet subnet : subnets) {
             log.debug("subnet => {}", subnet);
-            TFArguments.TFArgumentsBuilder tfArgumentsBuilder = TFArguments.builder();
-
-            tfArgumentsBuilder.argument("availability_zone_id", TFString.build(subnet.availabilityZoneId()));
-            tfArgumentsBuilder.argument("cidr_block", TFString.build(subnet.cidrBlock()));
-            if(!subnet.ipv6CidrBlockAssociationSet().isEmpty()) {
-                tfArgumentsBuilder.argument("ipv6_cidr_block", TFString.build(subnet.ipv6CidrBlockAssociationSet().get(0).ipv6CidrBlock()));
-            }
-            tfArgumentsBuilder.argument("map_public_ip_on_launch", TFBool.build(subnet.mapPublicIpOnLaunch()));
-            if(subnet.outpostArn() != null) {
-                tfArgumentsBuilder.argument("outpost_arn", TFString.build(subnet.outpostArn()));
-            }
-            tfArgumentsBuilder.argument("assign_ipv6_address_on_creation", TFBool.build(subnet.assignIpv6AddressOnCreation()));
-            tfArgumentsBuilder.argument("vpc_id", TFString.build(subnet.vpcId()));
-            tfArgumentsBuilder.argument("tags", TFMap.build(
-                    subnet.tags().stream()
-                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-            ));
 
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_subnet")
                             .name(subnet.subnetId())
-                            .arguments(tfArgumentsBuilder.build())
+                            .arguments(
+                                    TFArguments.builder()
+                                            .argument("availability_zone_id", TFString.build(subnet.availabilityZoneId()))
+                                            .argument("cidr_block", TFString.build(subnet.cidrBlock()))
+                                            .argumentIf(!subnet.ipv6CidrBlockAssociationSet().isEmpty(),
+                                                    "ipv6_cidr_block",
+                                                    TFString.build(subnet.ipv6CidrBlockAssociationSet().stream().findFirst().map(r -> r.ipv6CidrBlock()).orElse(null))
+                                            )
+                                            .argument("map_public_ip_on_launch", TFBool.build(subnet.mapPublicIpOnLaunch()))
+                                            .argumentIf(subnet.outpostArn() != null, "outpost_arn", TFString.build(subnet.outpostArn()))
+                                            .argument("assign_ipv6_address_on_creation", TFBool.build(subnet.assignIpv6AddressOnCreation()))
+                                            .argument("vpc_id", TFString.build(subnet.vpcId()))
+                                            .argument("tags", TFMap.build(
+                                                    subnet.tags().stream()
+                                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                                    )
+                                            )
+                                            .build()
+                            )
                             .build()
             );
         }
