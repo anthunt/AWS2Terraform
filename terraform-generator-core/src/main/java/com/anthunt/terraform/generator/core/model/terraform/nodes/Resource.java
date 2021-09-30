@@ -69,10 +69,6 @@ public class Resource extends AbstractMarshaller<Resource> {
             return argumentIf(() -> condition, argumentKey, argumentValue);
         }
 
-        public ResourceBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
-            return argumentIf(() -> condition, argumentKey, argumentValues);
-        }
-
         public ResourceBuilder argumentIf(boolean condition, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
             return argumentIf(() -> condition, argumentKey, argumentValueSupplier);
         }
@@ -93,13 +89,29 @@ public class Resource extends AbstractMarshaller<Resource> {
             }
         }
 
-        public ResourceBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+        public ResourceBuilder argumentsIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            return argumentsIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public ResourceBuilder argumentsIf(boolean condition, String argumentKey, Supplier<List<AbstractMarshaller<?>>> argumentValuesSupplier) {
+            return argumentsIf(() -> condition, argumentKey, argumentValuesSupplier.get());
+        }
+
+        public ResourceBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             int inx = 0;
             for (AbstractMarshaller<?> argumentValue : argumentValues) {
                 this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
                 inx++;
             }
             return this;
+        }
+
+        public ResourceBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, Supplier<List<AbstractMarshaller<?>>> argumentValuesSupplier) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argumentsIf(booleanSupplier, argumentKey, argumentValuesSupplier.get());
+            } else {
+                return this;
+            }
         }
 
         public ResourceBuilder arguments(TFArguments arguments) {

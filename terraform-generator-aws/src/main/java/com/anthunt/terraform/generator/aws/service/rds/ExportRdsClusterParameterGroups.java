@@ -64,7 +64,7 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
                                     .argument("name", TFString.build(parameterGroup.dbClusterParameterGroupName()))
                                     .argument("family", TFString.build(parameterGroup.dbParameterGroupFamily()))
                                     .argument("description", TFString.build(parameterGroup.description()))
-                                    .argumentIf(Optional.ofNullable(parameters).isPresent(),
+                                    .argumentsIf(Optional.ofNullable(parameters).isPresent(),
                                             "parameter",
                                             parameters.stream()
                                                     .filter(p -> p.source().equalsIgnoreCase("modified"))
