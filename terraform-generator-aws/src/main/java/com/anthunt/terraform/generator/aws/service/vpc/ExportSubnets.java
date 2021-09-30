@@ -50,7 +50,10 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
                                     TFArguments.builder()
                                             .argument("availability_zone_id", TFString.build(subnet.availabilityZoneId()))
                                             .argument("cidr_block", TFString.build(subnet.cidrBlock()))
-                                            .argumentIf(!subnet.ipv6CidrBlockAssociationSet().isEmpty(), "ipv6_cidr_block", TFString.build(Optional.ofNullable(subnet.ipv6CidrBlockAssociationSet()).map(r -> r.get(0).ipv6CidrBlock()).orElse(null)))
+                                            .argumentIf(!subnet.ipv6CidrBlockAssociationSet().isEmpty(),
+                                                    "ipv6_cidr_block",
+                                                    TFString.build(subnet.ipv6CidrBlockAssociationSet().stream().findFirst().map(r -> r.ipv6CidrBlock()).orElse(null))
+                                            )
                                             .argument("map_public_ip_on_launch", TFBool.build(subnet.mapPublicIpOnLaunch()))
                                             .argumentIf(subnet.outpostArn() != null, "outpost_arn", TFString.build(subnet.outpostArn()))
                                             .argument("assign_ipv6_address_on_creation", TFBool.build(subnet.assignIpv6AddressOnCreation()))

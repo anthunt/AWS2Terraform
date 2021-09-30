@@ -37,7 +37,7 @@ class ExportSubnetsTest {
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
         Maps<Resource> export = exportSubnets.export(ec2Client, null, null);
