@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.elasticache.ElastiCacheClient;
 import software.amazon.awssdk.services.elasticloadbalancing.ElasticLoadBalancingClient;
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
 import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.kafka.KafkaClient;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.lambda.LambdaClient;
 import software.amazon.awssdk.services.rds.RdsClient;
@@ -183,6 +184,13 @@ public class AmazonClients {
 
     public EfsClient getEfsClient() {
         return EfsClient.builder()
+                .region(region)
+                .credentialsProvider(getCredentialsProvider())
+                .build();
+    }
+
+    public KafkaClient getKafkaClient() {
+        return KafkaClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();

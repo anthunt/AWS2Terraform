@@ -85,6 +85,7 @@ project(':terraform-generator-aws') {
         implementation "software.amazon.awssdk:ecr:${awsSdkVersion}"
         implementation "software.amazon.awssdk:efs:${awsSdkVersion}"
         implementation "software.amazon.awssdk:eks:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:kafka:${awsSdkVersion}"
         implementation "com.google.code.gson:gson:2.8.8"
 
 

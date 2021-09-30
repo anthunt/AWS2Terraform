@@ -1,0 +1,99 @@
+package com.anthunt.terraform.generator.aws.service.msk;
+
+import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.msk.model.AWSMskCluster;
+import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
+import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
+import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ResourceLoader;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.kafka.KafkaClient;
+import software.amazon.awssdk.services.kafka.model.*;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Slf4j
+@SpringBootTest(classes = {AmazonClients.class})
+class ExportMskClustersTest {
+
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    private static ExportMskClusters exportMskClusters;
+
+    private static KafkaClient client;
+
+    @BeforeAll
+    public static void beforeAll() {
+        exportMskClusters = new ExportMskClusters();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getKafkaClient();
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportMskClusters.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void listClusters() {
+        List<AWSMskCluster> awsMskClusters = exportMskClusters.listClusters(client);
+        log.debug("awsKafkaClusters => {}", awsMskClusters);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSMskCluster> awsMskClusters = List.of(
+                AWSMskCluster.builder()
+                        .clusterInfo(ClusterInfo.builder()
+                                .clusterName("msk-dev")
+                                .currentBrokerSoftwareInfo(BrokerSoftwareInfo.builder()
+                                        .kafkaVersion("2.6.1")
+                                        .build())
+                                .numberOfBrokerNodes(2)
+                                .encryptionInfo(EncryptionInfo.builder()
+                                        .encryptionAtRest(EncryptionAtRest.builder()
+                                                .dataVolumeKMSKeyId("arn:aws:kms:ap-northeast-2:100020003000:key/10002000-227f-4116-a5f1-12ab61377980")
+                                                .build())
+                                        .encryptionInTransit(EncryptionInTransit.builder()
+                                                .inCluster(true)
+                                                .build())
+                                        .build())
+                                .brokerNodeGroupInfo(BrokerNodeGroupInfo.builder()
+                                        .clientSubnets("subnet-0f58e2bf1ada4d5c0", "subnet-003e5f077d31b5163")
+                                        .storageInfo(StorageInfo.builder()
+                                                .ebsStorageInfo(EBSStorageInfo.builder()
+                                                        .volumeSize(10)
+                                                        .build())
+                                                .build())
+                                        .instanceType("kafka.t3.small")
+                                        .securityGroups("sg-010fc4d6910de29ce")
+                                        .build())
+                                .tags(Map.of("Name", "msk-dev-ulsp"))
+                                .build())
+                        .build()
+        );
+
+        Maps<Resource> resourceMaps = exportMskClusters.getResourceMaps(awsMskClusters);
+        String actual = resourceMaps.unmarshall();
+
+        log.debug("actual => \n{}", actual);
+        String expected = TestDataFileUtils.asString(
+                resourceLoader.getResource("testData/msk/expected/MskCluster.tf")
+        );
+        assertEquals(expected, actual);
+    }
+
+}
