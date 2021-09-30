@@ -52,7 +52,7 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
                                             .argument("cidr_block", TFString.build(subnet.cidrBlock()))
                                             .argumentIf(!subnet.ipv6CidrBlockAssociationSet().isEmpty(),
                                                     "ipv6_cidr_block",
-                                                    TFString.build(subnet.ipv6CidrBlockAssociationSet().stream().findFirst().map(r -> r.ipv6CidrBlock()).orElse(null))
+                                                    () -> TFString.build(subnet.ipv6CidrBlockAssociationSet().get(0).ipv6CidrBlock())
                                             )
                                             .argument("map_public_ip_on_launch", TFBool.build(subnet.mapPublicIpOnLaunch()))
                                             .argumentIf(subnet.outpostArn() != null, "outpost_arn", TFString.build(subnet.outpostArn()))

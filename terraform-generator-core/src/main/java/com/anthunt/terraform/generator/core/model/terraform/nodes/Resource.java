@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @ToString
 public class Resource extends AbstractMarshaller<Resource> {
@@ -70,6 +71,18 @@ public class Resource extends AbstractMarshaller<Resource> {
 
         public ResourceBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             return argumentIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public ResourceBuilder argumentIf(boolean condition, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            return argumentIf(() -> condition, argumentKey, argumentValueSupplier);
+        }
+
+        public ResourceBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValueSupplier.get());
+            } else {
+                return this;
+            }
         }
 
         public ResourceBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
