@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @ToString
 public class TFArguments extends AbstractMarshaller<TFArguments> {
@@ -63,6 +64,18 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
 
         public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             return argumentIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            return this.argumentIf(() -> condition, argumentKey, argumentValueSupplier);
+        }
+
+        public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValueSupplier.get());
+            } else {
+                return this;
+            }
         }
 
         public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
