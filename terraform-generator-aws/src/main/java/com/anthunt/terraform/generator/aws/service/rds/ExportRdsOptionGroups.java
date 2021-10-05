@@ -80,8 +80,7 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
                                                     .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
                                     ))
                                     .build()
-                    )
-                    .build();
+                    );
 
         });
 

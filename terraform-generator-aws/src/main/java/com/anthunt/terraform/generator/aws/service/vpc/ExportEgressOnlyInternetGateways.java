@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -38,24 +37,20 @@ public class ExportEgressOnlyInternetGateways extends AbstractExport<Ec2Client> 
     protected Maps<Resource> getResourceMaps(List<EgressOnlyInternetGateway> egressOnlyInternetGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int i = 0;
-        for(EgressOnlyInternetGateway egressOnlyInternetGateway : egressOnlyInternetGateways) {
+        for (EgressOnlyInternetGateway egressOnlyInternetGateway : egressOnlyInternetGateways) {
 
             List<InternetGatewayAttachment> internetGatewayAttachments = egressOnlyInternetGateway.attachments();
 
-            for(InternetGatewayAttachment internetGatewayAttachment : internetGatewayAttachments) {
+            for (InternetGatewayAttachment internetGatewayAttachment : internetGatewayAttachments) {
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_egress_only_internet_gateway")
                                 .name("egress_only_internet_gateway" + i)
-                                .arguments(
-                                        TFArguments.builder()
-                                                .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
-                                                .argument("tags", TFMap.build(
-                                                        egressOnlyInternetGateway.tags().stream()
-                                                                .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                                ))
-                                                .build()
-                                )
+                                .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
+                                .argument("tags", TFMap.build(
+                                        egressOnlyInternetGateway.tags().stream()
+                                                .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                ))
                                 .build()
                 );
                 i++;

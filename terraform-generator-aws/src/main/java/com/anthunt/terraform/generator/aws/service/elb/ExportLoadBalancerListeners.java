@@ -64,26 +64,24 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
                     Resource.builder()
                             .api("aws_lb_listener")
                             .name(MessageFormat.format("{0}-{1}-{2}", loadBalancer.loadBalancerName(), listener.port(), listener.protocolAsString()))
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("load_balancer_arn", TFExpression.build(
-                                                    MessageFormat.format("aws_lb.{0}.arn", loadBalancer.loadBalancerName())))
-                                            .argument("port", TFNumber.build(listener.port()))
-                                            .argument("protocol", TFString.build(listener.protocolAsString()))
-                                            .argumentIf(listener.hasDefaultActions(), "default_action",
-                                                    listener.defaultActions().stream()
-                                                            .map(action -> TFBlock.builder()
-                                                                    .argument("target_group_arn",
-                                                                            TFExpression.build(Optional.ofNullable(awsListener.getTargetGroup())
-                                                                                    .map(t -> MessageFormat.format("aws_lb_target_group.{0}.arn", t.targetGroupName()))
-                                                                                    .orElse(null))
-                                                                    )
-                                                                    .argument("type", TFString.build(action.typeAsString()))
-                                                                    .build())
-                                                            .collect(Collectors.toList())
-                                            )
-                                            .build()
-                            ).build()
+                            .argument("load_balancer_arn", TFExpression.build(
+                                    MessageFormat.format("aws_lb.{0}.arn", loadBalancer.loadBalancerName())))
+                            .argument("port", TFNumber.build(listener.port()))
+                            .argument("protocol", TFString.build(listener.protocolAsString()))
+                            .argumentsIf(listener.hasDefaultActions(),
+                                    "default_action",
+                                    listener.defaultActions().stream()
+                                            .map(action -> TFBlock.builder()
+                                                    .argument("target_group_arn",
+                                                            TFExpression.build(Optional.ofNullable(awsListener.getTargetGroup())
+                                                                    .map(t -> MessageFormat.format("aws_lb_target_group.{0}.arn", t.targetGroupName()))
+                                                                    .orElse(null))
+                                                    )
+                                                    .argument("type", TFString.build(action.typeAsString()))
+                                                    .build())
+                                            .collect(Collectors.toList())
+                            )
+                            .build()
             ).build();
         }
         return resourceMapsBuilder.build();

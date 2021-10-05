@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -12,7 +11,8 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.iam.IamClient;
-import software.amazon.awssdk.services.iam.model.*;
+import software.amazon.awssdk.services.iam.model.InstanceProfile;
+import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -46,17 +46,13 @@ public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
                             Resource.builder()
                                     .api("aws_iam_instance_profile")
                                     .name(instanceProfile.instanceProfileName())
-                                    .arguments(
-                                            TFArguments.builder()
-                                                    .argument("name", TFString.build(instanceProfile.instanceProfileName()))
-                                                    .argument("role", TFList.build(instanceProfile.roles().stream()
-                                                            .map(role -> TFExpression.builder().isLineIndent(false)
-                                                                    .expression(MessageFormat.format("aws_iam_role.{0}.name", role.roleName()))
-                                                                    .build())
-                                                            .collect(Collectors.toList())))
+                                    .argument("name", TFString.build(instanceProfile.instanceProfileName()))
+                                    .argument("role", TFList.build(instanceProfile.roles().stream()
+                                            .map(role -> TFExpression.builder().isLineIndent(false)
+                                                    .expression(MessageFormat.format("aws_iam_role.{0}.name", role.roleName()))
                                                     .build())
-                                    .build())
-                    .build();
+                                            .collect(Collectors.toList())))
+                                    .build());
         }
         return resourceMapsBuilder.build();
     }

@@ -4,7 +4,6 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicyAttachment;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -37,8 +36,8 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
                 .peek(role -> log.debug("roleName => {}", role.roleName()))
                 .flatMap(
                         role -> client.listAttachedRolePolicies(ListAttachedRolePoliciesRequest.builder()
-                                .roleName(role.roleName())
-                                .build())
+                                        .roleName(role.roleName())
+                                        .build())
                                 .attachedPolicies()
                                 .stream()
                                 .map(attachedPolicy -> AWSRolePolicyAttachment.builder()
@@ -58,14 +57,11 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
                     Resource.builder()
                             .api("aws_iam_role_policy_attachment")
                             .name(MessageFormat.format("{0}-attach-{1}", awsRolePolicyAttachment.getRoleName(), awsRolePolicyAttachment.getPolicyName()))
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("role", TFExpression.build(
-                                                    MessageFormat.format("aws_iam_role.{0}.name", awsRolePolicyAttachment.getRoleName())))
-                                            .argument("policy_arn", TFExpression.build(
-                                                    MessageFormat.format("aws_iam_policy.{0}.arn", awsRolePolicyAttachment.getPolicyName())))
-                                            .build()
-                            ).build()
+                            .argument("role", TFExpression.build(
+                                    MessageFormat.format("aws_iam_role.{0}.name", awsRolePolicyAttachment.getRoleName())))
+                            .argument("policy_arn", TFExpression.build(
+                                    MessageFormat.format("aws_iam_policy.{0}.arn", awsRolePolicyAttachment.getPolicyName())))
+                            .build()
             );
         }
         return resourceMapsBuilder.build();

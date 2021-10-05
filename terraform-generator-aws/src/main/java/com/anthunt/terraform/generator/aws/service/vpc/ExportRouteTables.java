@@ -42,31 +42,28 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
         int i = 0;
-        for(RouteTable routeTable : routeTables) {
+        for (RouteTable routeTable : routeTables) {
 
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_route_table")
                             .name("route_table" + i)
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("vpc_id", TFString.build(routeTable.vpcId()))
-                                            .argument("tags", TFMap.build(
-                                                    routeTable.tags().stream()
-                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                            ))
-                                            .argument("propagating_vgws", TFList.build(
-                                                    routeTable.propagatingVgws().stream()
-                                                    .map(vgw -> TFString.build(vgw.gatewayId()))
-                                                    .collect(Collectors.toCollection(ArrayList::new))
-                                            ))
-                                            .build()
-                            ).build()
+                            .argument("vpc_id", TFString.build(routeTable.vpcId()))
+                            .argument("tags", TFMap.build(
+                                    routeTable.tags().stream()
+                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                            ))
+                            .argument("propagating_vgws", TFList.build(
+                                    routeTable.propagatingVgws().stream()
+                                            .map(vgw -> TFString.build(vgw.gatewayId()))
+                                            .collect(Collectors.toCollection(ArrayList::new))
+                            ))
+                            .build()
             );
 
             List<Route> routes = routeTable.routes();
             int j = 0;
-            for(Route route : routes) {
+            for (Route route : routes) {
 
                 resourceMapsBuilder.map(
                         Resource.builder()

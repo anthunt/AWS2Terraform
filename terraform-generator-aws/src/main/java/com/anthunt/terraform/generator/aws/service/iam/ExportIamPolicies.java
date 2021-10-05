@@ -4,7 +4,6 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSPolicy;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -41,12 +40,12 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
                 .map(policy -> AWSPolicy.builder().policy(policy)
                         .document(
                                 decodeURL(
-                                    client.getPolicyVersion(
-                                            GetPolicyVersionRequest.builder()
-                                                    .policyArn(policy.arn())
-                                                    .versionId(policy.defaultVersionId())
-                                                    .build()
-                                    ).policyVersion().document()
+                                        client.getPolicyVersion(
+                                                GetPolicyVersionRequest.builder()
+                                                        .policyArn(policy.arn())
+                                                        .versionId(policy.defaultVersionId())
+                                                        .build()
+                                        ).policyVersion().document()
                                 )
                         ).build()
                 )
@@ -62,14 +61,11 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
                     Resource.builder()
                             .api("aws_iam_policy")
                             .name(policy.policyName())
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("name", TFString.build(policy.policyName()))
-                                            .argument("path", TFString.build(policy.path()))
-                                            .argument("description", TFString.build(policy.description()))
-                                            .argument("policy", TFString.builder().isMultiline(true).value(document).build())
-                                            .build()
-                            ).build()
+                            .argument("name", TFString.build(policy.policyName()))
+                            .argument("path", TFString.build(policy.path()))
+                            .argument("description", TFString.build(policy.description()))
+                            .argument("policy", TFString.builder().isMultiline(true).value(document).build())
+                            .build()
             );
         }
         return resourceMapsBuilder.build();

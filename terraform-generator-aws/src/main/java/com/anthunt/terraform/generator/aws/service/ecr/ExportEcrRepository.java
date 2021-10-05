@@ -34,25 +34,22 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
 
     Maps<Resource> getResourceMaps(List<Repository> repositories) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (Repository repository:repositories) {
+        for (Repository repository : repositories) {
 
             resourceMapsBuilder.map(
-                    Resource.builder()
-                            .api("aws_ecr_repository")
-                            .name(repository.repositoryName().replaceAll("/", "-"))
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("name", TFString.build(repository.repositoryName()))
-                                            .argument("encryption_configuration", TFMap.builder()
-                                                    .map("encryption_type", TFString.build(repository.encryptionConfiguration().encryptionType().toString()))
-                                                    .map("kms_key", TFString.build(repository.encryptionConfiguration().kmsKey()))
-                                                    .build())
-                                            .argument("image_tag_mutability", TFString.build(repository.imageTagMutability().toString()))
-                                            .argument("image_scanning_configuration", TFMap.builder()
-                                                    .map("scan_on_push", TFBool.build(repository.imageScanningConfiguration().scanOnPush()))
-                                                    .build())
+                            Resource.builder()
+                                    .api("aws_ecr_repository")
+                                    .name(repository.repositoryName().replaceAll("/", "-"))
+                                    .argument("name", TFString.build(repository.repositoryName()))
+                                    .argument("encryption_configuration", TFMap.builder()
+                                            .map("encryption_type", TFString.build(repository.encryptionConfiguration().encryptionType().toString()))
+                                            .map("kms_key", TFString.build(repository.encryptionConfiguration().kmsKey()))
                                             .build())
-                            .build())
+                                    .argument("image_tag_mutability", TFString.build(repository.imageTagMutability().toString()))
+                                    .argument("image_scanning_configuration", TFMap.builder()
+                                            .map("scan_on_push", TFBool.build(repository.imageScanningConfiguration().scanOnPush()))
+                                            .build())
+                                    .build())
                     .build();
         }
         return resourceMapsBuilder.build();

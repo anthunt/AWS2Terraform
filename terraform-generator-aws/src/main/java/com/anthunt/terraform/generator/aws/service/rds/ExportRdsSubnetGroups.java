@@ -71,9 +71,7 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
                                                     .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
                                     ))
                                     .build()
-                    )
-                    .build();
-
+                    );
         });
 
         return resourceMapsBuilder.build();

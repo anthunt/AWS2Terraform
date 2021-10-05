@@ -58,26 +58,23 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
 
         for (SecurityGroup securityGroup : securityGroups) {
             resourceMapsBuilder.map(
-                Resource.builder()
-                    .api("aws_security_group")
-                    .name(securityGroup.groupName())
-                    .arguments(
-                        TFArguments.builder()
+                    Resource.builder()
+                            .api("aws_security_group")
+                            .name(securityGroup.groupName())
                             .argument("name", TFString.build(securityGroup.groupName()))
                             .argument("description", TFString.build(securityGroup.description()))
                             .argument("vpc_id", TFString.build(securityGroup.vpcId()))
                             .argument("tags", TFMap.build(
-                                securityGroup.tags().stream()
-                                        .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                    securityGroup.tags().stream()
+                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
                             ))
                             .argument("ingress", TFList.builder()
-                                .lists(getRuleList(securityGroup.ipPermissions()))
-                                .build())
+                                    .lists(getRuleList(securityGroup.ipPermissions()))
+                                    .build())
                             .argument("egress", TFList.builder()
-                                .lists(getRuleList(securityGroup.ipPermissionsEgress()))
-                                .build()
+                                    .lists(getRuleList(securityGroup.ipPermissionsEgress()))
+                                    .build()
                             ).build()
-                    ).build()
             );
         }
         return resourceMapsBuilder.build();
@@ -86,31 +83,31 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
     private List<TFObject> getRuleList(List<IpPermission> ipPermissions) {
         List<TFObject> ruleList = new ArrayList<>();
         ruleList.addAll(
-            ipPermissions.stream()
-                .flatMap(ipPermission -> {
-                    log.debug("ipPermission => {}", ipPermission);
-                    return ipPermission.userIdGroupPairs().stream().map(userIdGroupPair -> {
-                        log.debug("userIdGroupPair => {}", userIdGroupPair);
-                        return TFObject.builder()
-                                .member("description", TFString.builder().isEmptyStringToNull(false)
-                                        .value(Optional.ofNullable(userIdGroupPair.description()).orElse("")).build())
-                                .member("from_port", TFNumber.builder()
-                                        .value(Optional.ofNullable(ipPermission.fromPort()).orElse(0)).build())
-                                .member("to_port", TFNumber.builder()
-                                        .value(Optional.ofNullable(ipPermission.toPort()).orElse(0)).build())
-                                .member("protocal", TFString.builder()
-                                        .value(ipPermission.ipProtocol()).build())
-                                .member("cidr_blocks", TFList.builder()
-                                        .lists(Collections.emptyList()).build())
-                                .member("ipv6_cidr_blocks", TFList.builder().isLineIndent(false)
-                                        .lists(Collections.emptyList()).build())
-                                .member("security_groups", TFList.builder().isLineIndent(false)
-                                        .lists(List.of(TFString.builder().isLineIndent(false).value(userIdGroupPair.groupId()).build()))
-                                        .build())
-                                .build();
-                    });
-                })
-                .collect(Collectors.toList()));
+                ipPermissions.stream()
+                        .flatMap(ipPermission -> {
+                            log.debug("ipPermission => {}", ipPermission);
+                            return ipPermission.userIdGroupPairs().stream().map(userIdGroupPair -> {
+                                log.debug("userIdGroupPair => {}", userIdGroupPair);
+                                return TFObject.builder()
+                                        .member("description", TFString.builder().isEmptyStringToNull(false)
+                                                .value(Optional.ofNullable(userIdGroupPair.description()).orElse("")).build())
+                                        .member("from_port", TFNumber.builder()
+                                                .value(Optional.ofNullable(ipPermission.fromPort()).orElse(0)).build())
+                                        .member("to_port", TFNumber.builder()
+                                                .value(Optional.ofNullable(ipPermission.toPort()).orElse(0)).build())
+                                        .member("protocal", TFString.builder()
+                                                .value(ipPermission.ipProtocol()).build())
+                                        .member("cidr_blocks", TFList.builder()
+                                                .lists(Collections.emptyList()).build())
+                                        .member("ipv6_cidr_blocks", TFList.builder().isLineIndent(false)
+                                                .lists(Collections.emptyList()).build())
+                                        .member("security_groups", TFList.builder().isLineIndent(false)
+                                                .lists(List.of(TFString.builder().isLineIndent(false).value(userIdGroupPair.groupId()).build()))
+                                                .build())
+                                        .build();
+                            });
+                        })
+                        .collect(Collectors.toList()));
 
         ruleList.addAll(
                 ipPermissions.stream()
