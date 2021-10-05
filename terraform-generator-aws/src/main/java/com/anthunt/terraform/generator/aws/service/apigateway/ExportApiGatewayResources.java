@@ -73,7 +73,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
         for (AWSRestApiResource awsRestApiResource : awsRestApiResources) {
             RestApi restApi = awsRestApiResource.getRestApi();
 
-            String rootResouceId = awsRestApiResource.getAwsResources().stream()
+            String rootResourceId = awsRestApiResource.getAwsResources().stream()
                     .filter(awsResource -> awsResource.getResource().parentId() == null)
                     .findFirst().get()
                     .getResource()
@@ -89,7 +89,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                         .name(MessageFormat.format("{0}-{1}", restApi.name(), resource.id()))
                                         .argument("rest_api_id ", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
-                                        .argument("parent_id", resource.parentId().equals(rootResouceId) ?
+                                        .argument("parent_id", resource.parentId().equals(rootResourceId) ?
                                                 TFExpression.build(MessageFormat.format("aws_api_gateway_rest_api.{0}.root_resource_id", restApi.name()))
                                                 : TFExpression.build(MessageFormat.format("aws_api_gateway_resource.{0}-{1}.id", restApi.name(), resource.parentId())))
                                         .argument("path_part ", TFString.build(resource.pathPart()))
