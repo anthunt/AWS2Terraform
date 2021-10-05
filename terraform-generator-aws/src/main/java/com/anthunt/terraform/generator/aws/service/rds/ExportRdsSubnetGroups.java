@@ -29,13 +29,13 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSRdsSubnetGroup> dbSubnetGroups = getDBSubnetGroups(client);
+        List<AWSRdsSubnetGroup> awsRdsSubnetGroups = listAwsRdsSubnetGroups(client);
 
-        return getResourceMaps(dbSubnetGroups);
+        return getResourceMaps(awsRdsSubnetGroups);
 
     }
 
-    List<AWSRdsSubnetGroup> getDBSubnetGroups(RdsClient client) {
+    List<AWSRdsSubnetGroup> listAwsRdsSubnetGroups(RdsClient client) {
 
         DescribeDbSubnetGroupsResponse describeDbSubnetGroupsResponse = client.describeDBSubnetGroups();
         return describeDbSubnetGroupsResponse.dbSubnetGroups().stream()

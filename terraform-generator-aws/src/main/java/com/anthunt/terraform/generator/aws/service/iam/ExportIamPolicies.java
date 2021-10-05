@@ -28,13 +28,13 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSPolicy> policies = getPolices(client);
+        List<AWSPolicy> awsPolicies = listAwsPolices(client);
 
-        return getResourceMaps(policies);
+        return getResourceMaps(awsPolicies);
 
     }
 
-    List<AWSPolicy> getPolices(IamClient client) {
+    List<AWSPolicy> listAwsPolices(IamClient client) {
         ListPoliciesResponse listPoliciesResponse = client.listPolicies(ListPoliciesRequest.builder().build());
         return listPoliciesResponse.policies().stream()
                 .filter(policy -> !policy.arn().startsWith("arn:aws:iam::aws:policy/"))

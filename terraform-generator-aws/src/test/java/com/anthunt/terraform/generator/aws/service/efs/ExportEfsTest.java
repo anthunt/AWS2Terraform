@@ -31,17 +31,19 @@ class ExportEfsTest {
 
     private static ExportEfs exportEfs;
 
+    private static EfsClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportEfs = new ExportEfs();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEfsClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        EfsClient efsClient = amazonClients.getEfsClient();
-        Maps<Resource> export = exportEfs.export(efsClient, null, null);
+        Maps<Resource> export = exportEfs.export(client, null, null);
         log.debug("export => \n{}", export.unmarshall());
     }
 

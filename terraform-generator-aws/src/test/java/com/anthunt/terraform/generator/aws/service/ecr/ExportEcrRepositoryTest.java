@@ -30,17 +30,19 @@ class ExportEcrRepositoryTest {
 
     private static ExportEcrRepository exportEcrRepository;
 
+    private static EcrClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportEcrRepository = new ExportEcrRepository();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEcrClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        EcrClient ecrClient = amazonClients.getEcrClient();
-        Maps<Resource> export = exportEcrRepository.export(ecrClient, null, null);
+        Maps<Resource> export = exportEcrRepository.export(client, null, null);
         log.debug("export => \n{}", export.unmarshall());
     }
 

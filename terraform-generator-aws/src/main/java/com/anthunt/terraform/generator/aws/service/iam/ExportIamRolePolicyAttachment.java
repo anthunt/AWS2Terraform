@@ -25,12 +25,12 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSRolePolicyAttachment> awsRolePolicyAttachments = getRolePolices(client);
+        List<AWSRolePolicyAttachment> awsRolePolicyAttachments = listAwsRolePolicyAttachments(client);
 
         return getResourceMaps(awsRolePolicyAttachments);
     }
 
-    List<AWSRolePolicyAttachment> getRolePolices(IamClient client) {
+    List<AWSRolePolicyAttachment> listAwsRolePolicyAttachments(IamClient client) {
         ListRolesResponse listPoliciesResponse = client.listRoles();
         return listPoliciesResponse.roles().stream()
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))

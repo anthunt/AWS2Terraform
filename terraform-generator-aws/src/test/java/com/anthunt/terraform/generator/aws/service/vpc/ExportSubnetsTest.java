@@ -13,9 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.*;
+import software.amazon.awssdk.services.ec2.model.Subnet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,19 +28,19 @@ class ExportSubnetsTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static Ec2Client client;
+
     @BeforeAll
     public static void beforeAll() {
         exportSubnets = new ExportSubnets();
+        AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEc2Client();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
-
-        Maps<Resource> export = exportSubnets.export(ec2Client, null, null);
-
+        Maps<Resource> export = exportSubnets.export(client, null, null);
         log.debug("result => {}", export.unmarshall());
     }
 

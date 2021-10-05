@@ -23,13 +23,13 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSLoadBalancer> AWSLoadBalancers = getLoadBalancers(client);
+        List<AWSLoadBalancer> awsLoadBalancers = listAwsLoadBalancers(client);
 
-        return getResourceMaps(AWSLoadBalancers);
+        return getResourceMaps(awsLoadBalancers);
 
     }
 
-    List<AWSLoadBalancer> getLoadBalancers(ElasticLoadBalancingV2Client client) {
+    List<AWSLoadBalancer> listAwsLoadBalancers(ElasticLoadBalancingV2Client client) {
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         return describeLoadBalancersResponse.loadBalancers().stream()
@@ -53,12 +53,12 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<AWSLoadBalancer> AWSLoadBalancers) {
+    Maps<Resource> getResourceMaps(List<AWSLoadBalancer> awsLoadBalancers) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (AWSLoadBalancer AWSLoadBalancer : AWSLoadBalancers) {
-            LoadBalancer loadBalancer = AWSLoadBalancer.getLoadBalancer();
-            List<LoadBalancerAttribute> attributes = AWSLoadBalancer.getLoadBalancerAttributes();
-            List<Tag> tags = AWSLoadBalancer.getTags();
+        for (AWSLoadBalancer awsLoadBalancer : awsLoadBalancers) {
+            LoadBalancer loadBalancer = awsLoadBalancer.getLoadBalancer();
+            List<LoadBalancerAttribute> attributes = awsLoadBalancer.getLoadBalancerAttributes();
+            List<Tag> tags = awsLoadBalancer.getTags();
             int blockIndex = 0;
             resourceMapsBuilder.map(
                             Resource.builder()

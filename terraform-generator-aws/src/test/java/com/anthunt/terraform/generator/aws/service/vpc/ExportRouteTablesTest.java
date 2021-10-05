@@ -29,19 +29,19 @@ class ExportRouteTablesTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static Ec2Client client;
+
     @BeforeAll
     public static void beforeAll() {
         exportRouteTables = new ExportRouteTables();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEc2Client();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
-
-        Maps<Resource> export = exportRouteTables.export(ec2Client, null, null);
-
+        Maps<Resource> export = exportRouteTables.export(client, null, null);
         log.debug("result => \n{}", export.unmarshall());
     }
 

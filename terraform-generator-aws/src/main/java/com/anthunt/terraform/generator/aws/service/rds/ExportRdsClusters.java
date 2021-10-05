@@ -24,13 +24,13 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSRdsCluster> awsDbClusters = getDBClusters(client);
+        List<AWSRdsCluster> awsRdsClusters = listAwsRdsClusters(client);
 
-        return getResourceMaps(awsDbClusters);
+        return getResourceMaps(awsRdsClusters);
 
     }
 
-    List<AWSRdsCluster> getDBClusters(RdsClient client) {
+    List<AWSRdsCluster> listAwsRdsClusters(RdsClient client) {
 
         DescribeDbClustersResponse describeDbClustersResponse = client.describeDBClusters();
         return describeDbClustersResponse.dbClusters().stream()
@@ -44,9 +44,9 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<AWSRdsCluster> awsDbClusters) {
+    Maps<Resource> getResourceMaps(List<AWSRdsCluster> awsRdsClusters) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsDbClusters.stream().forEach(awsDbCluster -> {
+        awsRdsClusters.stream().forEach(awsDbCluster -> {
             DBCluster dbCluster = awsDbCluster.getDbCluster();
             List<DBInstance> dbClusterInstances = awsDbCluster.getDbClusterInstances();
             resourceMapsBuilder.map(

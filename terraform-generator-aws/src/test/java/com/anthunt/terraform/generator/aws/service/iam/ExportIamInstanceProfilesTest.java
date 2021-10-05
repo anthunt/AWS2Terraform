@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
-import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -13,18 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.iam.IamClient;
-import software.amazon.awssdk.services.iam.model.GetRolePolicyResponse;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.Role;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
@@ -35,19 +29,19 @@ class ExportIamInstanceProfilesTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static IamClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportIamInstanceProfiles = new ExportIamInstanceProfiles();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
+        client = amazonClients.getIamClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        IamClient iamClient = amazonClients.getIamClient();
-
-        Maps<Resource> export = exportIamInstanceProfiles.export(iamClient, null, null);
-
+        Maps<Resource> export = exportIamInstanceProfiles.export(client, null, null);
         log.debug("result => \n{}", export.unmarshall());
     }
 

@@ -49,7 +49,7 @@ class ExportMskClustersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void listClusters() {
-        List<AWSMskCluster> awsMskClusters = exportMskClusters.listClusters(client);
+        List<AWSMskCluster> awsMskClusters = exportMskClusters.listAwsMskClusters(client);
         log.debug("awsKafkaClusters => {}", awsMskClusters);
     }
 

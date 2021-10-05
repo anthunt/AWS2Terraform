@@ -26,11 +26,11 @@ public class ExportEgressOnlyInternetGateways extends AbstractExport<Ec2Client> 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<EgressOnlyInternetGateway> egressOnlyInternetGateways = getEgressOnlyInternetGateways(client);
+        List<EgressOnlyInternetGateway> egressOnlyInternetGateways = listEgressOnlyInternetGateways(client);
         return getResourceMaps(egressOnlyInternetGateways);
     }
 
-    protected List<EgressOnlyInternetGateway> getEgressOnlyInternetGateways(Ec2Client client) {
+    protected List<EgressOnlyInternetGateway> listEgressOnlyInternetGateways(Ec2Client client) {
         DescribeEgressOnlyInternetGatewaysResponse describeEgressOnlyInternetGatewaysResponse = client.describeEgressOnlyInternetGateways();
         return describeEgressOnlyInternetGatewaysResponse.egressOnlyInternetGateways();
     }

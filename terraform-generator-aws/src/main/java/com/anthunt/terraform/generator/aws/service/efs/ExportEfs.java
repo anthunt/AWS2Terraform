@@ -27,13 +27,13 @@ public class ExportEfs extends AbstractExport<EfsClient> {
     @Override
     protected Maps<Resource> export(EfsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSEfs> fileSystems = getEfs(client);
+        List<AWSEfs> awsEfs = listAwsEfs(client);
 
-        return getResourceMaps(fileSystems);
+        return getResourceMaps(awsEfs);
 
     }
 
-    List<AWSEfs> getEfs(EfsClient client) {
+    List<AWSEfs> listAwsEfs(EfsClient client) {
         DescribeFileSystemsResponse describeFileSystems = client.describeFileSystems();
         return describeFileSystems.fileSystems().stream()
 //                .peek(fileSystem -> log.debug("fileSystem => {}", fileSystem))

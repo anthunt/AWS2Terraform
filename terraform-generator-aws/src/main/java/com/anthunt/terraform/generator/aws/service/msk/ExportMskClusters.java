@@ -25,13 +25,13 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
     @Override
     protected Maps<Resource> export(KafkaClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSMskCluster> awsMskClusters = listClusters(client);
+        List<AWSMskCluster> awsMskClusters = listAwsMskClusters(client);
 
         return getResourceMaps(awsMskClusters);
 
     }
 
-    List<AWSMskCluster> listClusters(KafkaClient client) {
+    List<AWSMskCluster> listAwsMskClusters(KafkaClient client) {
         ListClustersResponse listClustersResponse = client.listClusters();
         return listClustersResponse.clusterInfoList().stream()
                 .map(clusterInfo ->

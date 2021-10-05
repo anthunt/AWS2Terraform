@@ -25,11 +25,11 @@ public class ExportNatGateways extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<NatGateway> natGateways = getNatGateways(client);
+        List<NatGateway> natGateways = listNatGateways(client);
         return getResourceMaps(natGateways);
     }
 
-    protected List<NatGateway> getNatGateways(Ec2Client client) {
+    protected List<NatGateway> listNatGateways(Ec2Client client) {
         DescribeNatGatewaysResponse describeNatGatewaysResponse = client.describeNatGateways();
         return describeNatGatewaysResponse.natGateways();
     }

@@ -47,7 +47,7 @@ class ExportLoadBalancerListenersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getListeners() {
-        List<AWSListener> awsListeners = exportLoadBalancerListeners.getListeners(client);
+        List<AWSListener> awsListeners = exportLoadBalancerListeners.listAwsListeners(client);
         log.debug("awsListeners => {}", awsListeners);
     }
 

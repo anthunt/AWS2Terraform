@@ -23,13 +23,13 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSCacheCluster> awsCacheClusters = getCacheClusters(client);
+        List<AWSCacheCluster> awsCacheClusters = listAwsCacheClusters(client);
 
         return getResourceMaps(awsCacheClusters);
 
     }
 
-    List<AWSCacheCluster> getCacheClusters(ElastiCacheClient client) {
+    List<AWSCacheCluster> listAwsCacheClusters(ElastiCacheClient client) {
 
         DescribeCacheClustersResponse describeCacheClustersResponse = client.describeCacheClusters(DescribeCacheClustersRequest.builder()
                         .showCacheClustersNotInReplicationGroups(true)

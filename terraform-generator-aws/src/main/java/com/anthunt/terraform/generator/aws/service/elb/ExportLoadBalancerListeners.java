@@ -24,12 +24,12 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSListener> awsListeners = getListeners(client);
+        List<AWSListener> awsListeners = listAwsListeners(client);
         return getResourceMaps(awsListeners);
 
     }
 
-    List<AWSListener> getListeners(ElasticLoadBalancingV2Client client) {
+    List<AWSListener> listAwsListeners(ElasticLoadBalancingV2Client client) {
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         return describeLoadBalancersResponse.loadBalancers().stream()

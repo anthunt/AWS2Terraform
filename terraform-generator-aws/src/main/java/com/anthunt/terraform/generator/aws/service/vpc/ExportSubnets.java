@@ -12,13 +12,11 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,11 +25,11 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<Subnet> subnets = getSubnets(client);
+        List<Subnet> subnets = listSubnets(client);
         return getResourceMaps(subnets);
     }
 
-    List<Subnet> getSubnets(Ec2Client client) {
+    List<Subnet> listSubnets(Ec2Client client) {
         DescribeSubnetsResponse describeSubnetsResponse = client.describeSubnets();
         return describeSubnetsResponse.subnets();
     }

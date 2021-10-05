@@ -23,11 +23,11 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<InternetGateway> internetGateways = getInternetGateways(client);
+        List<InternetGateway> internetGateways = listInternetGateways(client);
         return getResourceMaps(internetGateways);
     }
 
-    protected List<InternetGateway> getInternetGateways(Ec2Client client) {
+    protected List<InternetGateway> listInternetGateways(Ec2Client client) {
         DescribeInternetGatewaysResponse describeInternetGatewaysResponse = client.describeInternetGateways();
         return describeInternetGatewaysResponse.internetGateways();
     }

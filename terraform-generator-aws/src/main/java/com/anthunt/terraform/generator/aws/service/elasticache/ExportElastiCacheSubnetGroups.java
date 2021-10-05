@@ -29,13 +29,13 @@ public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheCli
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSCacheSubnetGroup> cacheSubnetGroups = getCacheSubnetGroups(client);
+        List<AWSCacheSubnetGroup> cacheSubnetGroups = listAwsCacheSubnetGroups(client);
 
         return getResourceMaps(cacheSubnetGroups);
 
     }
 
-    List<AWSCacheSubnetGroup> getCacheSubnetGroups(ElastiCacheClient client) {
+    List<AWSCacheSubnetGroup> listAwsCacheSubnetGroups(ElastiCacheClient client) {
 
         DescribeCacheSubnetGroupsResponse describeCacheSubnetGroupsResponse = client.describeCacheSubnetGroups();
         return describeCacheSubnetGroupsResponse.cacheSubnetGroups().stream()

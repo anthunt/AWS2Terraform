@@ -28,12 +28,12 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<RouteTable> routeTables = getRouteTables(client);
+        List<RouteTable> routeTables = listRouteTables(client);
 
         return getResourceMaps(routeTables);
     }
 
-    protected List<RouteTable> getRouteTables(Ec2Client client) {
+    protected List<RouteTable> listRouteTables(Ec2Client client) {
         DescribeRouteTablesResponse describeRouteTablesResponse = client.describeRouteTables();
         return describeRouteTablesResponse.routeTables();
     }

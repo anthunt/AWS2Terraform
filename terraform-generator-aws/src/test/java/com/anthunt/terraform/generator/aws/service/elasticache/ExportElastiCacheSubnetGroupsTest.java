@@ -49,7 +49,7 @@ class ExportElastiCacheSubnetGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getCacheSubnetGroups() {
-        List<AWSCacheSubnetGroup> awsCacheSubnetGroups = exportElastiCacheSubnetGroups.getCacheSubnetGroups(client);
+        List<AWSCacheSubnetGroup> awsCacheSubnetGroups = exportElastiCacheSubnetGroups.listAwsCacheSubnetGroups(client);
         log.debug("awsCacheSubnetGroups => {}", awsCacheSubnetGroups);
     }
 

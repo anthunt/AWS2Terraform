@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
@@ -28,12 +27,12 @@ public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<InstanceProfile> instanceProfiles = getInstanceProfiles(client);
+        List<InstanceProfile> instanceProfiles = listInstanceProfiles(client);
 
         return getResourceMaps(instanceProfiles);
     }
 
-    List<InstanceProfile> getInstanceProfiles(IamClient client) {
+    List<InstanceProfile> listInstanceProfiles(IamClient client) {
         ListInstanceProfilesResponse listInstanceProfilesResponse = client.listInstanceProfiles();
         return listInstanceProfilesResponse.instanceProfiles().stream()
                 .filter(instanceProfile -> !instanceProfile.arn().startsWith("arn:aws:iam::aws:instance-profile/"))

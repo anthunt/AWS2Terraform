@@ -28,13 +28,13 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSRdsOptionGroup> awsRdsOptionGroups = getOptionGroups(client);
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = listAwsRdsOptionGroups(client);
 
         return getResourceMaps(awsRdsOptionGroups);
 
     }
 
-    List<AWSRdsOptionGroup> getOptionGroups(RdsClient client) {
+    List<AWSRdsOptionGroup> listAwsRdsOptionGroups(RdsClient client) {
 
         DescribeOptionGroupsResponse describeOptionGroupsResponse = client.describeOptionGroups();
         return describeOptionGroupsResponse.optionGroupsList().stream()

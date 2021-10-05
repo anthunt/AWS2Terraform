@@ -50,7 +50,7 @@ class ExportRdsOptionGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getOptionGroups() {
-        List<AWSRdsOptionGroup> awsRdsOptionGroups = exportRdsOptionGroups.getOptionGroups(client);
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = exportRdsOptionGroups.listAwsRdsOptionGroups(client);
         log.debug("awsRdsOptionGroups => {}", awsRdsOptionGroups);
     }
 

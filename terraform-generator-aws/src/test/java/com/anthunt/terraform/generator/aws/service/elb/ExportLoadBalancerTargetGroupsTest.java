@@ -47,7 +47,7 @@ class ExportLoadBalancerTargetGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getTargetGroups() {
-        List<AWSTargetGroup> awsTargetGroups = exportLoadBalancerTargetGroups.getTagetGroups(client);
+        List<AWSTargetGroup> awsTargetGroups = exportLoadBalancerTargetGroups.listAwsTagetGroups(client);
         log.debug("awsTargetGroups => {}", awsTargetGroups);
     }
 

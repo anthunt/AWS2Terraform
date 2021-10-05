@@ -25,13 +25,13 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSReservation> reservations = getReservations(client);
+        List<AWSReservation> awsReservations = listAwsReservations(client);
 
-        return getResourceMaps(reservations);
+        return getResourceMaps(awsReservations);
 
     }
 
-    List<AWSReservation> getReservations(Ec2Client client) {
+    List<AWSReservation> listAwsReservations(Ec2Client client) {
 
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
         List<AWSReservation> reservations = new ArrayList<>();

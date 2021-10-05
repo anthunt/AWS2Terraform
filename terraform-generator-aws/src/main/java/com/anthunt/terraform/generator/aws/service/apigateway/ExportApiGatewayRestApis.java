@@ -25,13 +25,13 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
     @Override
     protected Maps<Resource> export(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSRestApi> awsRestApis = getAWSRestApis(client);
+        List<AWSRestApi> awsRestApis = listAWSRestApis(client);
 
         return getResourceMaps(awsRestApis);
 
     }
 
-    List<AWSRestApi> getAWSRestApis(ApiGatewayClient client) {
+    List<AWSRestApi> listAWSRestApis(ApiGatewayClient client) {
         GetRestApisResponse restApisResponse = client.getRestApis();
         return restApisResponse.items().stream()
                 .peek(restApi -> log.debug("restApi => {}", restApi))

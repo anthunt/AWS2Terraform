@@ -47,7 +47,7 @@ class ExportRdsClustersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getDBClusters() {
-        List<AWSRdsCluster> awsRdsClusters = exportRdsClusters.getDBClusters(client);
+        List<AWSRdsCluster> awsRdsClusters = exportRdsClusters.listAwsRdsClusters(client);
         log.debug("awsdbClusters => {}", awsRdsClusters);
     }
 
