@@ -90,7 +90,7 @@ class ExportRdsOptionGroupsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/rds/expected/RdsOptionGroup.tf")
+                resourceLoader.getResource("testData/aws/expected/RdsOptionGroup.tf")
         );
         assertEquals(expected, actual);
 

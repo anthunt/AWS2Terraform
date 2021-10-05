@@ -77,7 +77,7 @@ class ExportSubnetsTest {
         Maps<Resource> resourceMaps = exportSubnets.getResourceMaps(subnets);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/Subnet.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Subnet.tf"));
         assertEquals(expected, actual);
     }
 }

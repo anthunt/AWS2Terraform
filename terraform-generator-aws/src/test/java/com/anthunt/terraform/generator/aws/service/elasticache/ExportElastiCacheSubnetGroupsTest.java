@@ -73,7 +73,7 @@ class ExportElastiCacheSubnetGroupsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/elasticache/expected/ElastiCacheSubnetGroup.tf")
+                resourceLoader.getResource("testData/aws/expected/ElastiCacheSubnetGroup.tf")
         );
         assertEquals(expected, actual);
 

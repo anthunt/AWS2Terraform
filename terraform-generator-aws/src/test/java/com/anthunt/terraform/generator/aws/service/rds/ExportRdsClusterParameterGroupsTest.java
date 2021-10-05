@@ -86,7 +86,7 @@ class ExportRdsClusterParameterGroupsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/rds/expected/RdsClusterParameterGroup.tf")
+                resourceLoader.getResource("testData/aws/expected/RdsClusterParameterGroup.tf")
         );
         assertEquals(expected, actual);
 

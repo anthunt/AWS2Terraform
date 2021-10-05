@@ -78,7 +78,7 @@ class ExportLoadBalancerListenersTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/elb/expected/LoadBalancerListener.tf")
+                resourceLoader.getResource("testData/aws/expected/LoadBalancerListener.tf")
         );
         assertEquals(expected, actual);
 

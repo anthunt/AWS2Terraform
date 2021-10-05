@@ -66,7 +66,7 @@ class ExportIamRolePolicesTest {
                         .roleName("role-packer-base")
                         .policyName("policy-eks-describe")
                         .policyDocument(URLEncoder.encode(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/iam/input/IamRolePolicyDocument.json")),
+                                resourceLoader.getResource("testData/aws/input/IamRolePolicyDocument.json")),
                                         StandardCharsets.UTF_8))
                         .build()
 
@@ -76,7 +76,7 @@ class ExportIamRolePolicesTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/iam/expected/IamRolePolicy.tf")
+                resourceLoader.getResource("testData/aws/expected/IamRolePolicy.tf")
         );
         assertEquals(expected, actual);
     }

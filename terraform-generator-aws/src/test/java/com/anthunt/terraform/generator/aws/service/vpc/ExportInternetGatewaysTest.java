@@ -59,7 +59,7 @@ class ExportInternetGatewaysTest {
         Maps<Resource> resourceMaps = exportInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/InternetGateway.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/InternetGateway.tf"));
         assertEquals(expected, actual);
     }
 }

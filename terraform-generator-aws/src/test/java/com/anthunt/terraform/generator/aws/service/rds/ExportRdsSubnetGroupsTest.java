@@ -73,7 +73,7 @@ class ExportRdsSubnetGroupsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/rds/expected/RdsSubnetGroup.tf")
+                resourceLoader.getResource("testData/aws/expected/RdsSubnetGroup.tf")
         );
         assertEquals(expected, actual);
 

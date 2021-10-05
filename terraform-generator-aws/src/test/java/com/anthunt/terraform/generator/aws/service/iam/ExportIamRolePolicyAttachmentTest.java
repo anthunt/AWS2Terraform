@@ -47,7 +47,7 @@ class ExportIamRolePolicyAttachmentTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/iam/expected/IamRolePolicyAttachment.tf")
+                resourceLoader.getResource("testData/aws/expected/IamRolePolicyAttachment.tf")
         );
         assertEquals(expected, actual);
     }

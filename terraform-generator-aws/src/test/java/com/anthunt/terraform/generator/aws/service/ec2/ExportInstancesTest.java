@@ -92,7 +92,7 @@ class ExportInstancesTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/ec2/expected/instance.tf")
+                resourceLoader.getResource("testData/aws/expected/Instance.tf")
         );
         assertEquals(expected, actual);
     }

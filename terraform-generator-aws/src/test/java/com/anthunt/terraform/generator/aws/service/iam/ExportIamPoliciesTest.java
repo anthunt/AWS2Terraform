@@ -56,7 +56,7 @@ class ExportIamPoliciesTest {
                             .path("/")
                             .description("test")
                     .build()
-                ).document(TestDataFileUtils.asString(resourceLoader.getResource("testData/iam/input/IamPolicyDocument.json"))
+                ).document(TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/input/IamPolicyDocument.json"))
                 ).build()
         );
 
@@ -65,7 +65,7 @@ class ExportIamPoliciesTest {
         String actual = resourceMaps.unmarshall();
         log.debug("actual => \n{}", actual);
 
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/iam/expected/IamPolicy.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamPolicy.tf"));
         assertEquals(expected, actual);
     }
 }

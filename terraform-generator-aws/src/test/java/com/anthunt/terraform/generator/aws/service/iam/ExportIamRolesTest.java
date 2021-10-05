@@ -69,7 +69,7 @@ class ExportIamRolesTest {
                         .description("test description")
                         .arn("arn:aws:iam::100000000000:role/AmazonEKS_EFS_CSI_DriverRole")
                         .assumeRolePolicyDocument(URLEncoder.encode(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/iam/input/IamRoleAssumeRolePolicyDocument.json")),
+                                resourceLoader.getResource("testData/aws/input/IamRoleAssumeRolePolicyDocument.json")),
                                         StandardCharsets.UTF_8))
                         .build()
 
@@ -79,7 +79,7 @@ class ExportIamRolesTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/iam/expected/IamRole.tf")
+                resourceLoader.getResource("testData/aws/expected/IamRole.tf")
         );
         assertEquals(expected, actual);
     }

@@ -78,7 +78,7 @@ class ExportEcrRepositoryTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/ecr/expected/EcrRepository.tf")
+                resourceLoader.getResource("testData/aws/expected/EcrRepository.tf")
         );
         assertEquals(expected, actual);
     }
