@@ -96,7 +96,7 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
                                         .argument("rest_api_id", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("deployment_id", TFExpression.build(
-                                                MessageFormat.format("aws_api_gateway_deployment.{0}.id", stage.deploymentId())))
+                                                MessageFormat.format("aws_api_gateway_deployment.{0}-{1}.id", restApi.name(), stage.deploymentId())))
                                         .argument("stage_name", TFString.build(stage.stageName()))
                                         .argument("xray_tracing_enabled", TFBool.build(stage.tracingEnabled()))
                                         .argumentIf(Optional.ofNullable(stage.accessLogSettings()).isPresent(),
@@ -112,7 +112,7 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
                         resourceMapsBuilder.map(
                                 Resource.builder()
                                         .api("aws_api_gateway_deployment")
-                                        .name(deployment.id())
+                                        .name(MessageFormat.format("{0}-{1}", restApi.name(), deployment.id()))
                                         .argument("rest_api_id", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("stage_name", TFString.build(stage.stageName()))
