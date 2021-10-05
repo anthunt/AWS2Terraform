@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportApiGatewayTest {
+class ExportApiGatewayRestApisTest {
 
     @Autowired
     private ResourceLoader resourceLoader;

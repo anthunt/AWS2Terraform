@@ -11,12 +11,12 @@ resource aws_api_gateway_rest_api PetStore {
 
 resource aws_api_gateway_stage PROD {
 	rest_api_id = aws_api_gateway_rest_api.PetStore.id
-	deployment_id = aws_api_gateway_deployment.0t5yci.id
+	deployment_id = aws_api_gateway_deployment.PetStore-0t5yci.id
 	stage_name = "PROD"
 	xray_tracing_enabled = false
 }
 
-resource aws_api_gateway_deployment 0t5yci {
+resource aws_api_gateway_deployment PetStore-0t5yci {
 	rest_api_id = aws_api_gateway_rest_api.PetStore.id
 	stage_name = "PROD"
 	description = "test deploy"
