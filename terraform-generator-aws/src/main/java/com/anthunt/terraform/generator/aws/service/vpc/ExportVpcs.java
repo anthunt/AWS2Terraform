@@ -4,7 +4,6 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -32,19 +31,19 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
     List<AWSVpc> listVpcs(Ec2Client client) {
         DescribeVpcsResponse response = client.describeVpcs();
         return response.vpcs().stream().map(vpc ->
-            AWSVpc.builder()
-                    .vpc(vpc)
-                    .enableDnsSupport(client.describeVpcAttribute(
-                            DescribeVpcAttributeRequest.builder()
-                                    .vpcId(vpc.vpcId())
-                                    .attribute(VpcAttributeName.ENABLE_DNS_SUPPORT)
-                                    .build()).enableDnsSupport().value())
-                    .enableDnsHostnames(client.describeVpcAttribute(
-                            DescribeVpcAttributeRequest.builder()
-                                    .vpcId(vpc.vpcId())
-                                    .attribute(VpcAttributeName.ENABLE_DNS_HOSTNAMES)
-                                    .build()).enableDnsHostnames().value())
-                    .build()
+                AWSVpc.builder()
+                        .vpc(vpc)
+                        .enableDnsSupport(client.describeVpcAttribute(
+                                DescribeVpcAttributeRequest.builder()
+                                        .vpcId(vpc.vpcId())
+                                        .attribute(VpcAttributeName.ENABLE_DNS_SUPPORT)
+                                        .build()).enableDnsSupport().value())
+                        .enableDnsHostnames(client.describeVpcAttribute(
+                                DescribeVpcAttributeRequest.builder()
+                                        .vpcId(vpc.vpcId())
+                                        .attribute(VpcAttributeName.ENABLE_DNS_HOSTNAMES)
+                                        .build()).enableDnsHostnames().value())
+                        .build()
         ).collect(Collectors.toList());
 
     }
@@ -56,23 +55,19 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
             Vpc vpc = awsVpc.getVpc();
             resourceMapsBuilder.map(
                     Resource.builder()
-                        .api("aws_vpc")
-                        .name("vpc" + i)
-                        .arguments(
-                                TFArguments.builder()
-                                        .argument("cidr_block", TFString.build(vpc.cidrBlock()))
-                                        .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
-                                        .argument("enable_dns_support", TFBool.build(awsVpc.isEnableDnsSupport()))
-                                        .argument("enable_dns_hostnames", TFBool.build(awsVpc.isEnableDnsHostnames()))
-                                        .argument("enable_classiclink", TFBool.build(false))
-                                        .argument("assign_generated_ipv6_block", TFBool.build(vpc.hasIpv6CidrBlockAssociationSet()))
-                                        .argument("tags", TFMap.build(
-                                                vpc.tags().stream()
-                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                        ))
-                                        .build()
-                        )
-                    .build()
+                            .api("aws_vpc")
+                            .name("vpc" + i)
+                            .argument("cidr_block", TFString.build(vpc.cidrBlock()))
+                            .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
+                            .argument("enable_dns_support", TFBool.build(awsVpc.isEnableDnsSupport()))
+                            .argument("enable_dns_hostnames", TFBool.build(awsVpc.isEnableDnsHostnames()))
+                            .argument("enable_classiclink", TFBool.build(false))
+                            .argument("assign_generated_ipv6_block", TFBool.build(vpc.hasIpv6CidrBlockAssociationSet()))
+                            .argument("tags", TFMap.build(
+                                    vpc.tags().stream()
+                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                            ))
+                            .build()
             );
 
             i++;

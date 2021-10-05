@@ -4,7 +4,6 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
-import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -41,22 +40,19 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
 
     Maps<Resource> getResourceMaps(List<Role> roles) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (Role role:roles) {
+        for (Role role : roles) {
 
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_iam_role")
                             .name(role.roleName())
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("name", TFString.build(role.roleName()))
-                                            .argument("path", TFString.build(role.path()))
-                                            .argument("description", TFString.build(role.description()))
-                                            .argument("assume_role_policy", TFString.builder().isMultiline(true).value(
-                                                    JsonUtils.toPrettyFormat(URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8))
-                                            ).build())
-                                            .build()
-                            ).build()
+                            .argument("name", TFString.build(role.roleName()))
+                            .argument("path", TFString.build(role.path()))
+                            .argument("description", TFString.build(role.description()))
+                            .argument("assume_role_policy", TFString.builder().isMultiline(true).value(
+                                    JsonUtils.toPrettyFormat(URLDecoder.decode(role.assumeRolePolicyDocument(), StandardCharsets.UTF_8))
+                            ).build())
+                            .build()
             );
         }
         return resourceMapsBuilder.build();

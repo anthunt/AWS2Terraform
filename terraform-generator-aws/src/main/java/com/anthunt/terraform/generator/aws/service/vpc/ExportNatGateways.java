@@ -37,23 +37,19 @@ public class ExportNatGateways extends AbstractExport<Ec2Client> {
     protected Maps<Resource> getResourceMaps(List<NatGateway> natGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         int i = 0;
-        for(NatGateway natGateway : natGateways) {
+        for (NatGateway natGateway : natGateways) {
             List<NatGatewayAddress> natGatewayAddresses = natGateway.natGatewayAddresses();
-            for(NatGatewayAddress natGatewayAddress : natGatewayAddresses) {
+            for (NatGatewayAddress natGatewayAddress : natGatewayAddresses) {
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_nat_gateway")
                                 .name("nat_gateway" + i)
-                                .arguments(
-                                        TFArguments.builder()
-                                                .argument("allocation_id", TFString.build(natGatewayAddress.allocationId()))
-                                                .argument("subnet_id", TFString.build(natGateway.subnetId()))
-                                                .argument("tags", TFMap.build(
-                                                        natGateway.tags().stream()
-                                                                .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                                ))
-                                                .build()
-                                )
+                                .argument("allocation_id", TFString.build(natGatewayAddress.allocationId()))
+                                .argument("subnet_id", TFString.build(natGateway.subnetId()))
+                                .argument("tags", TFMap.build(
+                                        natGateway.tags().stream()
+                                                .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                                ))
                                 .build()
                 );
                 i++;

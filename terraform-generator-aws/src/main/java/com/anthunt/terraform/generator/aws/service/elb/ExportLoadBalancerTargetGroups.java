@@ -63,64 +63,56 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                     Resource.builder()
                             .api("aws_lb_target_group")
                             .name(targetGroup.targetGroupName())
-                            .arguments(
-                                    TFArguments.builder()
-                                            .argument("name", TFString.build(targetGroup.targetGroupName()))
-                                            .argument("port", TFNumber.build(targetGroup.port()))
-                                            .argument("protocol", TFString.build(targetGroup.protocolAsString()))
-                                            .argument("vpc_id", TFExpression.build(
-                                                    MessageFormat.format("aws_vpc.{0}.id", targetGroup.vpcId())))
-                                            .argument("target_type", TFString.build(targetGroup.targetTypeAsString()))
-                                            .argument("deregistration_delay", TFNumber.builder()
-                                                    .value(attributes.stream()
-                                                            .filter(a -> a.key().equals("deregistration_delay.timeout_seconds"))
-                                                            .map(a -> a.value())
-                                                            .findFirst().orElse(null))
-                                                    .build())
-                                            .argument("health_check", TFBlock.builder()
-                                                    .argument("enabled", TFBool.build(targetGroup.healthCheckEnabled()))
-                                                    .argument("port", TFNumber.build(targetGroup.healthCheckPort()))
-                                                    .argument("protocol", TFString.build(targetGroup.protocolAsString()))
-                                                    .argument("path", TFString.build(targetGroup.healthCheckPath()))
-                                                    .argument("healthy_threshold", TFNumber.build(targetGroup.healthyThresholdCount()))
-                                                    .argument("unhealthy_threshold", TFNumber.build(targetGroup.unhealthyThresholdCount()))
-                                                    .argument("interval", TFNumber.build(targetGroup.healthCheckIntervalSeconds()))
-                                                    .build()
-                                            ).build()
-                            ).build()
-            ).build();
+                            .argument("name", TFString.build(targetGroup.targetGroupName()))
+                            .argument("port", TFNumber.build(targetGroup.port()))
+                            .argument("protocol", TFString.build(targetGroup.protocolAsString()))
+                            .argument("vpc_id", TFExpression.build(
+                                    MessageFormat.format("aws_vpc.{0}.id", targetGroup.vpcId())))
+                            .argument("target_type", TFString.build(targetGroup.targetTypeAsString()))
+                            .argument("deregistration_delay", TFNumber.builder()
+                                    .value(attributes.stream()
+                                            .filter(a -> a.key().equals("deregistration_delay.timeout_seconds"))
+                                            .map(a -> a.value())
+                                            .findFirst().orElse(null))
+                                    .build())
+                            .argument("health_check", TFBlock.builder()
+                                    .argument("enabled", TFBool.build(targetGroup.healthCheckEnabled()))
+                                    .argument("port", TFNumber.build(targetGroup.healthCheckPort()))
+                                    .argument("protocol", TFString.build(targetGroup.protocolAsString()))
+                                    .argument("path", TFString.build(targetGroup.healthCheckPath()))
+                                    .argument("healthy_threshold", TFNumber.build(targetGroup.healthyThresholdCount()))
+                                    .argument("unhealthy_threshold", TFNumber.build(targetGroup.unhealthyThresholdCount()))
+                                    .argument("interval", TFNumber.build(targetGroup.healthCheckIntervalSeconds()))
+                                    .build()
+                            ).build());
 
             awsTargetGroup.getTargetDescriptions().stream().forEach(targetDescription ->
                     resourceMapsBuilder.map(
-                            Resource.builder()
-                                    .api("aws_lb_target_group_attachment")
-                                    .name(MessageFormat.format("{0}-{1}", targetGroup.targetGroupName(), targetDescription.id())
-                                            .replaceAll("\\.", "-"))
-                                    .arguments(
-                                            TFArguments.builder()
-                                                    .argument("target_group_arn ", TFExpression.build(
-                                                            MessageFormat.format("aws_lb_target_group.{0}.arn",
-                                                                    targetGroup.targetGroupName())))
-                                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
-                                                            "target_id", TFExpression.build(
-                                                                    MessageFormat.format("aws_instance.{0}.id",
-                                                                            targetDescription.id())))
-                                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
-                                                            "target_id", TFString.build(targetDescription.id()))
-                                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
-                                                            "target_id", TFExpression.build(
-                                                                    MessageFormat.format("aws_lambda_function.{0}.arn",
-                                                                            targetDescription.id())))
-                                                    .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
-                                                            "port", TFNumber.build(targetDescription.port()))
-                                                    //Todo: not implemented
-                                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
-                                                            "depends_on", TFExpression.build(
-                                                                    MessageFormat.format("aws_lambda_permission.{0}",
-                                                                            "xxxx")))
-                                                    .build())
-                                    .build()
-                    ).build()
+                                    Resource.builder()
+                                            .api("aws_lb_target_group_attachment")
+                                            .name(MessageFormat.format("{0}-{1}", targetGroup.targetGroupName(), targetDescription.id())
+                                                    .replaceAll("\\.", "-"))
+                                            .argument("target_group_arn ", TFExpression.build(
+                                                    MessageFormat.format("aws_lb_target_group.{0}.arn",
+                                                            targetGroup.targetGroupName())))
+                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
+                                                    "target_id", TFExpression.build(
+                                                            MessageFormat.format("aws_instance.{0}.id",
+                                                                    targetDescription.id())))
+                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
+                                                    "target_id", TFString.build(targetDescription.id()))
+                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
+                                                    "target_id", TFExpression.build(
+                                                            MessageFormat.format("aws_lambda_function.{0}.arn",
+                                                                    targetDescription.id())))
+                                            .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
+                                                    "port", TFNumber.build(targetDescription.port()))
+                                            //Todo: not implemented
+                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
+                                                    "depends_on", TFExpression.build(
+                                                            MessageFormat.format("aws_lambda_permission.{0}",
+                                                                    "xxxx")))
+                                            .build())
             );
         }
         return resourceMapsBuilder.build();
