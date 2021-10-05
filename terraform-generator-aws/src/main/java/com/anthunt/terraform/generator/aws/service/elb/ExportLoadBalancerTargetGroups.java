@@ -23,12 +23,12 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSTargetGroup> awsLoadBalancers = getTagetGroups(client);
-        return getResourceMaps(awsLoadBalancers);
+        List<AWSTargetGroup> awsTargetGroups = listAwsTagetGroups(client);
+        return getResourceMaps(awsTargetGroups);
 
     }
 
-    List<AWSTargetGroup> getTagetGroups(ElasticLoadBalancingV2Client client) {
+    List<AWSTargetGroup> listAwsTagetGroups(ElasticLoadBalancingV2Client client) {
 
         DescribeTargetGroupsResponse describeTargetGroupsResponse = client.describeTargetGroups();
         return describeTargetGroupsResponse.targetGroups()

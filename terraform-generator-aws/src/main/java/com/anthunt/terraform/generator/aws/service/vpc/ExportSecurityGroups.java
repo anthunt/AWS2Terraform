@@ -24,13 +24,13 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<SecurityGroup> securityGroups = getSecurityGroups(client);
+        List<SecurityGroup> securityGroups = listSecurityGroups(client);
 
         return getResourceMaps(securityGroups);
     }
 
 
-    List<SecurityGroup> getSecurityGroups(Ec2Client client) {
+    List<SecurityGroup> listSecurityGroups(Ec2Client client) {
         DescribeVpcsResponse describeVpcsResponse = client.describeVpcs();
         List<Vpc> vpcs = describeVpcsResponse.vpcs();
 

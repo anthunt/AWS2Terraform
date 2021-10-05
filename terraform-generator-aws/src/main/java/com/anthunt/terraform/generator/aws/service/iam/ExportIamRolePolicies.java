@@ -17,9 +17,7 @@ import software.amazon.awssdk.services.iam.model.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,12 +27,12 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<GetRolePolicyResponse> rolePolicies = getRolePolices(client);
+        List<GetRolePolicyResponse> rolePolicies = listRolePolices(client);
 
         return getResourceMaps(rolePolicies);
     }
 
-    List<GetRolePolicyResponse> getRolePolices(IamClient client) {
+    List<GetRolePolicyResponse> listRolePolices(IamClient client) {
         ListRolesResponse listPoliciesResponse = client.listRoles();
         return listPoliciesResponse.roles().stream()
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))

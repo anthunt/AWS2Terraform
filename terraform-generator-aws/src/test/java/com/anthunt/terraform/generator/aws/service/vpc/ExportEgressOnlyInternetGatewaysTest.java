@@ -14,7 +14,6 @@ import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
@@ -31,19 +30,18 @@ class ExportEgressOnlyInternetGatewaysTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static Ec2Client client;
     @BeforeAll
     public static void beforeAll() {
         exportEgressOnlyInternetGateways = new ExportEgressOnlyInternetGateways();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEc2Client();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
-
-        Maps<Resource> export = exportEgressOnlyInternetGateways.export(ec2Client, null, null);
-
+        Maps<Resource> export = exportEgressOnlyInternetGateways.export(client, null, null);
         log.debug("result => \n{}", export.unmarshall());
     }
 

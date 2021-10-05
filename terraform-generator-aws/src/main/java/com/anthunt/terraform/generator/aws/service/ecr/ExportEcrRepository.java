@@ -3,7 +3,6 @@ package com.anthunt.terraform.generator.aws.service.ecr;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -12,10 +11,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ecr.EcrClient;
 import software.amazon.awssdk.services.ecr.model.DescribeRepositoriesResponse;
 import software.amazon.awssdk.services.ecr.model.Repository;
-import software.amazon.awssdk.services.iam.model.Role;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -25,13 +21,13 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
     @Override
     protected Maps<Resource> export(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<Repository> policies = getEcrRepositories(client);
+        List<Repository> repositories = listRepositories(client);
 
-        return getResourceMaps(policies);
+        return getResourceMaps(repositories);
 
     }
 
-    List<Repository> getEcrRepositories(EcrClient client) {
+    List<Repository> listRepositories(EcrClient client) {
         DescribeRepositoriesResponse describeRepositoriesResponse = client.describeRepositories();
         return describeRepositoriesResponse.repositories();
     }

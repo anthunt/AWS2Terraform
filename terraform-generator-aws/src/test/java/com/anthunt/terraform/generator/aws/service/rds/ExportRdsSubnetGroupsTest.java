@@ -49,7 +49,7 @@ class ExportRdsSubnetGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getDBSubnetGroups() {
-        List<AWSRdsSubnetGroup> awsDbClusterParameterGroups = exportRdsSubnetGroups.getDBSubnetGroups(client);
+        List<AWSRdsSubnetGroup> awsDbClusterParameterGroups = exportRdsSubnetGroups.listAwsRdsSubnetGroups(client);
         log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
     }
 

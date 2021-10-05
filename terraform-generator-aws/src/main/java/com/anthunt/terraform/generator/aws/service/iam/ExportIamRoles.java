@@ -26,13 +26,13 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<Role> policies = getRoles(client);
+        List<Role> roles = listRoles(client);
 
-        return getResourceMaps(policies);
+        return getResourceMaps(roles);
 
     }
 
-    List<Role> getRoles(IamClient client) {
+    List<Role> listRoles(IamClient client) {
         ListRolesResponse listPoliciesResponse = client.listRoles();
         return listPoliciesResponse.roles().stream()
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))

@@ -25,11 +25,11 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSVpc> awsVpcs = getVpcs(client);
+        List<AWSVpc> awsVpcs = listVpcs(client);
         return getResourceMaps(awsVpcs);
     }
 
-    List<AWSVpc> getVpcs(Ec2Client client) {
+    List<AWSVpc> listVpcs(Ec2Client client) {
         DescribeVpcsResponse response = client.describeVpcs();
         return response.vpcs().stream().map(vpc ->
             AWSVpc.builder()

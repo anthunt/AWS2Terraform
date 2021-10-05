@@ -29,18 +29,20 @@ class ExportSecurityGroupsTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static Ec2Client client;
+
     @BeforeAll
     public static void beforeAll() {
         exportSecurityGroups = new ExportSecurityGroups();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
+        client = amazonClients.getEc2Client();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        Maps<Resource> export = exportSecurityGroups.export(ec2Client, null, null);
+        Maps<Resource> export = exportSecurityGroups.export(client, null, null);
 
         log.debug("result => {}", export.unmarshall());
     }
@@ -51,7 +53,7 @@ class ExportSecurityGroupsTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        List<SecurityGroup> securityGroups = exportSecurityGroups.getSecurityGroups(ec2Client);
+        List<SecurityGroup> securityGroups = exportSecurityGroups.listSecurityGroups(ec2Client);
         log.debug("securityGroups => {}", securityGroups);
     }
 

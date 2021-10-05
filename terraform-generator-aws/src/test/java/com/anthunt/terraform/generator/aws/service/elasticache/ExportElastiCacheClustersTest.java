@@ -47,7 +47,7 @@ class ExportElastiCacheClustersTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getCacheClusters() {
-        List<AWSCacheCluster> awsCacheClusters = exportElastiCacheClusters.getCacheClusters(client);
+        List<AWSCacheCluster> awsCacheClusters = exportElastiCacheClusters.listAwsCacheClusters(client);
         log.debug("cacheClusters => {}", awsCacheClusters);
     }
 

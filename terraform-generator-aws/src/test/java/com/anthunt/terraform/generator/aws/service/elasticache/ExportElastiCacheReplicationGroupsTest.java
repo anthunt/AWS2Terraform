@@ -47,7 +47,7 @@ class ExportElastiCacheReplicationGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void getCacheReplicationGroups() {
-        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = exportElastiCacheReplicationGroups.getReplicationGroupsResponse(client);
+        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = exportElastiCacheReplicationGroups.listAwsCacheReplicationGroups(client);
         log.debug("awsCacheReplicationGroups => {}", awsCacheReplicationGroups);
     }
 

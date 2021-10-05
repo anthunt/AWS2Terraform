@@ -15,7 +15,6 @@ import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.model.GetRolePolicyResponse;
-import software.amazon.awssdk.services.iam.model.Role;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -33,18 +32,20 @@ class ExportIamRolePolicesTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static IamClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportIamRolePolices = new ExportIamRolePolicies();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
+        client = amazonClients.getIamClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     public void getRolePolices() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        IamClient client = amazonClients.getIamClient();
 
-        List<GetRolePolicyResponse> rolePolices = exportIamRolePolices.getRolePolices(client);
+        List<GetRolePolicyResponse> rolePolices = exportIamRolePolices.listRolePolices(client);
 
         log.debug("roles => {}", rolePolices);
         rolePolices.stream()

@@ -32,18 +32,20 @@ class ExportIamRolesTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static IamClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportIamRoles = new ExportIamRoles();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
+        client = amazonClients.getIamClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     public void getRoles() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        IamClient client = amazonClients.getIamClient();
 
-        List<Role> roles = exportIamRoles.getRoles(client);
+        List<Role> roles = exportIamRoles.listRoles(client);
 
         roles.stream()
                 .map(role ->

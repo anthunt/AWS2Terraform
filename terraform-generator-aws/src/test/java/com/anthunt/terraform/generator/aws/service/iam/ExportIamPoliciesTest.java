@@ -28,18 +28,19 @@ class ExportIamPoliciesTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
+    private static IamClient client;
+
     @BeforeAll
     public static void beforeAll() {
         exportIamPolicies = new ExportIamPolicies();
+        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
+        client = amazonClients.getIamClient();
     }
 
     @Test
     @DisabledOnNoAwsCredentials
     public void getPolices() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        IamClient client = amazonClients.getIamClient();
-
-        List<AWSPolicy> polices = exportIamPolicies.getPolices(client);
+        List<AWSPolicy> polices = exportIamPolicies.listAwsPolices(client);
         log.debug("polices => {}", polices);
     }
 

@@ -23,13 +23,13 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
 
-        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = getReplicationGroupsResponse(client);
+        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = listAwsCacheReplicationGroups(client);
 
         return getResourceMaps(awsCacheReplicationGroups);
 
     }
 
-    List<AWSCacheReplicationGroup> getReplicationGroupsResponse(ElastiCacheClient client) {
+    List<AWSCacheReplicationGroup> listAwsCacheReplicationGroups(ElastiCacheClient client) {
 
         DescribeReplicationGroupsResponse describeReplicationGroups = client.describeReplicationGroups(DescribeReplicationGroupsRequest.builder()
                 .build());
