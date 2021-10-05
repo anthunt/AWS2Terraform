@@ -66,7 +66,7 @@ class ExportRouteTablesTest {
         Maps<Resource> resourceMaps = exportRouteTables.getResourceMaps(routeTables);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/RouteTable.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RouteTable.tf"));
         assertEquals(expected, actual);
     }
 }

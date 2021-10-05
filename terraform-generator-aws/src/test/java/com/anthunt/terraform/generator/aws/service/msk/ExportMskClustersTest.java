@@ -91,7 +91,7 @@ class ExportMskClustersTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/msk/expected/MskCluster.tf")
+                resourceLoader.getResource("testData/aws/expected/MskCluster.tf")
         );
         assertEquals(expected, actual);
     }

@@ -58,7 +58,7 @@ class ExportEgressOnlyInternetGatewaysTest {
         Maps<Resource> resourceMaps = exportEgressOnlyInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/EgressOnlyInternetGateway.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EgressOnlyInternetGateway.tf"));
         assertEquals(expected, actual);
     }
 }

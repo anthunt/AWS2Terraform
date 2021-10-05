@@ -114,7 +114,7 @@ class ExportElastiCacheReplicationGroupsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/elasticache/expected/ElasticacheReplicationGroup.tf")
+                resourceLoader.getResource("testData/aws/expected/ElasticacheReplicationGroup.tf")
         );
         assertEquals(expected, actual);
 

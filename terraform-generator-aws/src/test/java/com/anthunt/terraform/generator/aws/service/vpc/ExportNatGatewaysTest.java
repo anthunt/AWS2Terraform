@@ -62,7 +62,7 @@ class ExportNatGatewaysTest {
         Maps<Resource> resourceMaps = exportNatGateways.getResourceMaps(natGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/NatGateway.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/NatGateway.tf"));
         assertEquals(expected, actual);
     }
 }

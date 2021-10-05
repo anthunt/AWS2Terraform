@@ -64,7 +64,7 @@ class ExportVpcsTest {
         Maps<Resource> resourceMaps = exportvpcs.getResourceMaps(vpcs);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
-        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/vpc/expected/vpc.tf"));
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Vpc.tf"));
         assertEquals(expected, actual);
     }
 }

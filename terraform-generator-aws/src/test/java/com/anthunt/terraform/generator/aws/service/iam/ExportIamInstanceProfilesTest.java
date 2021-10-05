@@ -64,7 +64,7 @@ class ExportIamInstanceProfilesTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/iam/expected/IamInstanceProfile.tf")
+                resourceLoader.getResource("testData/aws/expected/IamInstanceProfile.tf")
         );
         assertEquals(expected, actual);
     }

@@ -61,7 +61,7 @@ class ExportEfsTest {
                                 .build())
                         .backupPolicyStatus("ENABLED")
                         .fileSystemPolicy(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/efs/input/FileSystemPolicyDocument.json")))
+                                resourceLoader.getResource("testData/aws/input/FileSystemPolicyDocument.json")))
                         .mountTargets(List.of(
                                 MountTargetDescription.builder()
                                         .mountTargetId("fsmt-01020304")
@@ -88,7 +88,7 @@ class ExportEfsTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/efs/expected/Efs.tf")
+                resourceLoader.getResource("testData/aws/expected/Efs.tf")
         );
         assertEquals(expected, actual);
     }

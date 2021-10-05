@@ -84,7 +84,7 @@ class ExportElastiCacheClustersTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/elasticache/expected/Elasticache.tf")
+                resourceLoader.getResource("testData/aws/expected/Elasticache.tf")
         );
         assertEquals(expected, actual);
 

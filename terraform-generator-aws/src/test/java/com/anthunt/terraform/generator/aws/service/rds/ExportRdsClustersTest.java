@@ -95,7 +95,7 @@ class ExportRdsClustersTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/rds/expected/rds.tf")
+                resourceLoader.getResource("testData/aws/expected/Rds.tf")
         );
         assertEquals(expected, actual);
 

@@ -121,7 +121,7 @@ class ExportEksClustersTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/eks/expected/EksCluster.tf")
+                resourceLoader.getResource("testData/aws/expected/EksCluster.tf")
         );
         assertEquals(expected, actual);
     }
