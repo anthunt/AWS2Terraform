@@ -1,7 +1,6 @@
 package com.anthunt.terraform.generator.aws.service.cloudwatchlogs;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.service.cloudwatchlogs.model.AWSLogGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -14,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
+import software.amazon.awssdk.services.cloudwatchlogs.model.ResourcePolicy;
 
 import java.util.List;
 
@@ -22,18 +21,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportCloudwatchLogGroupsTest {
+class ExportResourcePolicesTest {
 
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private static ExportCloudWatchLogGroups exportCloudwatchLogGroups;
+    private static ExportResourcePolicies exportResourcePolicies;
 
     private static CloudWatchLogsClient client;
 
     @BeforeAll
     public static void beforeAll() {
-        exportCloudwatchLogGroups = new ExportCloudWatchLogGroups();
+        exportResourcePolicies = new ExportResourcePolicies();
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getCloudWatchLogGroupClient();
     }
@@ -41,34 +40,26 @@ class ExportCloudwatchLogGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        Maps<Resource> export = exportCloudwatchLogGroups.export(client, null, null);
+        Maps<Resource> export = exportResourcePolicies.export(client, null, null);
         log.debug("export => \n{}", export.unmarshall());
     }
 
     @Test
     public void getResourceMaps() {
-        List<AWSLogGroup> awsLogGroups = List.of(
-                AWSLogGroup.builder()
-                        .logGroup(LogGroup.builder().logGroupName("/aws/containerinsights/EKS-CLS-SAMPLE/application")
-                                .build())
-                        .tag("Name", "test log group")
-                        .build(),
-                AWSLogGroup.builder()
-                        .logGroup(LogGroup.builder().logGroupName("/aws/containerinsights/EKS-CLS-SAMPLE/dataplane")
-                                .build())
-                        .build(),
-                AWSLogGroup.builder()
-                        .logGroup(LogGroup.builder().logGroupName("/aws/containerinsights/EKS-CLS-SAMPLE/host")
-                                .build())
+        List<ResourcePolicy> resourcePolicies = List.of(
+                ResourcePolicy.builder()
+                        .policyName("es_log_resource_policy")
+                        .policyDocument(TestDataFileUtils.asString(
+                                resourceLoader.getResource("testData/aws/input/CloudWatchLogResourcePolicyDocument.json")))
                         .build()
         );
 
-        Maps<Resource> resourceMaps = exportCloudwatchLogGroups.getResourceMaps(awsLogGroups);
+        Maps<Resource> resourceMaps = exportResourcePolicies.getResourceMaps(resourcePolicies);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/aws/expected/CloudWatchLog.tf")
+                resourceLoader.getResource("testData/aws/expected/CloudWatchLogResourcePolicy.tf")
         );
         assertEquals(expected, actual);
     }

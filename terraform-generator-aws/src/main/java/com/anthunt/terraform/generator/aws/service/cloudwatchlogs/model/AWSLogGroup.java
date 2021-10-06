@@ -13,6 +13,7 @@ import java.util.Map;
 @Builder
 public class AWSLogGroup {
     private LogGroup logGroup;
+
     @Singular
     private Map<String,String> tags;
 }
