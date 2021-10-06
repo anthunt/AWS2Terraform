@@ -87,6 +87,7 @@ project(':terraform-generator-aws') {
         implementation "software.amazon.awssdk:eks:${awsSdkVersion}"
         implementation "software.amazon.awssdk:kafka:${awsSdkVersion}"
         implementation "software.amazon.awssdk:elasticsearch:${awsSdkVersion}"
+        implementation "software.amazon.awssdk:cloudwatchlogs:${awsSdkVersion}"
         implementation "com.google.code.gson:gson:2.8.8"
 
 
