@@ -9,6 +9,7 @@ import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.acm.AcmClient;
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.directconnect.DirectConnectClient;
 import software.amazon.awssdk.services.directory.DirectoryClient;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -199,6 +200,13 @@ public class AmazonClients {
 
     public ElasticsearchClient getElasticsearchClient() {
         return ElasticsearchClient.builder()
+                .region(region)
+                .credentialsProvider(getCredentialsProvider())
+                .build();
+    }
+
+    public CloudWatchLogsClient getCloudWatchLogGroupClient() {
+        return CloudWatchLogsClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
