@@ -62,10 +62,6 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
             return argumentIf(() -> condition, argumentKey, argumentValue);
         }
 
-        public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
-            return argumentIf(() -> condition, argumentKey, argumentValues);
-        }
-
         public TFArgumentsBuilder argumentIf(boolean condition, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
             return this.argumentIf(() -> condition, argumentKey, argumentValueSupplier);
         }
@@ -86,7 +82,11 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
             }
         }
 
-        public TFArgumentsBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+        public TFArgumentsBuilder argumentsIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            return argumentsIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public TFArgumentsBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             int inx = 0;
             for (AbstractMarshaller<?> argumentValue : argumentValues) {
                 this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);

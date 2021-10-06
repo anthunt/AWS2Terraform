@@ -66,7 +66,7 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
                                             optionGroup.options().stream()
                                                     .map(option -> TFBlock.builder()
                                                             .argument("option_name", TFString.build(option.optionName()))
-                                                            .argumentIf(Optional.ofNullable(option.optionSettings()).isPresent(),
+                                                            .argumentsIf(Optional.ofNullable(option.optionSettings()).isPresent(),
                                                                     "option_settings ", option.optionSettings().stream()
                                                                             .map(optionSetting -> TFBlock.builder()
                                                                                     .argument("name", TFString.build(optionSetting.name()))

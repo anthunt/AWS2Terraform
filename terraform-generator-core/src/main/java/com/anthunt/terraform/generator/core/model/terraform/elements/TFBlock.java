@@ -5,6 +5,7 @@ import lombok.ToString;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @ToString
 public class TFBlock extends AbstractMarshaller<TFBlock> {
@@ -32,6 +33,43 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
         TFBlockBuilder() {
         }
 
+        public TFBlockBuilder argumentIf(boolean condition, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            return argumentIf(() -> condition, argumentKey, argumentValue);
+        }
+
+        public TFBlockBuilder argumentIf(boolean condition, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            return this.argumentIf(() -> condition, argumentKey, argumentValueSupplier);
+        }
+
+        public TFBlockBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, Supplier<AbstractMarshaller<?>> argumentValueSupplier) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValueSupplier.get());
+            } else {
+                return this;
+            }
+        }
+
+        public TFBlockBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
+            if (booleanSupplier.getAsBoolean()) {
+                return this.argument(argumentKey, argumentValue);
+            } else {
+                return this;
+            }
+        }
+
+        public TFBlockBuilder argumentsIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            return argumentsIf(() -> condition, argumentKey, argumentValues);
+        }
+
+        public TFBlockBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
+            int inx = 0;
+            for (AbstractMarshaller<?> argumentValue : argumentValues) {
+                this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
+                inx++;
+            }
+            return this;
+        }
+
         public TFBlockBuilder argument(String argumentKey, AbstractMarshaller<?> argumentValue) {
             if (tfArgumentsBuilder == null) {
                 tfArgumentsBuilder = TFArguments.builder();
@@ -46,31 +84,6 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
             }
             arguments.getArguments().entrySet().stream()
                     .forEach(entry -> tfArgumentsBuilder.argument(entry.getKey(), entry.getValue()));
-            return this;
-        }
-
-        public TFBlockBuilder argumentIf(boolean condition, String argumentKey, AbstractMarshaller<?> argumentValue) {
-            return argumentIf(() -> condition, argumentKey, argumentValue);
-        }
-
-        public TFBlockBuilder argumentIf(boolean condition, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
-            return argumentIf(() -> condition, argumentKey, argumentValues);
-        }
-
-        public TFBlockBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, AbstractMarshaller<?> argumentValue) {
-            if (booleanSupplier.getAsBoolean()) {
-                return this.argument(argumentKey, argumentValue);
-            } else {
-                return this;
-            }
-        }
-
-        public TFBlockBuilder argumentIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
-            int inx = 0;
-            for (AbstractMarshaller<?> argumentValue : argumentValues) {
-                this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
-                inx++;
-            }
             return this;
         }
 
