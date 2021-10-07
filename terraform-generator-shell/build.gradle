@@ -33,8 +33,6 @@ bootJar {
     enabled = true
 }
 
-createExe.dependsOn bootJar
-
 createExe {
     headerType      = "console"
     outfile         = "${project.name}-${project.version}.exe"
@@ -47,7 +45,6 @@ createExe {
     jdkPreference   = "jdkOnly"
     jreRuntimeBits  = "64"
     jreMinVersion   = "11"
-    jreMaxVersion   = "11.0.9"
     copyright       = "github.com/anthunt"
 }
 
@@ -58,9 +55,11 @@ tasks.register('makeJreDirectory') {
 }
 
 tasks.register('addJreToDistributable', Copy) {
-    from layout.buildDirectory.dir("../../jdk-11.0.9+11-jre")
+    from layout.buildDirectory.dir("../jdk-11.0.9+11-jre")
     into layout.buildDirectory.dir("launch4j/jdk-11.0.9+11-jre")
-}   
+}
 
+createExe.dependsOn bootJar
+createExe.dependsOn addJreToDistributable
 addJreToDistributable.dependsOn makeJreDirectory
 
