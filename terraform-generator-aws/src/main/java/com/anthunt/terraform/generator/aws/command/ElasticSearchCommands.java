@@ -11,17 +11,17 @@ import javax.validation.Valid;
 
 @Slf4j
 @ShellComponent
-public class ElasticsearchCommands extends AbstractCommands {
+public class ElasticSearchCommands extends AbstractCommands {
 
     private ExportElasticsearchDomains exportElasticsearchDomains;
 
-    public ElasticsearchCommands(ExportElasticsearchDomains exportElasticsearchDomains) {
+    public ElasticSearchCommands(ExportElasticsearchDomains exportElasticsearchDomains) {
         this.exportElasticsearchDomains = exportElasticsearchDomains;
     }
 
 
     @ShellMethod("Export terraform resources of Elasticsearch Domains.")
-    public void elasticsearchDomains(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void elasticSearchDomains(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportElasticsearchDomains.exportTerraform(ElasticsearchClient.class, commonArgs);
     }
 }

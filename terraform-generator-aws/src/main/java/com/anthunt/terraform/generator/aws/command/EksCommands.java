@@ -20,7 +20,7 @@ public class EksCommands extends AbstractCommands {
     }
 
     @ShellMethod("Export terraform resources of ec2 instances.")
-    public void ec2Instances(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void eksClusters(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportEksClusters.exportTerraform(EksClient.class, commonArgs);
     }
 
