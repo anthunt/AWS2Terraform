@@ -22,7 +22,7 @@ public class EfsCommands extends AbstractCommands {
     }
 
     @ShellMethod("Export terraform resources of ECR Repository.")
-    public void ecrRepository(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
+    public void efsFileSystems(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
         exportEfs.exportTerraform(EfsClient.class, commonArgs);
     }
 
