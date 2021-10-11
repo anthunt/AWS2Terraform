@@ -78,7 +78,7 @@ class ExportApiGatewayRestApisTest {
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
-                resourceLoader.getResource("testData/aws/expected/Apigateway.tf")
+                resourceLoader.getResource("testData/aws/expected/ApigatewayRestApi.tf")
         );
         assertEquals(expected, actual);
     }
