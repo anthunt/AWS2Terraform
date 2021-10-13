@@ -94,7 +94,11 @@ public class Resource extends AbstractMarshaller<Resource> {
         }
 
         public ResourceBuilder argumentsIf(boolean condition, String argumentKey, Supplier<List<AbstractMarshaller<?>>> argumentValuesSupplier) {
-            return argumentsIf(() -> condition, argumentKey, argumentValuesSupplier.get());
+            if (condition) {
+                return argumentsIf(() -> condition, argumentKey, argumentValuesSupplier.get());
+            } else {
+                return this;
+            }
         }
 
         public ResourceBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {

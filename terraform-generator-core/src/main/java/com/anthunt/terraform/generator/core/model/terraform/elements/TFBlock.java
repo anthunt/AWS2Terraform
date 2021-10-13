@@ -61,6 +61,14 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
             return argumentsIf(() -> condition, argumentKey, argumentValues);
         }
 
+        public TFBlockBuilder argumentsIf(boolean condition, String argumentKey, Supplier<List<AbstractMarshaller<?>>> argumentValuesSupplier) {
+            if (condition) {
+                return argumentsIf(() -> condition, argumentKey, argumentValuesSupplier.get());
+            } else {
+                return this;
+            }
+        }
+
         public TFBlockBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             int inx = 0;
             for (AbstractMarshaller<?> argumentValue : argumentValues) {
@@ -68,6 +76,10 @@ public class TFBlock extends AbstractMarshaller<TFBlock> {
                 inx++;
             }
             return this;
+        }
+
+        public TFBlockBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, Supplier<List<AbstractMarshaller<?>>> argumentValuesSupplier) {
+            return argumentsIf(booleanSupplier.getAsBoolean(), argumentKey, argumentValuesSupplier);
         }
 
         public TFBlockBuilder argument(String argumentKey, AbstractMarshaller<?> argumentValue) {
