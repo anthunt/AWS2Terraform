@@ -115,11 +115,6 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                     .build()
                                             )
                                             .collect(Collectors.toList()))
-                            .argumentIf(Optional.ofNullable(awsBucket.getPolicy()).isPresent(),
-                                    "policy",
-                                    () -> TFString.builder().isMultiline(true)
-                                            .value(JsonUtils.toPrettyFormat(awsBucket.getPolicy()))
-                                            .build())
                             .argumentIf(Optional.ofNullable(bucketWebsite).isPresent(),
                                     "website",
                                     () -> TFBlock.builder()
@@ -143,9 +138,9 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                             .argumentIf(Optional.ofNullable(bucketLogging).isPresent() &&
                                             Optional.ofNullable(bucketLogging.loggingEnabled()).isPresent(),
                                     "logging",
-                                    () -> TFObject.builder()
-                                            .member("target_bucket", TFString.build(bucketLogging.loggingEnabled().targetBucket()))
-                                            .member("target_prefix", TFString.build(bucketLogging.loggingEnabled().targetPrefix()))
+                                    () -> TFBlock.builder()
+                                            .argument("target_bucket", TFString.build(bucketLogging.loggingEnabled().targetBucket()))
+                                            .argument("target_prefix", TFString.build(bucketLogging.loggingEnabled().targetPrefix()))
                                             .build())
                             .argumentsIf(Optional.ofNullable(lifecycleRules).isPresent(),
                                     "lifecycle_rule",
@@ -194,7 +189,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                     .build())
                                             .collect(Collectors.toList()))
 
-                            .argument("accelerateConfiguration", TFString.builder().value(awsBucket.getAccelerateConfiguration().statusAsString()).build())
+                            .argument("acceleration_status", TFString.builder().value(awsBucket.getAccelerateConfiguration().statusAsString()).build())
                             .argument("request_payer", TFString.builder().value(awsBucket.getRequestPayment().payerAsString()).build())
                             .argumentIf(Optional.ofNullable(replication).isPresent(),
                                     "replication_configuration",
@@ -237,7 +232,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                 .build();
                                     })
                             .argumentIf(Optional.ofNullable(objectLock).isPresent(),
-                                    "object_lock_configuration ",
+                                    "object_lock_configuration",
                                     () -> {
                                         ObjectLockConfiguration objectLockConfiguration = objectLock.objectLockConfiguration();
                                         return TFBlock.builder()
@@ -260,6 +255,11 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                         })
                                                 .build();
                                     })
+                            .argumentIf(Optional.ofNullable(awsBucket.getPolicy()).isPresent(),
+                                    "policy",
+                                    () -> TFString.builder().isMultiline(true)
+                                            .value(JsonUtils.toPrettyFormat(awsBucket.getPolicy()))
+                                            .build())
                             .argument("tags", TFMap.build(
                                     tags.stream()
                                             .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))

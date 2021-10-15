@@ -10,6 +10,8 @@ resource aws_s3_bucket config-bucket-235090236746 {
 		permission = ["FULL_CONTROL"]
 		uri = "http://acs.amazonaws.com/groups/s3/LogDelivery"
 	}
+	acceleration_status = null
+	request_payer = "BucketOwner"
 	policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -49,8 +51,6 @@ resource aws_s3_bucket config-bucket-235090236746 {
   ]
 }
 EOF
-	accelerateConfiguration = null
-	request_payer = "BucketOwner"
 	tags = {
 	}
 }
@@ -62,6 +62,30 @@ resource aws_s3_bucket aws-cloudtrail-logs {
 		type = "CanonicalUser"
 		permission = ["FULL_CONTROL"]
 	}
+	versioning {
+		enabled = true
+	}
+	logging {
+		target_bucket = "s3-dev-aws-console-log"
+		target_prefix = "s3-access-log"
+	}
+	lifecycle_rule {
+		id = "ctail-dev-aws-log-retention-cycle"
+		prefix = "ctrail"
+		tags = {
+		}
+		enabled = true
+	}
+	acceleration_status = null
+	request_payer = "BucketOwner"
+	server_side_encryption_configuration {
+		rule {
+			apply_server_side_encryption_by_default {
+				kms_master_key_id = "arn:aws:kms:ap-northeast-2:100020003000:alias/aws/s3"
+				sse_algorithm = "aws:kms"
+			}
+		}
+	}
 	policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -101,29 +125,6 @@ resource aws_s3_bucket aws-cloudtrail-logs {
   ]
 }
 EOF
-	versioning {
-		enabled = true
-	}
-	logging = {
-		target_bucket = "s3-dev-aws-console-log"
-		target_prefix = "s3-access-log"
-	}	lifecycle_rule {
-		id = "ctail-dev-aws-log-retention-cycle"
-		prefix = "ctrail"
-		tags = {
-		}
-		enabled = true
-	}
-	accelerateConfiguration = null
-	request_payer = "BucketOwner"
-	server_side_encryption_configuration {
-		rule {
-			apply_server_side_encryption_by_default {
-				kms_master_key_id = "arn:aws:kms:ap-northeast-2:100020003000:alias/aws/s3"
-				sse_algorithm = "aws:kms"
-			}
-		}
-	}
 	tags = {
 	}
 }
