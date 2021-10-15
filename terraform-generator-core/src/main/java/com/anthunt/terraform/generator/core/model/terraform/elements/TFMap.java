@@ -13,8 +13,14 @@ public class TFMap extends AbstractMarshaller<TFMap> {
 
     @Singular private Map<String, AbstractMarshaller<?>> maps;
 
+    private static final TFMap EMPTY = new TFMap(Map.of());
+
     public static TFMap build(Map<String, AbstractMarshaller<?>> maps) {
         return TFMap.builder().maps(maps).build();
+    }
+
+    public static TFMap empty() {
+        return EMPTY;
     }
 
     @Override

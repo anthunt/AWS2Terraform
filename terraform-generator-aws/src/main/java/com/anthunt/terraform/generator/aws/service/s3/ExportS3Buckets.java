@@ -39,9 +39,10 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                         .acl(client.getBucketAcl(GetBucketAclRequest.builder()
                                 .bucket(bucket.name())
                                 .build()))
-                        .policy(client.getBucketPolicy(GetBucketPolicyRequest.builder()
-                                        .bucket(bucket.name()).build())
-                                .policy())
+                        .policy(OptionalUtils.getExceptionAsOptional(() ->
+                                client.getBucketPolicy(GetBucketPolicyRequest.builder()
+                                                .bucket(bucket.name()).build())
+                                        .policy()).orElse(null))
                         .website(OptionalUtils.getExceptionAsOptional(() ->
                                 client.getBucketWebsite(GetBucketWebsiteRequest.builder()
                                         .bucket(bucket.name())
@@ -114,9 +115,6 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                     .build()
                                             )
                                             .collect(Collectors.toList()))
-                            .argument("policy", TFString.builder().isMultiline(true)
-                                    .value(JsonUtils.toPrettyFormat(awsBucket.getPolicy()))
-                                    .build())
                             .argumentIf(Optional.ofNullable(bucketWebsite).isPresent(),
                                     "website",
                                     () -> TFBlock.builder()
@@ -135,40 +133,51 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                             Optional.ofNullable(bucketVersioning.status()).isPresent(),
                                     "versioning",
                                     () -> TFBlock.builder()
-                                            //TODO: status 확인후 수정 필요
-                                            .argument("enabled", TFString.build(bucketVersioning.status().name()))
+                                            .argument("enabled", TFBool.build(BucketVersioningStatus.ENABLED == bucketVersioning.status()))
                                             .build())
                             .argumentIf(Optional.ofNullable(bucketLogging).isPresent() &&
                                             Optional.ofNullable(bucketLogging.loggingEnabled()).isPresent(),
                                     "logging",
-                                    () -> TFObject.builder()
-                                            .member("target_bucket", TFString.build(bucketLogging.loggingEnabled().targetBucket()))
-                                            .member("target_prefix", TFString.build(bucketLogging.loggingEnabled().targetPrefix()))
+                                    () -> TFBlock.builder()
+                                            .argument("target_bucket", TFString.build(bucketLogging.loggingEnabled().targetBucket()))
+                                            .argument("target_prefix", TFString.build(bucketLogging.loggingEnabled().targetPrefix()))
                                             .build())
                             .argumentsIf(Optional.ofNullable(lifecycleRules).isPresent(),
                                     "lifecycle_rule",
                                     () -> lifecycleRules.stream()
+                                            .peek(lifecycleRule -> log.debug("lifecycleRule.filter()=>{}", lifecycleRule.filter()))
                                             .map(lifecycleRule -> TFBlock.builder()
                                                     .argument("id", TFString.build(lifecycleRule.id()))
                                                     .argument("prefix", TFString.build(lifecycleRule.filter().prefix()))
-                                                    .argument("tags", TFMap.builder()
-                                                            .map(lifecycleRule.filter().tag().key(), TFString.build(lifecycleRule.filter().tag().value()))
-                                                            .build())
-                                                    //TODO: status 확인후 수정 필요
-                                                    .argument("enabled", TFString.build(lifecycleRule.status().name()))
-                                                    .argument("abort_incomplete_multipart_upload_days",
-                                                            TFNumber.build(lifecycleRule.abortIncompleteMultipartUpload().daysAfterInitiation()))
-                                                    .argument("expiration", TFBlock.builder()
-                                                            .argumentIf(Optional.ofNullable(lifecycleRule.expiration().days()).isPresent(),
-                                                                    "days",
-                                                                    TFNumber.build(lifecycleRule.expiration().days()))
-                                                            .argumentIf(Optional.ofNullable(lifecycleRule.expiration().days()).isPresent(),
-                                                                    "date",
-                                                                    TFString.build(lifecycleRule.expiration().date().toString()))
-                                                            .build())
-                                                    .argument("noncurrent_version_expiration", TFObject.builder()
-                                                            .member("days", TFNumber.build(lifecycleRule.noncurrentVersionExpiration().noncurrentDays()))
-                                                            .build())
+                                                    .argumentIf(Optional.ofNullable(lifecycleRule.filter().tag()).isPresent(),
+                                                            "tags",
+                                                            () -> TFMap.builder()
+                                                                    .map(lifecycleRule.filter().tag().key(),
+                                                                            TFString.build(lifecycleRule.filter().tag().value()))
+                                                                    .build())
+                                                    .argumentIf(Optional.ofNullable(lifecycleRule.filter().tag()).isEmpty(),
+                                                            "tags",
+                                                            () -> TFMap.empty())
+                                                    .argument("enabled", TFBool.build(lifecycleRule.status() == ExpirationStatus.ENABLED))
+                                                    .argumentIf(Optional.ofNullable(lifecycleRule.abortIncompleteMultipartUpload()).isPresent(),
+                                                            "abort_incomplete_multipart_upload_days",
+                                                            () -> TFNumber.build(lifecycleRule.abortIncompleteMultipartUpload()
+                                                                    .daysAfterInitiation()))
+                                                    .argumentIf(Optional.ofNullable(lifecycleRule.expiration()).isPresent(),
+                                                            "expiration",
+                                                            () -> TFBlock.builder()
+                                                                    .argumentIf(Optional.ofNullable(lifecycleRule.expiration().days()).isPresent(),
+                                                                            "days",
+                                                                            TFNumber.build(lifecycleRule.expiration().days()))
+                                                                    .argumentIf(Optional.ofNullable(lifecycleRule.expiration().days()).isPresent(),
+                                                                            "date",
+                                                                            TFString.build(lifecycleRule.expiration().date().toString()))
+                                                                    .build())
+                                                    .argumentIf(Optional.ofNullable(lifecycleRule.noncurrentVersionExpiration()).isPresent(),
+                                                            "noncurrent_version_expiration",
+                                                            () -> TFObject.builder().member("days",
+                                                                            TFNumber.build(lifecycleRule.noncurrentVersionExpiration().noncurrentDays()))
+                                                                    .build())
                                                     .argumentsIf(Optional.ofNullable(lifecycleRule.noncurrentVersionTransitions()).isPresent(),
                                                             "noncurrent_version_transition",
                                                             lifecycleRule.noncurrentVersionTransitions().stream()
@@ -180,7 +189,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                     .build())
                                             .collect(Collectors.toList()))
 
-                            .argument("accelerateConfiguration", TFString.builder().value(awsBucket.getAccelerateConfiguration().statusAsString()).build())
+                            .argument("acceleration_status", TFString.builder().value(awsBucket.getAccelerateConfiguration().statusAsString()).build())
                             .argument("request_payer", TFString.builder().value(awsBucket.getRequestPayment().payerAsString()).build())
                             .argumentIf(Optional.ofNullable(replication).isPresent(),
                                     "replication_configuration",
@@ -223,7 +232,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                 .build();
                                     })
                             .argumentIf(Optional.ofNullable(objectLock).isPresent(),
-                                    "object_lock_configuration ",
+                                    "object_lock_configuration",
                                     () -> {
                                         ObjectLockConfiguration objectLockConfiguration = objectLock.objectLockConfiguration();
                                         return TFBlock.builder()
@@ -246,6 +255,11 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                         })
                                                 .build();
                                     })
+                            .argumentIf(Optional.ofNullable(awsBucket.getPolicy()).isPresent(),
+                                    "policy",
+                                    () -> TFString.builder().isMultiline(true)
+                                            .value(JsonUtils.toPrettyFormat(awsBucket.getPolicy()))
+                                            .build())
                             .argument("tags", TFMap.build(
                                     tags.stream()
                                             .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))

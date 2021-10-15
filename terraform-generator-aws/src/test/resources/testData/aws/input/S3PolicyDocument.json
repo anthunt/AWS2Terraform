@@ -8,7 +8,7 @@
         "Service": "config.amazonaws.com"
       },
       "Action": "s3:GetBucketAcl",
-      "Resource": "arn:aws:s3:::config-bucket-235090236746"
+      "Resource": "arn:aws:s3:::config-bucket-100020003000"
     },
     {
       "Sid": "AWSConfigBucketExistenceCheck",
@@ -17,7 +17,7 @@
         "Service": "config.amazonaws.com"
       },
       "Action": "s3:ListBucket",
-      "Resource": "arn:aws:s3:::config-bucket-235090236746"
+      "Resource": "arn:aws:s3:::config-bucket-100020003000"
     },
     {
       "Sid": "AWSConfigBucketDelivery",
@@ -26,7 +26,7 @@
         "Service": "config.amazonaws.com"
       },
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::config-bucket-235090236746/AWSLogs/235090236746/Config/*",
+      "Resource": "arn:aws:s3:::config-bucket-100020003000/AWSLogs/100020003000/Config/*",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": "bucket-owner-full-control"
