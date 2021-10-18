@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,9 @@ import software.amazon.awssdk.services.ecr.EcrClient;
 import software.amazon.awssdk.services.ecr.model.DescribeRepositoriesResponse;
 import software.amazon.awssdk.services.ecr.model.Repository;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,9 +32,8 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
 
     @Override
     protected TFImport scriptImport(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<Repository> repositories = listRepositories(client);
+        return getTFImport(repositories);
     }
 
     List<Repository> listRepositories(EcrClient client) {
@@ -60,5 +62,18 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
                     .build();
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<Repository> repositories) {
+        return TFImport.builder()
+                .importLines(repositories.stream()
+                        .map(repository -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_ecr_repository",
+                                        repository.repositoryName()))
+                                .id(repository.repositoryName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }
