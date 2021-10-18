@@ -27,13 +27,13 @@ class ExportLaunchTemplateTest {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private static ExportlaunchTemplates exportlaunchTemplates;
+    private static ExportLaunchTemplates exportlaunchTemplates;
 
     private static Ec2Client client;
 
     @BeforeAll
     public static void beforeAll() {
-        exportlaunchTemplates = new ExportlaunchTemplates();
+        exportlaunchTemplates = new ExportLaunchTemplates();
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEc2Client();
     }

@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ExportlaunchTemplates extends AbstractExport<Ec2Client> {
+public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
