@@ -7,12 +7,16 @@ import com.anthunt.terraform.generator.aws.service.cloudwatchlogs.model.AWSLogGr
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.cloudwatchlogs.model.*;
+import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
+import software.amazon.awssdk.services.cloudwatchlogs.model.ListTagsLogGroupRequest;
+import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
 
 import java.util.List;
 import java.util.Map;
@@ -25,11 +29,15 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
 
     @Override
     protected Maps<Resource> export(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSLogGroup> awsLogGroups = listAwsLogGroups(client);
-
         return getResourceMaps(awsLogGroups);
+    }
 
+    @Override
+    protected TFImport scriptImport(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSLogGroup> listAwsLogGroups(CloudWatchLogsClient client) {

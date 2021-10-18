@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.utils.IOUtils;
 import com.anthunt.terraform.generator.core.model.terraform.Terraform;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Provider;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
@@ -15,9 +16,6 @@ import com.beust.jcommander.JCommander;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
-
-import java.util.List;
 
 @Slf4j
 public abstract class AbstractExport<T extends SdkClient> {
@@ -43,6 +41,11 @@ public abstract class AbstractExport<T extends SdkClient> {
                         .region(this.region)
                         .build().getClient(t), commonArgs, extraArgs);
 
+        TFImport tfImport = this.scriptImport(AmazonClients.builder()
+                .profileName(profileName)
+                .region(this.region)
+                .build().getClient(t), commonArgs, extraArgs);
+
         if (commonArgs.isDeleteOutputDirectory()) {
             IOUtils.emptyDir(commonArgs.getOutputDirPath());
         }
@@ -67,6 +70,16 @@ public abstract class AbstractExport<T extends SdkClient> {
                     log.info("result=>'{}'", resourceString);
                 }
             }
+
+            if (!tfImport.isEmpty()) {
+                String scriptString = tfImport.script();
+                IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getImportFileName(), scriptString, commonArgs.isSilence());
+                if (!commonArgs.isSilence()) {
+                    log.info("result=>'{}'", scriptString);
+                }
+            }
+
+
         } else {
             Terraform terraform = Terraform.builder()
                     .providers(providers)
@@ -82,6 +95,8 @@ public abstract class AbstractExport<T extends SdkClient> {
     }
 
     protected abstract Maps<Resource> export(T client, CommonArgs commonArgs, ExtraArgs extraArgs);
+
+    protected abstract TFImport scriptImport(T client, CommonArgs commonArgs, ExtraArgs extraArgs);
 
     private Maps<Provider> exportProvider() {
         return Maps.<Provider>builder()

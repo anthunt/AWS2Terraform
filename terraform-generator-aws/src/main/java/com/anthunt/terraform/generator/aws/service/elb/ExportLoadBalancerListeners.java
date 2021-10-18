@@ -4,7 +4,11 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSListener;
-import com.anthunt.terraform.generator.core.model.terraform.elements.*;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
+import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,10 +27,15 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
 
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSListener> awsListeners = listAwsListeners(client);
         return getResourceMaps(awsListeners);
+    }
 
+    @Override
+    protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSListener> listAwsListeners(ElasticLoadBalancingV2Client client) {

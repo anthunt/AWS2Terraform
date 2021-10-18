@@ -8,6 +8,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpressio
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +29,15 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSRdsSubnetGroup> awsRdsSubnetGroups = listAwsRdsSubnetGroups(client);
-
         return getResourceMaps(awsRdsSubnetGroups);
+    }
 
+    @Override
+    protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSRdsSubnetGroup> listAwsRdsSubnetGroups(RdsClient client) {

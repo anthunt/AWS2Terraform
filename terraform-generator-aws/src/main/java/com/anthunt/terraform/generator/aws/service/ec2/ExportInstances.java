@@ -6,6 +6,8 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.ec2.model.AWSInstance;
 import com.anthunt.terraform.generator.aws.service.ec2.model.AWSReservation;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
+import java.text.MessageFormat;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,20 +26,24 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSReservation> awsReservations = listAwsReservations(client);
-
         return getResourceMaps(awsReservations);
+    }
 
+    @Override
+    protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        List<AWSReservation> awsReservations = listAwsReservations(client);
+        return getTFImport(awsReservations);
     }
 
     List<AWSReservation> listAwsReservations(Ec2Client client) {
 
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
-
+        log.info("Autoscaling group instances will not be retrieved!");
         return describeInstancesResponse.reservations().stream()
                 .map(reservation -> AWSReservation.builder()
                         .instances(reservation.instances().stream()
+                                .filter(instance -> instance.tags().stream().noneMatch(tag -> tag.key().equals("aws:autoscaling:groupName")))
                                 .map(instance -> AWSInstance.builder()
                                         .instance(instance)
                                         .disableApiTermination(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
@@ -64,7 +71,6 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     Maps<Resource> getResourceMaps(List<AWSReservation> awsReservations) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
-        int i = 0;
         for (AWSReservation reservation : awsReservations) {
             for (AWSInstance awsInstance : reservation.getInstances()) {
                 Instance instance = awsInstance.getInstance();
@@ -100,7 +106,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                                         .flatMap(
                                                                 ni -> ni.privateIpAddresses().stream()
                                                                         .filter(nis -> !nis.primary())
-                                                                        .map(nis -> TFString.build(nis.privateIpAddress()))
+                                                                        .map(nis -> TFString.builder().isLineIndent(false)
+                                                                                .value(nis.privateIpAddress()).build())
                                                         )
                                                         .collect(Collectors.toList())
                                         )
@@ -150,11 +157,24 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                 )
                                 .build()
                 );
-                i++;
             }
         }
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSReservation> awsReservations) {
+        return TFImport.builder()
+                .importLines(awsReservations.stream().flatMap(awsReservation
+                                -> awsReservation.getInstances().stream())
+                        .map(awsInstance -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_instance",
+                                        awsInstance.getInstance().instanceId()))
+                                .id(awsInstance.getInstance().instanceId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }
