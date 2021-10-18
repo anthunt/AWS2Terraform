@@ -38,22 +38,7 @@ class ExportInstancesTest {
         client = amazonClients.getEc2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportInstances.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getDescribeInstancesResponse() {
-        List<AWSReservation> awsReservations = exportInstances.listAwsReservations(client);
-        log.debug("awsReservations => {}", awsReservations);
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<AWSReservation> getAwsReservations() {
         List<AWSReservation> awsReservations = List.of(
                 AWSReservation.builder()
                         .instance(AWSInstance.builder()
@@ -86,6 +71,26 @@ class ExportInstancesTest {
                         )
                         .build()
         );
+        return awsReservations;
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportInstances.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getDescribeInstancesResponse() {
+        List<AWSReservation> awsReservations = exportInstances.listAwsReservations(client);
+        log.debug("awsReservations => {}", awsReservations);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSReservation> awsReservations = getAwsReservations();
 
         Maps<Resource> resourceMaps = exportInstances.getResourceMaps(awsReservations);
         String actual = resourceMaps.unmarshall();
@@ -94,6 +99,14 @@ class ExportInstancesTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/Instance.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Instance.cmd"));
+        String actual = exportInstances.getTFImport(getAwsReservations()).script();
+
         assertEquals(expected, actual);
     }
 

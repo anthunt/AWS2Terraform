@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.s3.model.AWSBucket;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +25,15 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
 
     @Override
     protected Maps<Resource> export(S3Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSBucket> repositories = listAwsBuckets(client);
-
         return getResourceMaps(repositories);
+    }
 
+    @Override
+    protected TFImport scriptImport(S3Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSBucket> listAwsBuckets(S3Client client) {

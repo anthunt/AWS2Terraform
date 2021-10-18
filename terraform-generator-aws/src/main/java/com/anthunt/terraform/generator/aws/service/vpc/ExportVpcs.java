@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,15 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSVpc> awsVpcs = listVpcs(client);
         return getResourceMaps(awsVpcs);
+    }
+
+    @Override
+    protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSVpc> listVpcs(Ec2Client client) {

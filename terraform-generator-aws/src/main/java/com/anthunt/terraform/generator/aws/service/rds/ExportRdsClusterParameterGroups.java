@@ -7,10 +7,12 @@ import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsClusterParame
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.kafka.KafkaClient;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.*;
 
@@ -24,11 +26,15 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups = listAwsRdsClusterParameterGroups(client);
-
         return getResourceMaps(awsRdsClusterParameterGroups);
+    }
 
+    @Override
+    protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSRdsClusterParameterGroup> listAwsRdsClusterParameterGroups(RdsClient client) {

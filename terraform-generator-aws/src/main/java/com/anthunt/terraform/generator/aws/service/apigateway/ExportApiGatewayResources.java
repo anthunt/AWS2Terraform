@@ -10,6 +10,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -28,11 +29,15 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
 
     @Override
     protected Maps<Resource> export(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSRestApiResource> awsRestApiResources = listAWSRestApiResources(client);
-
         return getResourceMaps(awsRestApiResources);
+    }
 
+    @Override
+    protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSRestApiResource> listAWSRestApiResources(ApiGatewayClient client) {

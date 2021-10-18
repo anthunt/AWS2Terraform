@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsOptionGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,15 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSRdsOptionGroup> awsRdsOptionGroups = listAwsRdsOptionGroups(client);
-
         return getResourceMaps(awsRdsOptionGroups);
+    }
 
+    @Override
+    protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSRdsOptionGroup> listAwsRdsOptionGroups(RdsClient client) {

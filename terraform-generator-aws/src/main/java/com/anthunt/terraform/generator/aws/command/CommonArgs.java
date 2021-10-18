@@ -33,6 +33,9 @@ public class CommonArgs {
     @Parameter(names = {"--resource-file-name"}, description = "terraform resources file name will be generate with name <resource file name>.tf")
     private String resourceFileName = "main.tf";
 
+    @Parameter(names = {"--import-file-name"}, description = "terraform import file name will be generate with name <import file name>.cmd")
+    private String importFileName = "main.cmd";
+
     @Parameter(names = {"-S", "--silence"}, description = "no stdout.")
     private boolean isSilence = true;
 

@@ -4,6 +4,8 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +27,14 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<LaunchTemplateVersion> launchTemplateVersions = listLaunchTemplateVersions(client);
-
         return getResourceMaps(launchTemplateVersions);
+    }
 
+    @Override
+    protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        List<LaunchTemplateVersion> launchTemplateVersions = listLaunchTemplateVersions(client);
+        return getTFImport(launchTemplateVersions);
     }
 
     List<LaunchTemplateVersion> listLaunchTemplateVersions(Ec2Client client) {
@@ -41,6 +46,7 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
                                 .launchTemplateId(launchTemplate.launchTemplateId())
                                 .versions(launchTemplate.latestVersionNumber().toString()).build())
                         .launchTemplateVersions().stream().findFirst().get())
+                .peek(launchTemplateVersion -> log.debug("launchTemplateVersion=>{}", launchTemplateVersion))
                 .collect(Collectors.toList());
     }
 
@@ -182,6 +188,19 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
         }
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<LaunchTemplateVersion> launchTemplateVersions) {
+        return TFImport.builder()
+                .importLines(launchTemplateVersions.stream()
+                        .map(launchTemplateVersion -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_launch_template",
+                                        launchTemplateVersion.launchTemplateName()))
+                                .id(launchTemplateVersion.launchTemplateId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

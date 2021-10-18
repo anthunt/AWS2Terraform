@@ -5,10 +5,12 @@ import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheCluster;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.eks.EksClient;
 import software.amazon.awssdk.services.elasticache.ElastiCacheClient;
 import software.amazon.awssdk.services.elasticache.model.*;
 
@@ -22,11 +24,15 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
 
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-
         List<AWSCacheCluster> awsCacheClusters = listAwsCacheClusters(client);
-
         return getResourceMaps(awsCacheClusters);
+    }
 
+    @Override
+    protected TFImport scriptImport(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
+        //TODO:Need to be implemented
+        log.warn("Import Script is not implemented, yet!");
+        return TFImport.builder().build();
     }
 
     List<AWSCacheCluster> listAwsCacheClusters(ElastiCacheClient client) {

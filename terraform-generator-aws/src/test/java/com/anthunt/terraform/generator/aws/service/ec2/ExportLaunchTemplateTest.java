@@ -38,25 +38,11 @@ class ExportLaunchTemplateTest {
         client = amazonClients.getEc2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportlaunchTemplates.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void listLaunchTemplateVersions() {
-        List<LaunchTemplateVersion> launchTemplateVersions = exportlaunchTemplates.listLaunchTemplateVersions(client);
-        log.debug("launchTemplateVersions => {}", launchTemplateVersions);
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<LaunchTemplateVersion> getLaunchTemplateVersions() {
         List<LaunchTemplateVersion> awsEksClusters = List.of(
                 LaunchTemplateVersion.builder()
                         .launchTemplateName("LT-DEV-DLS")
+                        .launchTemplateId("lt-0c6296fcff64943d6")
                         .launchTemplateData(ResponseLaunchTemplateData.builder()
                                 .disableApiTermination(true)
                                 .ebsOptimized(false)
@@ -74,14 +60,41 @@ class ExportLaunchTemplateTest {
                                 .build())
                         .build()
         );
+        return awsEksClusters;
+    }
 
-        Maps<Resource> resourceMaps = exportlaunchTemplates.getResourceMaps(awsEksClusters);
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportlaunchTemplates.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void listLaunchTemplateVersions() {
+        List<LaunchTemplateVersion> launchTemplateVersions = exportlaunchTemplates.listLaunchTemplateVersions(client);
+        log.debug("launchTemplateVersions => {}", launchTemplateVersions);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<LaunchTemplateVersion> launchTemplateVersions = getLaunchTemplateVersions();
+        Maps<Resource> resourceMaps = exportlaunchTemplates.getResourceMaps(launchTemplateVersions);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/LaunchTemplate.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/LaunchTemplate.cmd"));
+        String actual = exportlaunchTemplates.getTFImport(getLaunchTemplateVersions()).script();
+
         assertEquals(expected, actual);
     }
 
