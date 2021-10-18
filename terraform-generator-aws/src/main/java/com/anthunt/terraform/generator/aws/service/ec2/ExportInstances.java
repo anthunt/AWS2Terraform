@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,40 +33,32 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     List<AWSReservation> listAwsReservations(Ec2Client client) {
 
         DescribeInstancesResponse describeInstancesResponse = client.describeInstances();
-        List<AWSReservation> reservations = new ArrayList<>();
 
-        for (Reservation reservation : describeInstancesResponse.reservations()) {
-            AWSReservation.AWSReservationBuilder awsReservationBuilder = AWSReservation.builder();
-            for (Instance instance : reservation.instances()) {
-                AWSInstance.AWSInstanceBuilder awsInstanceBuilder = AWSInstance.builder();
-                awsInstanceBuilder.instance(instance);
-
-                DescribeInstanceAttributeResponse disableApiTerminationAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                        .instanceId(instance.instanceId())
-                        .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
-                        .build());
-                awsInstanceBuilder.disableApiTermination(disableApiTerminationAttribute.disableApiTermination().value());
-
-                DescribeInstanceAttributeResponse shutdownBehaviorAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                        .instanceId(instance.instanceId())
-                        .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
-                        .build());
-                awsInstanceBuilder.shutdownBehavior(shutdownBehaviorAttribute.instanceInitiatedShutdownBehavior().value());
-
-                DescribeInstanceAttributeResponse userDataAttribute = client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                        .instanceId(instance.instanceId())
-                        .attribute(InstanceAttributeName.USER_DATA)
-                        .build());
-                awsInstanceBuilder.userData(userDataAttribute.userData().value());
-
-
-                awsReservationBuilder.instance(awsInstanceBuilder.build());
-            }
-            reservations.add(awsReservationBuilder.build());
-
-        }
-
-        return reservations;
+        return describeInstancesResponse.reservations().stream()
+                .map(reservation -> AWSReservation.builder()
+                        .instances(reservation.instances().stream()
+                                .map(instance -> AWSInstance.builder()
+                                        .instance(instance)
+                                        .disableApiTermination(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                        .instanceId(instance.instanceId())
+                                                        .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
+                                                        .build())
+                                                .disableApiTermination().value())
+                                        .shutdownBehavior(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                        .instanceId(instance.instanceId())
+                                                        .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
+                                                        .build())
+                                                .instanceInitiatedShutdownBehavior().value())
+                                        .userData(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                        .instanceId(instance.instanceId())
+                                                        .attribute(InstanceAttributeName.USER_DATA)
+                                                        .build())
+                                                .userData().value())
+                                        .build())
+                                .collect(Collectors.toList())
+                        )
+                        .build())
+                .collect(Collectors.toList());
     }
 
     Maps<Resource> getResourceMaps(List<AWSReservation> awsReservations) {
@@ -75,8 +66,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
 
         int i = 0;
         for (AWSReservation reservation : awsReservations) {
-            for (AWSInstance AWSInstance : reservation.getInstances()) {
-                Instance instance = AWSInstance.getInstance();
+            for (AWSInstance awsInstance : reservation.getInstances()) {
+                Instance instance = awsInstance.getInstance();
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_instance")
@@ -88,8 +79,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                 .argument("cpu_core_count", TFNumber.build(instance.cpuOptions().coreCount()))
                                 .argument("cpu_threads_per_core", TFNumber.build(instance.cpuOptions().threadsPerCore()))
                                 .argument("ebs_optimized", TFBool.build(instance.ebsOptimized()))
-                                .argument("disable_api_termination", TFBool.build(AWSInstance.getDisableApiTermination()))
-                                .argument("instance_initiated_shutdown_behavior", TFString.build(AWSInstance.getShutdownBehavior()))
+                                .argument("disable_api_termination", TFBool.build(awsInstance.getDisableApiTermination()))
+                                .argument("instance_initiated_shutdown_behavior", TFString.build(awsInstance.getShutdownBehavior()))
                                 .argument("instance_type", TFString.build(instance.instanceType().toString()))
                                 .argument("key_name", TFString.build(instance.keyName()))
                                 //.argument("get_password_data", TFBool.build(instance.pass))
@@ -116,8 +107,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                                         .build())
                                 .argument("source_dest_check", TFBool.build(instance.sourceDestCheck()))
                                 .argument("user_data", TFString.builder().isMultiline(true).value(
-                                        AWSInstance.getUserData() != null ?
-                                                new String(Base64.getDecoder().decode(AWSInstance.getUserData())).replaceAll("[$]", "\\$\\$")
+                                        awsInstance.getUserData() != null ?
+                                                new String(Base64.getDecoder().decode(awsInstance.getUserData())).replaceAll("[$]", "\\$\\$")
                                                 : ""
                                 ).build())
                                 .argument("iam_instance_profile", TFString.build(
