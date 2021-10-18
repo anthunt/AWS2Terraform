@@ -41,16 +41,7 @@ class ExportApiGatewayResourcesTest {
         client = amazonClients.getApiGatewayClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportApiGatewayResources.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
-
+    private List<AWSRestApiResource> getAwsRestApiResources() {
         AWSResource awsResource1 = AWSResource.builder()
                 .resource(software.amazon.awssdk.services.apigateway.model.Resource.builder()
                         .id("22vkob0b6j")
@@ -147,10 +138,11 @@ class ExportApiGatewayResourcesTest {
                         .build())
                 .build();
 
-        List<AWSRestApiResource> awsRestApis = List.of(
+        return List.of(
                 AWSRestApiResource.builder()
                         .restApi(RestApi.builder()
                                 .name("PetStore")
+                                .id("12345abcde")
                                 .description("Your first API with Amazon API Gateway. This is a sample API that integrates via HTTP with our demo Pet Store endpoints")
                                 .apiKeySource(ApiKeySourceType.HEADER)
                                 .disableExecuteApiEndpoint(false)
@@ -161,6 +153,19 @@ class ExportApiGatewayResourcesTest {
                         )
                         .awsResources(List.of(awsResource1, awsResource2, awsResource3))
                         .build());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportApiGatewayResources.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+
+        List<AWSRestApiResource> awsRestApis = getAwsRestApiResources();
 
         Maps<Resource> resourceMaps = exportApiGatewayResources.getResourceMaps(awsRestApis);
         String actual = resourceMaps.unmarshall();
@@ -169,6 +174,14 @@ class ExportApiGatewayResourcesTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/ApigatewayResource.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/ApigatewayResource.cmd"));
+        String actual = exportApiGatewayResources.getTFImport(getAwsRestApiResources()).script();
+
         assertEquals(expected, actual);
     }
 

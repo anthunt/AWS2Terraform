@@ -11,6 +11,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpressio
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,8 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
 
     @Override
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRestApiResource> awsRestApiResources = listAWSRestApiResources(client);
+        return getTFImport(awsRestApiResources);
     }
 
     List<AWSRestApiResource> listAWSRestApiResources(ApiGatewayClient client) {
@@ -78,6 +78,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
         for (AWSRestApiResource awsRestApiResource : awsRestApiResources) {
             RestApi restApi = awsRestApiResource.getRestApi();
 
+            @SuppressWarnings("OptionalGetWithoutIsPresent")
             String rootResourceId = awsRestApiResource.getAwsResources().stream()
                     .filter(awsResource -> awsResource.getResource().parentId() == null)
                     .findFirst().get()
@@ -143,5 +144,62 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                     });
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSRestApiResource> awsRestApiResources) {
+        TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
+
+        for (AWSRestApiResource awsRestApiResource : awsRestApiResources) {
+            RestApi restApi = awsRestApiResource.getRestApi();
+
+            awsRestApiResource.getAwsResources().stream()
+                    .filter(awsResource -> awsResource.getResource().parentId() != null)
+                    .forEach(awsResource -> {
+                        tfImportBuilder.importLine(TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_api_gateway_resource",
+                                        MessageFormat.format("{0}-{1}",
+                                                restApi.name(),
+                                                awsResource.getResource().id())))
+                                .id(MessageFormat.format("{0}/{1}",
+                                        restApi.id(),
+                                        awsResource.getResource().id()))
+                                .build());
+
+                        awsResource.getAwsMethods().forEach(awsMethod -> {
+                            GetMethodResponse method = awsMethod.getMethod();
+                            GetIntegrationResponse integration = awsMethod.getIntegration();
+
+                            tfImportBuilder.importLine(TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_api_gateway_method",
+                                            MessageFormat.format("{0}-{1}-{2}",
+                                                    restApi.name(),
+                                                    awsResource.getResource().id(),
+                                                    method.httpMethod())
+                                    ))
+                                    .id(MessageFormat.format("{0}/{1}/{2}",
+                                            restApi.name(),
+                                            awsResource.getResource().id(),
+                                            method.httpMethod()))
+                                    .build());
+
+                            tfImportBuilder.importLine(TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_api_gateway_integration",
+                                            MessageFormat.format("{0}-{1}-{2}",
+                                                    restApi.name(),
+                                                    awsResource.getResource().id(),
+                                                    awsMethod.getMethod().httpMethod())
+                                    ))
+                                    .id(MessageFormat.format("{0}/{1}/{2}",
+                                            restApi.name(),
+                                            awsResource.getResource().id(),
+                                            awsMethod.getMethod().httpMethod()))
+                                    .build());
+                        });
+                    });
+        }
+        return tfImportBuilder.build();
     }
 }

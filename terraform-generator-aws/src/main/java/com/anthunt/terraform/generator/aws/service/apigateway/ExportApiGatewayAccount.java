@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,8 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
 
     @Override
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        GetAccountResponse account = getAccount(client);
+        return getTFImport(account);
     }
 
     GetAccountResponse getAccount(ApiGatewayClient client) {
@@ -53,5 +53,18 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
 
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(GetAccountResponse account) {
+        return TFImport.builder()
+                .importLine(TFImportLine.builder()
+                        .address(MessageFormat.format("{0}.{1}",
+                                "aws_api_gateway_account",
+                                MessageFormat.format("{0}-{1}",
+                                        "account",
+                                        account.cloudwatchRoleArn().split(":")[4])))
+                        .id("api-gateway-account")
+                        .build())
+                .build();
     }
 }
