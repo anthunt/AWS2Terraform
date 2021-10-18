@@ -39,15 +39,7 @@ class ExportEcrRepositoryTest {
         client = amazonClients.getEcrClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportEcrRepository.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<Repository> getRepositories() {
         List<Repository> repositories = List.of(
                 Repository.builder()
                         .repositoryName("envoyproxy/envoy")
@@ -72,6 +64,19 @@ class ExportEcrRepositoryTest {
                                 .build())
                         .build()
         );
+        return repositories;
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportEcrRepository.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<Repository> repositories = getRepositories();
 
         Maps<Resource> resourceMaps = exportEcrRepository.getResourceMaps(repositories);
         String actual = resourceMaps.unmarshall();
@@ -83,4 +88,11 @@ class ExportEcrRepositoryTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EcrRepository.cmd"));
+        String actual = exportEcrRepository.getTFImport(getRepositories()).script();
+
+        assertEquals(expected, actual);
+    }
 }
