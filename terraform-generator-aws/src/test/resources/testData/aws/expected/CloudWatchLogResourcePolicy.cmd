@@ -1,0 +1,1 @@
+terraform import aws_cloudwatch_log_resource_policy.es_log_resource_policy es_log_resource_policy

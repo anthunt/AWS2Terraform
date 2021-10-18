@@ -38,16 +38,8 @@ class ExportCloudwatchLogGroupsTest {
         client = amazonClients.getCloudWatchLogGroupClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportCloudwatchLogGroups.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSLogGroup> awsLogGroups = List.of(
+    private List<AWSLogGroup> getAwsLogGroups() {
+        return List.of(
                 AWSLogGroup.builder()
                         .logGroup(LogGroup.builder().logGroupName("/aws/containerinsights/EKS-CLS-SAMPLE/application")
                                 .build())
@@ -62,6 +54,18 @@ class ExportCloudwatchLogGroupsTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportCloudwatchLogGroups.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSLogGroup> awsLogGroups = getAwsLogGroups();
 
         Maps<Resource> resourceMaps = exportCloudwatchLogGroups.getResourceMaps(awsLogGroups);
         String actual = resourceMaps.unmarshall();
@@ -70,6 +74,14 @@ class ExportCloudwatchLogGroupsTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/CloudWatchLog.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/CloudWatchLog.cmd"));
+        String actual = exportCloudwatchLogGroups.getTFImport(getAwsLogGroups()).script();
+
         assertEquals(expected, actual);
     }
 

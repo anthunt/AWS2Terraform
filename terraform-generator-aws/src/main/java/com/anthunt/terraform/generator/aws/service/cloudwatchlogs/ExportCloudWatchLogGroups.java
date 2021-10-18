@@ -8,16 +8,17 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
 import software.amazon.awssdk.services.cloudwatchlogs.model.ListTagsLogGroupRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,9 +36,8 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
 
     @Override
     protected TFImport scriptImport(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSLogGroup> awsLogGroups = listAwsLogGroups(client);
+        return getTFImport(awsLogGroups);
     }
 
     List<AWSLogGroup> listAwsLogGroups(CloudWatchLogsClient client) {
@@ -60,12 +60,10 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
             resourceMapsBuilder.map(
                             Resource.builder()
                                     .api("aws_cloudwatch_log_group")
-                                    .name(logGroup.logGroupName().startsWith("/") ?
-                                            logGroup.logGroupName().substring(1).replaceAll("/", "-")
-                                            : logGroup.logGroupName().replaceAll("/", "-"))
+                                    .name(getResourceName(logGroup.logGroupName()))
                                     .argument("name", TFString.build(logGroup.logGroupName()))
                                     .argument("retention_in_days", Optional.ofNullable(logGroup.retentionInDays())
-                                            .map(days -> TFNumber.build(days))
+                                            .map(TFNumber::build)
                                             .orElse(TFNumber.build(null)))
                                     .argument("kms_key_id", TFString.build(logGroup.kmsKeyId()))
                                     .argument("tags", TFMap.build(
@@ -76,5 +74,27 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
                     .build();
         }
         return resourceMapsBuilder.build();
+    }
+
+    private String getResourceName(String logGroupName) {
+        return logGroupName.startsWith("/") ?
+                logGroupName.substring(1).replaceAll("/", "-")
+                : logGroupName.replaceAll("/", "-");
+    }
+
+    TFImport getTFImport(List<AWSLogGroup> awsLogGroups) {
+        return TFImport.builder()
+                .importLines(awsLogGroups.stream()
+                        .map(awsLogGroup -> {
+                            LogGroup logGroup = awsLogGroup.getLogGroup();
+                            return TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_cloudwatch_log_group",
+                                            getResourceName(logGroup.logGroupName())))
+                                    .id(logGroup.logGroupName())
+                                    .build();
+                        })
+                        .collect(Collectors.toList()))
+                .build();
     }
 }
