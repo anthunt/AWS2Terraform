@@ -1,0 +1,1 @@
+terraform import aws_api_gateway_account.account-100020003000 api-gateway-account

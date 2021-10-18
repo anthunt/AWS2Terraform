@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSRestApi;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSStage;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +32,8 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
 
     @Override
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRestApi> awsRestApis = listAWSRestApis(client);
+        return getTFImport(awsRestApis);
     }
 
     List<AWSRestApi> listAWSRestApis(ApiGatewayClient client) {
@@ -129,5 +129,18 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
 
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSRestApi> awsRestApis) {
+        return TFImport.builder()
+                .importLines(awsRestApis.stream()
+                        .map(awsRestApi -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_launch_template",
+                                        awsRestApi.getRestApi().name()))
+                                .id(awsRestApi.getRestApi().id())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

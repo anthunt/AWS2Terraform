@@ -35,6 +35,12 @@ class ExportApiGatewayAccountTest {
         client = amazonClients.getApiGatewayClient();
     }
 
+    private GetAccountResponse getGetAccountResponse() {
+        return GetAccountResponse.builder()
+                .cloudwatchRoleArn("arn:aws:iam::100020003000:role/APIGatewayPushToCloudWatchLogs")
+                .build();
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
@@ -44,11 +50,7 @@ class ExportApiGatewayAccountTest {
 
     @Test
     public void getResourceMaps() {
-        GetAccountResponse account =
-                GetAccountResponse.builder()
-                        .cloudwatchRoleArn("arn:aws:iam::100020003000:role/APIGatewayPushToCloudWatchLogs")
-                        .build();
-
+        GetAccountResponse account = getGetAccountResponse();
 
         Maps<Resource> resourceMaps = exportApiGatewayAccount.getResourceMaps(account);
         String actual = resourceMaps.unmarshall();
@@ -57,6 +59,14 @@ class ExportApiGatewayAccountTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/Apigateway.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Apigateway.cmd"));
+        String actual = exportApiGatewayAccount.getTFImport(getGetAccountResponse()).script();
+
         assertEquals(expected, actual);
     }
 
