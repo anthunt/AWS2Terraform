@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.command;
 
 import com.anthunt.terraform.generator.aws.service.ec2.ExportInstances;
-import com.anthunt.terraform.generator.aws.service.ec2.ExportlaunchTemplates;
+import com.anthunt.terraform.generator.aws.service.ec2.ExportLaunchTemplates;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -16,11 +16,11 @@ public class Ec2Commands extends AbstractCommands {
 
     private ExportInstances exportInstances;
 
-    private ExportlaunchTemplates exportlaunchTemplates;
+    private ExportLaunchTemplates exportLaunchTemplates;
 
-    public Ec2Commands(ExportInstances exportInstances, ExportlaunchTemplates exportlaunchTemplates) {
+    public Ec2Commands(ExportInstances exportInstances, ExportLaunchTemplates exportLaunchTemplates) {
         this.exportInstances = exportInstances;
-        this.exportlaunchTemplates = exportlaunchTemplates;
+        this.exportLaunchTemplates = exportLaunchTemplates;
     }
 
     @ShellMethod("Export terraform resources of ec2 instances.")
@@ -30,7 +30,7 @@ public class Ec2Commands extends AbstractCommands {
 
     @ShellMethod("Export terraform resources of launch templates.")
     public void launchTemplates(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
-        exportlaunchTemplates.exportTerraform(Ec2Client.class, commonArgs);
+        exportLaunchTemplates.exportTerraform(Ec2Client.class, commonArgs);
     }
 
 }
