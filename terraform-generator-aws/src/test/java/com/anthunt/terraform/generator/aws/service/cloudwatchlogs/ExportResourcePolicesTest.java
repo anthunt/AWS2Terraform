@@ -37,6 +37,16 @@ class ExportResourcePolicesTest {
         client = amazonClients.getCloudWatchLogGroupClient();
     }
 
+    private List<ResourcePolicy> getResourcePolicies() {
+        return List.of(
+                ResourcePolicy.builder()
+                        .policyName("es_log_resource_policy")
+                        .policyDocument(TestDataFileUtils.asString(
+                                resourceLoader.getResource("testData/aws/input/CloudWatchLogResourcePolicyDocument.json")))
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
@@ -46,13 +56,7 @@ class ExportResourcePolicesTest {
 
     @Test
     public void getResourceMaps() {
-        List<ResourcePolicy> resourcePolicies = List.of(
-                ResourcePolicy.builder()
-                        .policyName("es_log_resource_policy")
-                        .policyDocument(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/aws/input/CloudWatchLogResourcePolicyDocument.json")))
-                        .build()
-        );
+        List<ResourcePolicy> resourcePolicies = getResourcePolicies();
 
         Maps<Resource> resourceMaps = exportResourcePolicies.getResourceMaps(resourcePolicies);
         String actual = resourceMaps.unmarshall();
@@ -61,6 +65,14 @@ class ExportResourcePolicesTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/CloudWatchLogResourcePolicy.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/CloudWatchLogResourcePolicy.cmd"));
+        String actual = exportResourcePolicies.getTFImport(getResourcePolicies()).script();
+
         assertEquals(expected, actual);
     }
 
