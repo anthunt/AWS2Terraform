@@ -92,7 +92,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                         resourceMapsBuilder.map(
                                 Resource.builder()
                                         .api("aws_api_gateway_resource")
-                                        .name(MessageFormat.format("{0}-{1}", restApi.name(), resource.id()))
+                                        .name(getApiGatewayResourceName(restApi.name(), resource.id()))
                                         .argument("rest_api_id ", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("parent_id", resource.parentId().equals(rootResourceId) ?
@@ -106,7 +106,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                     resourceMapsBuilder.map(
                                             Resource.builder()
                                                     .api("aws_api_gateway_method")
-                                                    .name(MessageFormat.format("{0}-{1}-{2}", restApi.name(), resource.id(), method.httpMethod()))
+                                                    .name(getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod()))
                                                     .argument("rest_api_id", TFExpression.build(
                                                             MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                                     .argument("resource_id", TFExpression.build(
@@ -123,7 +123,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                     resourceMapsBuilder.map(
                                             Resource.builder()
                                                     .api("aws_api_gateway_integration")
-                                                    .name(MessageFormat.format("{0}-{1}-{2}", restApi.name(), resource.id(), method.httpMethod()))
+                                                    .name(getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod()))
                                                     .argument("rest_api_id", TFExpression.build(
                                                             MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                                     .argument("resource_id", TFExpression.build(
@@ -146,6 +146,10 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
         return resourceMapsBuilder.build();
     }
 
+    private String getApiGatewayMethodResourceName(String restApiName, String resourceId, String httpMethod) {
+        return MessageFormat.format("{0}-{1}-{2}", restApiName, resourceId, httpMethod);
+    }
+
     TFImport getTFImport(List<AWSRestApiResource> awsRestApiResources) {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
 
@@ -158,9 +162,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                         tfImportBuilder.importLine(TFImportLine.builder()
                                 .address(MessageFormat.format("{0}.{1}",
                                         "aws_api_gateway_resource",
-                                        MessageFormat.format("{0}-{1}",
-                                                restApi.name(),
-                                                awsResource.getResource().id())))
+                                        getApiGatewayResourceName(restApi.name(), awsResource.getResource().id())))
                                 .id(MessageFormat.format("{0}/{1}",
                                         restApi.id(),
                                         awsResource.getResource().id()))
@@ -173,10 +175,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                             tfImportBuilder.importLine(TFImportLine.builder()
                                     .address(MessageFormat.format("{0}.{1}",
                                             "aws_api_gateway_method",
-                                            MessageFormat.format("{0}-{1}-{2}",
-                                                    restApi.name(),
-                                                    awsResource.getResource().id(),
-                                                    method.httpMethod())
+                                            getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod())
                                     ))
                                     .id(MessageFormat.format("{0}/{1}/{2}",
                                             restApi.name(),
@@ -187,10 +186,7 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                             tfImportBuilder.importLine(TFImportLine.builder()
                                     .address(MessageFormat.format("{0}.{1}",
                                             "aws_api_gateway_integration",
-                                            MessageFormat.format("{0}-{1}-{2}",
-                                                    restApi.name(),
-                                                    awsResource.getResource().id(),
-                                                    awsMethod.getMethod().httpMethod())
+                                            getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod())
                                     ))
                                     .id(MessageFormat.format("{0}/{1}/{2}",
                                             restApi.name(),
@@ -201,5 +197,11 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                     });
         }
         return tfImportBuilder.build();
+    }
+
+    private String getApiGatewayResourceName(String restApiName, String resourceId) {
+        return MessageFormat.format("{0}-{1}",
+                restApiName,
+                resourceId);
     }
 }

@@ -43,9 +43,7 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_api_gateway_account")
-                            .name(MessageFormat.format("{0}-{1}",
-                                    "account",
-                                    accountResponse.cloudwatchRoleArn().split(":")[4]))
+                            .name(getResourceName(accountResponse))
                             .argument("cloudwatch_role_arn", TFString.build(accountResponse.cloudwatchRoleArn()))
                             .build()
             );
@@ -55,14 +53,18 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
         return resourceMapsBuilder.build();
     }
 
+    private String getResourceName(GetAccountResponse accountResponse) {
+        return MessageFormat.format("{0}-{1}",
+                "account",
+                accountResponse.cloudwatchRoleArn().split(":")[4]);
+    }
+
     TFImport getTFImport(GetAccountResponse account) {
         return TFImport.builder()
                 .importLine(TFImportLine.builder()
                         .address(MessageFormat.format("{0}.{1}",
                                 "aws_api_gateway_account",
-                                MessageFormat.format("{0}-{1}",
-                                        "account",
-                                        account.cloudwatchRoleArn().split(":")[4])))
+                                getResourceName(account)))
                         .id("api-gateway-account")
                         .build())
                 .build();
