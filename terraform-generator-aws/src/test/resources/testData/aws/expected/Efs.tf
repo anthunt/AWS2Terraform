@@ -12,12 +12,12 @@ resource aws_efs_file_system efs-test-app {
 
 resource aws_efs_mount_target fsmt-01020304 {
 	file_system_id = aws_efs_file_system.efs-test-app.id
-	subnet_id = aws_subnet.subnet-0f58e2bf1ada4d5c0.id
+	subnet_id = aws_subnet.subnet-01020304.id
 }
 
 resource aws_efs_mount_target fsmt-02030405 {
 	file_system_id = aws_efs_file_system.efs-test-app.id
-	subnet_id = aws_subnet.subnet-003e5f077d31b5163.id
+	subnet_id = aws_subnet.subnet-02020304.id
 }
 
 resource aws_efs_file_system_policy efs-test-app-policy {
@@ -33,7 +33,7 @@ resource aws_efs_file_system_policy efs-test-app-policy {
       "Principal": {
         "AWS": "*"
       },
-      "Resource": "${aws_efs_file_system.test.arn}",
+      "Resource": "${aws_efs_file_system.efs-test-app.arn}",
       "Action": [
         "elasticfilesystem:ClientMount",
         "elasticfilesystem:ClientWrite"
@@ -56,7 +56,7 @@ resource aws_efs_backup_policy efs-test-app {
 	}
 }
 
-resource aws_efs_file_system aws_efs_file_system-1 {
+resource aws_efs_file_system fs-6fa144c6 {
 	encrypted = false
 	kms_key_id = null
 	performance_mode = "generalPurpose"

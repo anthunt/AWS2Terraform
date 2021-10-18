@@ -40,17 +40,10 @@ class ExportEfsTest {
         client = amazonClients.getEfsClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportEfs.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSEfs> awsEfs = List.of(
+    private List<AWSEfs> getAwsEfs() {
+        return List.of(
                 AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
+                                .fileSystemId("fs-5af144c6")
                                 .encrypted(true)
                                 .kmsKeyId("arn:aws:kms:ap-northeast-2:100020003000:key/1000ffff-2210-472f-ad29-2c2f4ef0c4e2")
                                 .performanceMode("generalPurpose")
@@ -65,15 +58,16 @@ class ExportEfsTest {
                         .mountTargets(List.of(
                                 MountTargetDescription.builder()
                                         .mountTargetId("fsmt-01020304")
-                                        .subnetId("subnet-0f58e2bf1ada4d5c0")
+                                        .subnetId("subnet-01020304")
                                         .build(),
                                 MountTargetDescription.builder()
                                         .mountTargetId("fsmt-02030405")
-                                        .subnetId("subnet-003e5f077d31b5163")
+                                        .subnetId("subnet-02020304")
                                         .build()
                         ))
                         .build(),
                 AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
+                                .fileSystemId("fs-6fa144c6")
                                 .encrypted(false)
                                 .kmsKeyId(null)
                                 .performanceMode("generalPurpose")
@@ -82,14 +76,32 @@ class ExportEfsTest {
                                 .build())
                         .build()
         );
+    }
 
-        Maps<Resource> resourceMaps = exportEfs.getResourceMaps(awsEfs);
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportEfs.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+        Maps<Resource> resourceMaps = exportEfs.getResourceMaps(getAwsEfs());
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/Efs.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Efs.cmd"));
+        String actual = exportEfs.getTFImport(getAwsEfs()).script();
+
         assertEquals(expected, actual);
     }
 
