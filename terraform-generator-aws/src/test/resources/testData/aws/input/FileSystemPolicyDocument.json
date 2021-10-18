@@ -8,7 +8,7 @@
       "Principal": {
         "AWS": "*"
       },
-      "Resource": "${aws_efs_file_system.test.arn}",
+      "Resource": "${aws_efs_file_system.efs-test-app.arn}",
       "Action": [
         "elasticfilesystem:ClientMount",
         "elasticfilesystem:ClientWrite"
