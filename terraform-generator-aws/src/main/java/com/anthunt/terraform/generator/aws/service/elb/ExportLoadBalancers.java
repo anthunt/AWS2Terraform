@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSLoadBalancer;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,8 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
 
     @Override
     protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSLoadBalancer> awsLoadBalancers = listAwsLoadBalancers(client);
+        return getTFImport(awsLoadBalancers);
     }
 
     List<AWSLoadBalancer> listAwsLoadBalancers(ElasticLoadBalancingV2Client client) {
@@ -136,10 +136,21 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
                                     ))
                                     .build())
                     .build();
-
         }
         return resourceMapsBuilder.build();
+    }
 
+    TFImport getTFImport(List<AWSLoadBalancer> awsLoadBalancers) {
+        return TFImport.builder()
+                .importLines(awsLoadBalancers.stream()
+                        .map(awsLoadBalancer -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_lb",
+                                        awsLoadBalancer.getLoadBalancer().loadBalancerName()))
+                                .id(awsLoadBalancer.getLoadBalancer().loadBalancerArn())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,8 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
 
     @Override
     protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSTargetGroup> awsTargetGroups = listAwsTagetGroups(client);
+        return getTFImport(awsTargetGroups);
     }
 
     List<AWSTargetGroup> listAwsTagetGroups(ElasticLoadBalancingV2Client client) {
@@ -52,7 +52,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                                 .targetGroupArn(targetGroup.targetGroupArn())
                                                 .build())
                                         .targetHealthDescriptions().stream()
-                                        .map(t -> t.target())
+                                        .map(TargetHealthDescription::target)
                                         .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
@@ -78,7 +78,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                             .argument("deregistration_delay", TFNumber.builder()
                                     .value(attributes.stream()
                                             .filter(a -> a.key().equals("deregistration_delay.timeout_seconds"))
-                                            .map(a -> a.value())
+                                            .map(TargetGroupAttribute::value)
                                             .findFirst().orElse(null))
                                     .build())
                             .argument("health_check", TFBlock.builder()
@@ -92,7 +92,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                     .build()
                             ).build());
 
-            awsTargetGroup.getTargetDescriptions().stream().forEach(targetDescription ->
+            awsTargetGroup.getTargetDescriptions().forEach(targetDescription ->
                     resourceMapsBuilder.map(
                                     Resource.builder()
                                             .api("aws_lb_target_group_attachment")
@@ -122,6 +122,19 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
             );
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSTargetGroup> awsTargetGroups) {
+        return TFImport.builder()
+                .importLines(awsTargetGroups.stream()
+                        .map(awsTargetGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_lb_target_group",
+                                        awsTargetGroup.getTargetGroup().targetGroupName()))
+                                .id(awsTargetGroup.getTargetGroup().targetGroupArn())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }
