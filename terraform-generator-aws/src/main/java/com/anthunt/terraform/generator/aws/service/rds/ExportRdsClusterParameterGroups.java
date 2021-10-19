@@ -8,14 +8,15 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.kafka.KafkaClient;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.*;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,9 +33,8 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups = listAwsRdsClusterParameterGroups(client);
+        return getTFImport(awsRdsClusterParameterGroups);
     }
 
     List<AWSRdsClusterParameterGroup> listAwsRdsClusterParameterGroups(RdsClient client) {
@@ -47,8 +47,8 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
                 .map(parameterGroup -> AWSRdsClusterParameterGroup.builder()
                         .dbClusterParameterGroup(parameterGroup)
                         .parameters(client.describeDBClusterParameters(DescribeDbClusterParametersRequest.builder()
-                                .dbClusterParameterGroupName(parameterGroup.dbClusterParameterGroupName())
-                                .build()).parameters().stream()
+                                        .dbClusterParameterGroupName(parameterGroup.dbClusterParameterGroupName())
+                                        .build()).parameters().stream()
                                 .peek(parameter -> log.debug("parameter => {}", parameter))
                                 .collect(Collectors.toList()))
                         .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
@@ -64,30 +64,41 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
             List<Parameter> parameters = awsDbClusterParameterGroup.getParameters();
             List<Tag> tags = awsDbClusterParameterGroup.getTags();
             resourceMapsBuilder.map(
-                            Resource.builder()
-                                    .api("aws_rds_cluster_parameter_group")
-                                    .name(parameterGroup.dbClusterParameterGroupName())
-                                    .argument("name", TFString.build(parameterGroup.dbClusterParameterGroupName()))
-                                    .argument("family", TFString.build(parameterGroup.dbParameterGroupFamily()))
-                                    .argument("description", TFString.build(parameterGroup.description()))
-                                    .argumentsIf(Optional.ofNullable(parameters).isPresent(),
-                                            "parameter",
-                                            parameters.stream()
-                                                    .filter(p -> p.source().equalsIgnoreCase("modified"))
-                                                    .map(parameter -> TFBlock.builder()
-                                                            .argument("name", TFString.build(parameter.parameterName()))
-                                                            .argument("value", TFString.build(parameter.parameterValue()))
-                                                            .build())
-                                                    .collect(Collectors.toList()))
-                                    .argument("tags", TFMap.build(
-                                            tags.stream()
-                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
-                                    ))
-                                    .build()
-                    );
+                    Resource.builder()
+                            .api("aws_rds_cluster_parameter_group")
+                            .name(parameterGroup.dbClusterParameterGroupName())
+                            .argument("name", TFString.build(parameterGroup.dbClusterParameterGroupName()))
+                            .argument("family", TFString.build(parameterGroup.dbParameterGroupFamily()))
+                            .argument("description", TFString.build(parameterGroup.description()))
+                            .argumentsIf(Optional.ofNullable(parameters).isPresent(),
+                                    "parameter",
+                                    () -> parameters.stream()
+                                            .filter(p -> p.source().equalsIgnoreCase("modified"))
+                                            .map(parameter -> TFBlock.builder()
+                                                    .argument("name", TFString.build(parameter.parameterName()))
+                                                    .argument("value", TFString.build(parameter.parameterValue()))
+                                                    .build())
+                                            .collect(Collectors.toList()))
+                            .argument("tags", TFMap.build(
+                                    tags.stream()
+                                            .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value())))
+                            ))
+                            .build()
+            );
         });
-
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups) {
+        return TFImport.builder()
+                .importLines(awsRdsClusterParameterGroups.stream()
+                        .map(awsRdsClusterParameterGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_rds_cluster_parameter_group",
+                                        awsRdsClusterParameterGroup.getDbClusterParameterGroup().dbClusterParameterGroupName()))
+                                .id(awsRdsClusterParameterGroup.getDbClusterParameterGroup().dbClusterParameterGroupName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
+    }
 }

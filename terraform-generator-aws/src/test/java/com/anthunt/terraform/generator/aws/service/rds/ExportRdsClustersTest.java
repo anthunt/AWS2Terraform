@@ -37,23 +37,8 @@ class ExportRdsClustersTest {
         client = amazonClients.getRdsClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportRdsClusters.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getDBClusters() {
-        List<AWSRdsCluster> awsRdsClusters = exportRdsClusters.listAwsRdsClusters(client);
-        log.debug("awsdbClusters => {}", awsRdsClusters);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSRdsCluster> awsTargetGroups = List.of(
+    private List<AWSRdsCluster> getAwsRdsClusters() {
+        return List.of(
                 AWSRdsCluster.builder()
                         .dbCluster(DBCluster.builder()
                                 .databaseName("rds-dev")
@@ -89,6 +74,25 @@ class ExportRdsClustersTest {
                                 .build()))
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportRdsClusters.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getDBClusters() {
+        List<AWSRdsCluster> awsRdsClusters = exportRdsClusters.listAwsRdsClusters(client);
+        log.debug("awsdbClusters => {}", awsRdsClusters);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSRdsCluster> awsTargetGroups = getAwsRdsClusters();
 
         Maps<Resource> resourceMaps = exportRdsClusters.getResourceMaps(awsTargetGroups);
         String actual = resourceMaps.unmarshall();
@@ -98,6 +102,13 @@ class ExportRdsClustersTest {
                 resourceLoader.getResource("testData/aws/expected/Rds.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Rds.cmd"));
+        String actual = exportRdsClusters.getTFImport(getAwsRdsClusters()).script();
+
+        assertEquals(expected, actual);
     }
 }

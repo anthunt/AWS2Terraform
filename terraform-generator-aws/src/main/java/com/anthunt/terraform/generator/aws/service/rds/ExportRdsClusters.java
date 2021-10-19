@@ -4,8 +4,10 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
+import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +32,8 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
 
     @Override
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRdsCluster> awsRdsClusters = listAwsRdsClusters(client);
+        return getTFImport(awsRdsClusters);
     }
 
     List<AWSRdsCluster> listAwsRdsClusters(RdsClient client) {
@@ -42,16 +43,20 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                 .peek(dbCuster -> log.debug("dbCuster => {}", dbCuster))
                 .map(dbCuster -> AWSRdsCluster.builder()
                         .dbCluster(dbCuster)
-                        .dbClusterInstances(client.describeDBInstances(DescribeDbInstancesRequest.builder()
-                                .filters(f -> f.name("db-cluster-id").values(dbCuster.dbClusterArn()))
-                                .build()).dbInstances())
+                        .dbClusterInstances(OptionalUtils.getExceptionAsOptional(() ->
+                                        client.describeDBInstances(DescribeDbInstancesRequest.builder()
+                                                        .filters(f -> f.name("db-cluster-id")
+                                                                .values(dbCuster.dbClusterArn()))
+                                                        .build())
+                                                .dbInstances())
+                                .orElse(null))
                         .build())
                 .collect(Collectors.toList());
     }
 
     Maps<Resource> getResourceMaps(List<AWSRdsCluster> awsRdsClusters) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsRdsClusters.stream().forEach(awsDbCluster -> {
+        awsRdsClusters.forEach(awsDbCluster -> {
             DBCluster dbCluster = awsDbCluster.getDbCluster();
             List<DBInstance> dbClusterInstances = awsDbCluster.getDbClusterInstances();
             resourceMapsBuilder.map(
@@ -78,7 +83,7 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                                             .build())
                                     .collect(Collectors.toList())))
                             .argument("backtrack_window", TFNumber.build(Optional.ofNullable(dbCluster.backtrackWindow())
-                                    .map(v -> v.toString()).orElse(null)))
+                                    .map(Object::toString).orElse(null)))
                             .argument("backup_retention_period", TFNumber.build(dbCluster.backupRetentionPeriod().toString()))
                             .argument("copy_tags_to_snapshot", TFBool.build(dbCluster.copyTagsToSnapshot()))
                             .argument("deletion_protection", TFBool.build(dbCluster.deletionProtection()))
@@ -88,7 +93,7 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                             ))
                             .build());
 
-            dbClusterInstances.stream().forEach(dbInstance ->
+            dbClusterInstances.forEach(dbInstance ->
                     resourceMapsBuilder.map(
                             Resource.builder()
                                     .api("aws_rds_cluster_instance")
@@ -120,4 +125,29 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<AWSRdsCluster> awsRdsClusters) {
+        TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
+        awsRdsClusters.forEach(awsRdsCluster -> {
+                    List<DBInstance> dbClusterInstances = awsRdsCluster.getDbClusterInstances();
+                    DBCluster dbCluster = awsRdsCluster.getDbCluster();
+                    tfImportBuilder.importLine(TFImportLine.builder()
+                            .address(MessageFormat.format("{0}.{1}",
+                                    "aws_rds_cluster",
+                                    dbCluster.dbClusterIdentifier()))
+                            .id(dbCluster.dbClusterIdentifier())
+                            .build()
+                    );
+                    dbClusterInstances.forEach(dbInstance ->
+                            tfImportBuilder.importLine(TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_rds_cluster_instance",
+                                            dbInstance.dbInstanceIdentifier()))
+                                    .id(dbInstance.dbInstanceIdentifier())
+                                    .build()
+                            )
+                    );
+                }
+        );
+        return tfImportBuilder.build();
+    }
 }

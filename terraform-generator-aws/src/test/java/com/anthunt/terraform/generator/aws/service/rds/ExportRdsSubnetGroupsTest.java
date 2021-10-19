@@ -39,6 +39,21 @@ class ExportRdsSubnetGroupsTest {
         client = amazonClients.getRdsClient();
     }
 
+    private List<AWSRdsSubnetGroup> getAwsRdsSubnetGroups() {
+        return List.of(
+                AWSRdsSubnetGroup.builder()
+                        .dbSubnetGroup(
+                                DBSubnetGroup.builder()
+                                        .dbSubnetGroupName("rds-dev-subnetgrp")
+                                        .subnets(Subnet.builder().subnetIdentifier("subnet-000140c12f7a1ca6e").build(),
+                                                Subnet.builder().subnetIdentifier("subnet-000240c12f7a1ca6e").build()
+                                        )
+                                        .build())
+                        .tag(Tag.builder().key("Name").value("rds-dev-subnetgrp").build())
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -55,18 +70,7 @@ class ExportRdsSubnetGroupsTest {
 
     @Test
     public void getResourceMaps() {
-        List<AWSRdsSubnetGroup> awsRdsSubnetGroup = List.of(
-                AWSRdsSubnetGroup.builder()
-                        .dbSubnetGroup(
-                                DBSubnetGroup.builder()
-                                        .dbSubnetGroupName("rds-dev-subnetgrp")
-                                        .subnets(Subnet.builder().subnetIdentifier("subnet-000140c12f7a1ca6e").build(),
-                                                Subnet.builder().subnetIdentifier("subnet-000240c12f7a1ca6e").build()
-                                        )
-                                        .build())
-                        .tag(Tag.builder().key("Name").value("rds-dev-subnetgrp").build())
-                        .build()
-        );
+        List<AWSRdsSubnetGroup> awsRdsSubnetGroup = getAwsRdsSubnetGroups();
 
         Maps<Resource> resourceMaps = exportRdsSubnetGroups.getResourceMaps(awsRdsSubnetGroup);
         String actual = resourceMaps.unmarshall();
@@ -76,6 +80,13 @@ class ExportRdsSubnetGroupsTest {
                 resourceLoader.getResource("testData/aws/expected/RdsSubnetGroup.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RdsSubnetGroup.cmd"));
+        String actual = exportRdsSubnetGroups.getTFImport(getAwsRdsSubnetGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }
