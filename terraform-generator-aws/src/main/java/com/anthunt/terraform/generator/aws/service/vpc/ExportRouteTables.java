@@ -8,6 +8,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,10 @@ import software.amazon.awssdk.services.ec2.model.Route;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,9 +37,8 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<RouteTable> routeTables = listRouteTables(client);
+        return getTFImport(routeTables);
     }
 
     protected List<RouteTable> listRouteTables(Ec2Client client) {
@@ -47,13 +49,12 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
     protected Maps<Resource> getResourceMaps(List<RouteTable> routeTables) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
-        int i = 0;
         for (RouteTable routeTable : routeTables) {
 
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_route_table")
-                            .name("route_table" + i)
+                            .name(routeTable.routeTableId())
                             .argument("vpc_id", TFString.build(routeTable.vpcId()))
                             .argument("tags", TFMap.build(
                                     routeTable.tags().stream()
@@ -68,13 +69,11 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
             );
 
             List<Route> routes = routeTable.routes();
-            int j = 0;
             for (Route route : routes) {
-
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_route")
-                                .name("route_table" + i + ".route" + j)
+                                .name(getRouteResourceName(routeTable.routeTableId(), route))
                                 .arguments(
                                         TFArguments.builder()
                                                 .argument("route_table_id", TFString.build(routeTable.routeTableId()))
@@ -93,13 +92,47 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
                                 )
                                 .build()
                 );
-
-                j++;
             }
-            i++;
         }
-
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<RouteTable> routeTables) {
+        TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
+        for (RouteTable routeTable : routeTables) {
+            tfImportBuilder.importLine(
+                    TFImportLine.builder()
+                            .address(MessageFormat.format("{0}.{1}",
+                                    "aws_route_table",
+                                    routeTable.routeTableId()))
+                            .id(routeTable.routeTableId())
+                            .build()
+            );
+            routeTable.routes().forEach(route ->
+                    tfImportBuilder.importLine(
+                            TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_route",
+                                            getRouteResourceName(routeTable.routeTableId(), route)))
+                                    .id(getRouteResourceId(routeTable.routeTableId(), route))
+                                    .build()
+                    )
+            );
+        }
+        return tfImportBuilder.build();
+    }
+
+    private String getRouteResourceName(String routeTableId, Route route) {
+        return getRouteResourceId(routeTableId, route)
+                .replaceAll("\\.", "-")
+                .replaceAll("/", "_");
+    }
+
+    private String getRouteResourceId(String routeTableId, Route route) {
+        return MessageFormat.format("{0}_{1}",
+                routeTableId,
+                Optional.ofNullable(route.destinationCidrBlock())
+                        .orElse(Optional.ofNullable(route.destinationIpv6CidrBlock())
+                                .orElse(route.destinationPrefixListId())));
+    }
 }

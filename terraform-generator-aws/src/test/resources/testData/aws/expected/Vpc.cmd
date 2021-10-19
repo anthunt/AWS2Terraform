@@ -1,0 +1,1 @@
+terraform import aws_vpc.vpc-a01106c2 vpc-a01106c2

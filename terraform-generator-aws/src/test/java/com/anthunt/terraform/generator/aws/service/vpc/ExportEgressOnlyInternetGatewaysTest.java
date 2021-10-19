@@ -38,6 +38,16 @@ class ExportEgressOnlyInternetGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
+    private List<EgressOnlyInternetGateway> getEgressOnlyInternetGateways() {
+        return List.of(
+                EgressOnlyInternetGateway.builder()
+                        .egressOnlyInternetGatewayId("eigw-015e0e244e24dfe8a")
+                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
+                        .tags(Tag.builder().key("Name").value("test").build())
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -48,17 +58,20 @@ class ExportEgressOnlyInternetGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<EgressOnlyInternetGateway> internetGateways = List.of(
-                EgressOnlyInternetGateway.builder()
-                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
-                        .tags(Tag.builder().key("Name").value("test").build())
-                        .build()
-            );
+        List<EgressOnlyInternetGateway> internetGateways = getEgressOnlyInternetGateways();
 
         Maps<Resource> resourceMaps = exportEgressOnlyInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EgressOnlyInternetGateway.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EgressOnlyInternetGateway.cmd"));
+        String actual = exportEgressOnlyInternetGateways.getTFImport(getEgressOnlyInternetGateways()).script();
+
         assertEquals(expected, actual);
     }
 }
