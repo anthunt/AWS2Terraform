@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheReplicationGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,8 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
 
     @Override
     protected TFImport scriptImport(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = listAwsCacheReplicationGroups(client);
+        return getTFImport(awsCacheReplicationGroups);
     }
 
     List<AWSCacheReplicationGroup> listAwsCacheReplicationGroups(ElastiCacheClient client) {
@@ -104,6 +104,19 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
         });
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSCacheReplicationGroup> awsCacheReplicationGroups) {
+        return TFImport.builder()
+                .importLines(awsCacheReplicationGroups.stream()
+                        .map(awsCacheReplicationGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_elasticache_replication_group",
+                                        awsCacheReplicationGroup.getReplicationGroup().replicationGroupId()))
+                                .id(awsCacheReplicationGroup.getReplicationGroup().replicationGroupId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

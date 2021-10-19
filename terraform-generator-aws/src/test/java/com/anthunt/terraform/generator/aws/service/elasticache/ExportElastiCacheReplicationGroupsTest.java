@@ -37,22 +37,7 @@ class ExportElastiCacheReplicationGroupsTest {
         client = amazonClients.getElastiCacheClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportElastiCacheReplicationGroups.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getCacheReplicationGroups() {
-        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = exportElastiCacheReplicationGroups.listAwsCacheReplicationGroups(client);
-        log.debug("awsCacheReplicationGroups => {}", awsCacheReplicationGroups);
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<AWSCacheReplicationGroup> getAwsCacheReplicationGroups() {
         List<AWSCacheReplicationGroup> awsCacheClusters = List.of(
                 AWSCacheReplicationGroup.builder()
                         .replicationGroup(ReplicationGroup.builder()
@@ -108,6 +93,26 @@ class ExportElastiCacheReplicationGroupsTest {
                         .tag(Tag.builder().key("Name").value("redis-dev").build())
                         .build()
         );
+        return awsCacheClusters;
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportElastiCacheReplicationGroups.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getCacheReplicationGroups() {
+        List<AWSCacheReplicationGroup> awsCacheReplicationGroups = exportElastiCacheReplicationGroups.listAwsCacheReplicationGroups(client);
+        log.debug("awsCacheReplicationGroups => {}", awsCacheReplicationGroups);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSCacheReplicationGroup> awsCacheClusters = getAwsCacheReplicationGroups();
 
         Maps<Resource> resourceMaps = exportElastiCacheReplicationGroups.getResourceMaps(awsCacheClusters);
         String actual = resourceMaps.unmarshall();
@@ -118,5 +123,13 @@ class ExportElastiCacheReplicationGroupsTest {
         );
         assertEquals(expected, actual);
 
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/ElasticacheReplicationGroup.cmd"));
+        String actual = exportElastiCacheReplicationGroups.getTFImport(getAwsCacheReplicationGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }

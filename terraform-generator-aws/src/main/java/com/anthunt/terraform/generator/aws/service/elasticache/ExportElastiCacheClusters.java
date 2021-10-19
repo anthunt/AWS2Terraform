@@ -6,11 +6,11 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheCluster;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.eks.EksClient;
 import software.amazon.awssdk.services.elasticache.ElastiCacheClient;
 import software.amazon.awssdk.services.elasticache.model.*;
 
@@ -30,9 +30,8 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
 
     @Override
     protected TFImport scriptImport(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSCacheCluster> awsCacheClusters = listAwsCacheClusters(client);
+        return getTFImport(awsCacheClusters);
     }
 
     List<AWSCacheCluster> listAwsCacheClusters(ElastiCacheClient client) {
@@ -88,6 +87,19 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
         });
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSCacheCluster> awsCacheClusters) {
+        return TFImport.builder()
+                .importLines(awsCacheClusters.stream()
+                        .map(awsCacheCluster -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_elasticache_cluster",
+                                        awsCacheCluster.getCacheCluster().cacheClusterId()))
+                                .id(awsCacheCluster.getCacheCluster().cacheClusterId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }
