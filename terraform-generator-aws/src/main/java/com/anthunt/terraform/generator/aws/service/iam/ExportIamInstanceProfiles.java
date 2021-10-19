@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpressio
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,8 @@ public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<InstanceProfile> instanceProfiles = listInstanceProfiles(client);
+        return getTFImport(instanceProfiles);
     }
 
     List<InstanceProfile> listInstanceProfiles(IamClient client) {
@@ -65,5 +65,18 @@ public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
 
     private String decodeURL(String origin) {
         return URLDecoder.decode(origin, StandardCharsets.UTF_8);
+    }
+
+    TFImport getTFImport(List<InstanceProfile> instanceProfiles) {
+        return TFImport.builder()
+                .importLines(instanceProfiles.stream()
+                        .map(instanceProfile -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_iam_instance_profile",
+                                        instanceProfile.instanceProfileName()))
+                                .id(instanceProfile.instanceProfileName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

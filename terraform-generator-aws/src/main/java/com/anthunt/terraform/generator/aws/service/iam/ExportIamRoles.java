@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.iam.model.Role;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,8 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<Role> roles = listRoles(client);
+        return getTFImport(roles);
     }
 
     List<Role> listRoles(IamClient client) {
@@ -65,5 +66,18 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
 
     private String decodeURL(String origin) {
         return URLDecoder.decode(origin, StandardCharsets.UTF_8);
+    }
+
+    TFImport getTFImport(List<Role> roles) {
+        return TFImport.builder()
+                .importLines(roles.stream()
+                        .map(role -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_iam_role",
+                                        role.roleName()))
+                                .id(role.roleName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

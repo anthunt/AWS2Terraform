@@ -41,6 +41,21 @@ class ExportIamRolesTest {
         client = amazonClients.getIamClient();
     }
 
+    private List<Role> getRoleList() {
+        return List.of(
+                Role.builder()
+                        .path("/")
+                        .roleName("testRole")
+                        .description("test description")
+                        .arn("arn:aws:iam::100000000000:role/AmazonEKS_EFS_CSI_DriverRole")
+                        .assumeRolePolicyDocument(URLEncoder.encode(TestDataFileUtils.asString(
+                                        resourceLoader.getResource("testData/aws/input/IamRoleAssumeRolePolicyDocument.json")),
+                                StandardCharsets.UTF_8))
+                        .build()
+
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     public void getRoles() {
@@ -62,18 +77,7 @@ class ExportIamRolesTest {
 
     @Test
     public void getResourceMaps() {
-        List<Role> roles = List.of(
-                Role.builder()
-                        .path("/")
-                        .roleName("testRole")
-                        .description("test description")
-                        .arn("arn:aws:iam::100000000000:role/AmazonEKS_EFS_CSI_DriverRole")
-                        .assumeRolePolicyDocument(URLEncoder.encode(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/aws/input/IamRoleAssumeRolePolicyDocument.json")),
-                                        StandardCharsets.UTF_8))
-                        .build()
-
-        );
+        List<Role> roles = getRoleList();
         Maps<Resource> resourceMaps = exportIamRoles.getResourceMaps(roles);
         String actual = resourceMaps.unmarshall();
 
@@ -84,4 +88,11 @@ class ExportIamRolesTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamRole.cmd"));
+        String actual = exportIamRoles.getTFImport(getRoleList()).script();
+
+        assertEquals(expected, actual);
+    }
 }
