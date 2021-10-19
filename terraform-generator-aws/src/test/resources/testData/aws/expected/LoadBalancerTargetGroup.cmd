@@ -1,0 +1,2 @@
+terraform import aws_lb_target_group.k8s-ingressn-ingressn-1dab2d3f88 arn:aws:elasticloadbalancing:us-west-2:187416307283:targetgroup/k8s-ingressn-ingressn-1dab2d3f88/20cfe21448b66314
+terraform import aws_lb_target_group.tg-dev-service-was arn:aws:elasticloadbalancing:us-west-2:187416307283:targetgroup/tg-dev-service-was/20cfe21448b66314

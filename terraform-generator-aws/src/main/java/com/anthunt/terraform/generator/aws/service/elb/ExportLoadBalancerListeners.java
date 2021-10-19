@@ -9,6 +9,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpressio
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +34,8 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
 
     @Override
     protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSListener> awsListeners = listAwsListeners(client);
+        return getTFImport(awsListeners);
     }
 
     List<AWSListener> listAwsListeners(ElasticLoadBalancingV2Client client) {
@@ -49,15 +49,14 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
                                 .listener(listener)
                                 .loadBalancer(loadBalancer)
                                 .targetGroup(listener.defaultActions().stream()
-                                        .map(a -> a.targetGroupArn())
+                                        .map(Action::targetGroupArn)
                                         .findFirst()
-                                        .map(targetGroupArn -> client.describeTargetGroups(
+                                        .flatMap(targetGroupArn -> client.describeTargetGroups(
                                                         DescribeTargetGroupsRequest.builder()
                                                                 .targetGroupArns(targetGroupArn)
                                                                 .build())
                                                 .targetGroups().stream()
-                                                .findFirst()
-                                                .orElse(null))
+                                                .findFirst())
                                         .orElse(null))
                                 .build()))
                 .collect(Collectors.toList());
@@ -72,7 +71,7 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_lb_listener")
-                            .name(MessageFormat.format("{0}-{1}-{2}", loadBalancer.loadBalancerName(), listener.port(), listener.protocolAsString()))
+                            .name(getResourceName(loadBalancer.loadBalancerName(), listener.port(), listener.protocolAsString()))
                             .argument("load_balancer_arn", TFExpression.build(
                                     MessageFormat.format("aws_lb.{0}.arn", loadBalancer.loadBalancerName())))
                             .argument("port", TFNumber.build(listener.port()))
@@ -94,6 +93,25 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
             ).build();
         }
         return resourceMapsBuilder.build();
+    }
+
+    private String getResourceName(String loadBalancerName, int listenerPort, String listenerProtocal) {
+        return MessageFormat.format("{0}-{1}-{2}", loadBalancerName, listenerPort, listenerProtocal);
+    }
+
+    TFImport getTFImport(List<AWSListener> awsListeners) {
+        return TFImport.builder()
+                .importLines(awsListeners.stream()
+                        .map(awsListener -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_lb_listener",
+                                        getResourceName(awsListener.getLoadBalancer().loadBalancerName(),
+                                                awsListener.getListener().port(),
+                                                awsListener.getListener().protocolAsString())))
+                                .id(awsListener.getListener().listenerArn())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

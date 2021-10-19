@@ -37,24 +37,10 @@ class ExportLoadBalancersTest {
         client = amazonClients.getElasticLoadBalancingV2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportLoadBalancers.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getLoadBalancers() {
-        List<AWSLoadBalancer> loadBalancers = exportLoadBalancers.listAwsLoadBalancers(client);
-        log.debug("polices => {}", loadBalancers);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSLoadBalancer> AWSLoadBalancers = List.of(
+    private List<AWSLoadBalancer> getAwsLoadBalancers() {
+        return List.of(
                 AWSLoadBalancer.builder().loadBalancer(LoadBalancer.builder()
+                                .loadBalancerArn("arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/my-load-balancer/50dc6c495c0c9188")
                                 .loadBalancerName("a000567db2d1f4d02b7493427dc88888")
                                 .scheme(LoadBalancerSchemeEnum.INTERNET_FACING)
                                 .type(LoadBalancerTypeEnum.NETWORK)
@@ -143,6 +129,25 @@ class ExportLoadBalancersTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportLoadBalancers.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getLoadBalancers() {
+        List<AWSLoadBalancer> loadBalancers = exportLoadBalancers.listAwsLoadBalancers(client);
+        log.debug("polices => {}", loadBalancers);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSLoadBalancer> AWSLoadBalancers = getAwsLoadBalancers();
 
         Maps<Resource> resourceMaps = exportLoadBalancers.getResourceMaps(AWSLoadBalancers);
         String actual = resourceMaps.unmarshall();
@@ -151,6 +156,14 @@ class ExportLoadBalancersTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/LoadBalancer.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/LoadBalancer.cmd"));
+        String actual = exportLoadBalancers.getTFImport(getAwsLoadBalancers()).script();
+
         assertEquals(expected, actual);
     }
 }

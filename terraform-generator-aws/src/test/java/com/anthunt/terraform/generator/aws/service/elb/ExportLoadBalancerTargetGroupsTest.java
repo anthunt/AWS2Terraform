@@ -37,25 +37,11 @@ class ExportLoadBalancerTargetGroupsTest {
         client = amazonClients.getElasticLoadBalancingV2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportLoadBalancerTargetGroups.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getTargetGroups() {
-        List<AWSTargetGroup> awsTargetGroups = exportLoadBalancerTargetGroups.listAwsTagetGroups(client);
-        log.debug("awsTargetGroups => {}", awsTargetGroups);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSTargetGroup> awsTargetGroups = List.of(
+    private List<AWSTargetGroup> getAwsTargetGroups() {
+        return List.of(
                 AWSTargetGroup.builder()
                         .targetGroup(TargetGroup.builder()
+                                .targetGroupArn("arn:aws:elasticloadbalancing:us-west-2:187416307283:targetgroup/k8s-ingressn-ingressn-1dab2d3f88/20cfe21448b66314")
                                 .targetGroupName("k8s-ingressn-ingressn-1dab2d3f88")
                                 .port(30832)
                                 .protocol(ProtocolEnum.TCP)
@@ -84,6 +70,7 @@ class ExportLoadBalancerTargetGroupsTest {
                         .build(),
                 AWSTargetGroup.builder()
                         .targetGroup(TargetGroup.builder()
+                                .targetGroupArn("arn:aws:elasticloadbalancing:us-west-2:187416307283:targetgroup/tg-dev-service-was/20cfe21448b66314")
                                 .targetGroupName("tg-dev-service-was")
                                 .port(8080)
                                 .protocol(ProtocolEnum.HTTP)
@@ -107,6 +94,25 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportLoadBalancerTargetGroups.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getTargetGroups() {
+        List<AWSTargetGroup> awsTargetGroups = exportLoadBalancerTargetGroups.listAwsTagetGroups(client);
+        log.debug("awsTargetGroups => {}", awsTargetGroups);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSTargetGroup> awsTargetGroups = getAwsTargetGroups();
 
         Maps<Resource> resourceMaps = exportLoadBalancerTargetGroups.getResourceMaps(awsTargetGroups);
         String actual = resourceMaps.unmarshall();
@@ -116,6 +122,13 @@ class ExportLoadBalancerTargetGroupsTest {
                 resourceLoader.getResource("testData/aws/expected/LoadBalancerTargetGroup.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/LoadBalancerTargetGroup.cmd"));
+        String actual = exportLoadBalancerTargetGroups.getTFImport(getAwsTargetGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }

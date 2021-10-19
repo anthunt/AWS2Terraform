@@ -37,25 +37,11 @@ class ExportLoadBalancerListenersTest {
         client = amazonClients.getElasticLoadBalancingV2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportLoadBalancerListeners.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getListeners() {
-        List<AWSListener> awsListeners = exportLoadBalancerListeners.listAwsListeners(client);
-        log.debug("awsListeners => {}", awsListeners);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSListener> awsListeners = List.of(
+    private List<AWSListener> getAwsListeners() {
+        return List.of(
                 AWSListener.builder()
                         .listener(Listener.builder()
+                                .listenerArn("arn:aws:elasticloadbalancing:us-west-2:187416307283:listener/app/front-end-alb/8e4497da625e2d8a/9ab28ade35828f96")
                                 .port(80)
                                 .protocol(ProtocolEnum.TCP)
                                 .defaultActions(Action.builder()
@@ -72,6 +58,25 @@ class ExportLoadBalancerListenersTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportLoadBalancerListeners.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getListeners() {
+        List<AWSListener> awsListeners = exportLoadBalancerListeners.listAwsListeners(client);
+        log.debug("awsListeners => {}", awsListeners);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSListener> awsListeners = getAwsListeners();
 
         Maps<Resource> resourceMaps = exportLoadBalancerListeners.getResourceMaps(awsListeners);
         String actual = resourceMaps.unmarshall();
@@ -81,6 +86,13 @@ class ExportLoadBalancerListenersTest {
                 resourceLoader.getResource("testData/aws/expected/LoadBalancerListener.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/LoadBalancerListener.cmd"));
+        String actual = exportLoadBalancerListeners.getTFImport(getAwsListeners()).script();
+
+        assertEquals(expected, actual);
     }
 }
