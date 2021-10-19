@@ -39,22 +39,7 @@ class ExportEksClustersTest {
         client = amazonClients.getEksClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportEksClusters.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void listAWSEksClusters() {
-        List<AWSEksCluster> awsEksClusters = exportEksClusters.listAWSEksClusters(client);
-        log.debug("awsEksClusters => {}", awsEksClusters);
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<AWSEksCluster> getAwsEksClusters() {
         List<AWSEksCluster> awsEksClusters = List.of(
                 AWSEksCluster.builder()
                         .cluster(Cluster.builder()
@@ -115,6 +100,26 @@ class ExportEksClustersTest {
                         .tag("Name", "testCluster")
                         .build()
         );
+        return awsEksClusters;
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportEksClusters.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void listAWSEksClusters() {
+        List<AWSEksCluster> awsEksClusters = exportEksClusters.listAWSEksClusters(client);
+        log.debug("awsEksClusters => {}", awsEksClusters);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSEksCluster> awsEksClusters = getAwsEksClusters();
 
         Maps<Resource> resourceMaps = exportEksClusters.getResourceMaps(awsEksClusters);
         String actual = resourceMaps.unmarshall();
@@ -123,6 +128,14 @@ class ExportEksClustersTest {
         String expected = TestDataFileUtils.asString(
                 resourceLoader.getResource("testData/aws/expected/EksCluster.tf")
         );
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EksCluster.cmd"));
+        String actual = exportEksClusters.getTFImport(getAwsEksClusters()).script();
+
         assertEquals(expected, actual);
     }
 
