@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.eks.model.AWSEksCluster;
 import com.anthunt.terraform.generator.aws.service.eks.model.AWSEksNodeGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,8 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
 
     @Override
     protected TFImport scriptImport(EksClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSEksCluster> awsEksClusters = listAWSEksClusters(client);
+        return getTFImport(awsEksClusters);
     }
 
     List<AWSEksCluster> listAWSEksClusters(EksClient client) {
@@ -226,5 +226,18 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
 
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSEksCluster> awsEksClusters) {
+        return TFImport.builder()
+                .importLines(awsEksClusters.stream()
+                        .map(awsEksCluster -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_eks_cluster",
+                                        awsEksCluster.getCluster().name()))
+                                .id(awsEksCluster.getCluster().name())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }
