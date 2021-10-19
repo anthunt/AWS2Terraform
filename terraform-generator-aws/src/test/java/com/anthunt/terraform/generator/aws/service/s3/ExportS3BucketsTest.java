@@ -38,16 +38,8 @@ class ExportS3BucketsTest {
         client = amazonClients.getS3Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportS3Buckets.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSBucket> awsBuckets = List.of(
+    private List<AWSBucket> getAwsBuckets() {
+        return List.of(
                 AWSBucket.builder()
                         .bucket(Bucket.builder()
                                 .name("config-bucket-235090236746")
@@ -117,6 +109,18 @@ class ExportS3BucketsTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportS3Buckets.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSBucket> awsBuckets = getAwsBuckets();
 
         Maps<Resource> resourceMaps = exportS3Buckets.getResourceMaps(awsBuckets);
         String actual = resourceMaps.unmarshall();
@@ -128,4 +132,11 @@ class ExportS3BucketsTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/S3Bucket.cmd"));
+        String actual = exportS3Buckets.getTFImport(getAwsBuckets()).script();
+
+        assertEquals(expected, actual);
+    }
 }

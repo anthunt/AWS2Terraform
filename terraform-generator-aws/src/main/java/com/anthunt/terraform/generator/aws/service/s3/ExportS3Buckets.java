@@ -8,6 +8,7 @@ import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,9 +33,8 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
 
     @Override
     protected TFImport scriptImport(S3Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSBucket> repositories = listAwsBuckets(client);
+        return getTFImport(repositories);
     }
 
     List<AWSBucket> listAwsBuckets(S3Client client) {
@@ -59,7 +60,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                 .bucket(bucket.name()).build()))
                         .lifecycleRules(OptionalUtils.getExceptionAsOptional(() ->
                                 client.getBucketLifecycleConfiguration(GetBucketLifecycleConfigurationRequest.builder()
-                                        .bucket(bucket.name()).build())).map(r -> r.rules()).orElse(null)
+                                        .bucket(bucket.name()).build())).map(GetBucketLifecycleConfigurationResponse::rules).orElse(null)
                         )
                         .accelerateConfiguration(client.getBucketAccelerateConfiguration(GetBucketAccelerateConfigurationRequest.builder()
                                 .bucket(bucket.name()).build()))
@@ -68,7 +69,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                         .replication(OptionalUtils.getExceptionAsOptional(() ->
                                         client.getBucketReplication(GetBucketReplicationRequest.builder()
                                                 .bucket(bucket.name()).build()))
-                                .map(r -> r.replicationConfiguration()).orElse(null))
+                                .map(GetBucketReplicationResponse::replicationConfiguration).orElse(null))
                         .encryption(OptionalUtils.getExceptionAsOptional(() ->
                                 client.getBucketEncryption(GetBucketEncryptionRequest.builder()
                                         .bucket(bucket.name()).build())).orElse(null))
@@ -78,7 +79,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                         .tags(OptionalUtils.getExceptionAsOptional(() ->
                                 client.getBucketTagging(GetBucketTaggingRequest.builder()
                                         .bucket(bucket.name())
-                                        .build())).map(r -> r.tagSet()).orElse(List.of())
+                                        .build())).map(GetBucketTaggingResponse::tagSet).orElse(List.of())
                         )
 
                         .build())
@@ -99,14 +100,14 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
             GetBucketEncryptionResponse encryption = awsBucket.getEncryption();
             GetObjectLockConfigurationResponse objectLock = awsBucket.getObjectLock();
             List<Tag> tags = awsBucket.getTags();
-            Maps.MapsBuilder<Resource> map = resourceMapsBuilder.map(
+            resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_s3_bucket")
                             .name(bucket.name())
                             .argument("bucket", TFString.build(bucket.name()))
                             .argumentsIf(acl != null,
                                     "grant",
-                                    acl.grants().stream()
+                                    () -> acl.grants().stream()
                                             .map(grant -> TFBlock.builder()
                                                     .argumentIf(grant.grantee().typeAsString().equals("CanonicalUser"),
                                                             "id",
@@ -162,7 +163,7 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                                                                     .build())
                                                     .argumentIf(Optional.ofNullable(lifecycleRule.filter().tag()).isEmpty(),
                                                             "tags",
-                                                            () -> TFMap.empty())
+                                                            TFMap::empty)
                                                     .argument("enabled", TFBool.build(lifecycleRule.status() == ExpirationStatus.ENABLED))
                                                     .argumentIf(Optional.ofNullable(lifecycleRule.abortIncompleteMultipartUpload()).isPresent(),
                                                             "abort_incomplete_multipart_upload_days",
@@ -272,5 +273,18 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
                             .build());
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSBucket> awsBuckets) {
+        return TFImport.builder()
+                .importLines(awsBuckets.stream()
+                        .map(awsBucket -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_s3_bucket",
+                                        awsBucket.getBucket().name()))
+                                .id(awsBucket.getBucket().name())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }
