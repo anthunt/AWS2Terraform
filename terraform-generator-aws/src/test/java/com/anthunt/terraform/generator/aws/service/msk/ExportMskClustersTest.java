@@ -39,25 +39,11 @@ class ExportMskClustersTest {
         client = amazonClients.getKafkaClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void export() {
-        Maps<Resource> export = exportMskClusters.export(client, null, null);
-        log.debug("export => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void listClusters() {
-        List<AWSMskCluster> awsMskClusters = exportMskClusters.listAwsMskClusters(client);
-        log.debug("awsKafkaClusters => {}", awsMskClusters);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSMskCluster> awsMskClusters = List.of(
+    private List<AWSMskCluster> getAwsMskClusters() {
+        return List.of(
                 AWSMskCluster.builder()
                         .clusterInfo(ClusterInfo.builder()
+                                .clusterArn("arn:aws:kafka:us-west-2:123456789012:cluster/example/279c0212-d057-4dba-9aa9-1c4e5a25bfc7-3")
                                 .clusterName("msk-dev")
                                 .currentBrokerSoftwareInfo(BrokerSoftwareInfo.builder()
                                         .kafkaVersion("2.6.1")
@@ -85,6 +71,25 @@ class ExportMskClustersTest {
                                 .build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void export() {
+        Maps<Resource> export = exportMskClusters.export(client, null, null);
+        log.debug("export => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void listClusters() {
+        List<AWSMskCluster> awsMskClusters = exportMskClusters.listAwsMskClusters(client);
+        log.debug("awsKafkaClusters => {}", awsMskClusters);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSMskCluster> awsMskClusters = getAwsMskClusters();
 
         Maps<Resource> resourceMaps = exportMskClusters.getResourceMaps(awsMskClusters);
         String actual = resourceMaps.unmarshall();
@@ -96,4 +101,11 @@ class ExportMskClustersTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/MskCluster.cmd"));
+        String actual = exportMskClusters.getTFImport(getAwsMskClusters()).script();
+
+        assertEquals(expected, actual);
+    }
 }
