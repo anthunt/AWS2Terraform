@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.msk.model.AWSMskCluster;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +32,8 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
 
     @Override
     protected TFImport scriptImport(KafkaClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSMskCluster> awsMskClusters = listAwsMskClusters(client);
+        return getTFImport(awsMskClusters);
     }
 
     List<AWSMskCluster> listAwsMskClusters(KafkaClient client) {
@@ -88,5 +88,18 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
 
         }
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSMskCluster> awsMskClusters) {
+        return TFImport.builder()
+                .importLines(awsMskClusters.stream()
+                        .map(awsMskCluster -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_msk_cluster",
+                                        awsMskCluster.getClusterInfo().clusterName()))
+                                .id(awsMskCluster.getClusterInfo().clusterArn())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }
