@@ -39,6 +39,22 @@ class ExportElastiCacheSubnetGroupsTest {
         client = amazonClients.getElastiCacheClient();
     }
 
+    private List<AWSCacheSubnetGroup> getAwsCacheSubnetGroups() {
+        List<AWSCacheSubnetGroup> awsRdsSubnetGroup = List.of(
+                AWSCacheSubnetGroup.builder()
+                        .cacheSubnetGroup(
+                                CacheSubnetGroup.builder()
+                                        .cacheSubnetGroupName("redis-dev-subnetgrp")
+                                        .subnets(Subnet.builder().subnetIdentifier("subnet-000140c12f7a1ca6e").build(),
+                                                Subnet.builder().subnetIdentifier("subnet-000240c12f7a1ca6e").build()
+                                        )
+                                        .build())
+                        .tag(Tag.builder().key("Name").value("redis-dev-subnetgrp").build())
+                        .build()
+        );
+        return awsRdsSubnetGroup;
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -55,18 +71,7 @@ class ExportElastiCacheSubnetGroupsTest {
 
     @Test
     public void getResourceMaps() {
-        List<AWSCacheSubnetGroup> awsRdsSubnetGroup = List.of(
-                AWSCacheSubnetGroup.builder()
-                        .cacheSubnetGroup(
-                                CacheSubnetGroup.builder()
-                                        .cacheSubnetGroupName("redis-dev-subnetgrp")
-                                        .subnets(Subnet.builder().subnetIdentifier("subnet-000140c12f7a1ca6e").build(),
-                                                Subnet.builder().subnetIdentifier("subnet-000240c12f7a1ca6e").build()
-                                        )
-                                        .build())
-                        .tag(Tag.builder().key("Name").value("redis-dev-subnetgrp").build())
-                        .build()
-        );
+        List<AWSCacheSubnetGroup> awsRdsSubnetGroup = getAwsCacheSubnetGroups();
 
         Maps<Resource> resourceMaps = exportElastiCacheSubnetGroups.getResourceMaps(awsRdsSubnetGroup);
         String actual = resourceMaps.unmarshall();
@@ -76,6 +81,13 @@ class ExportElastiCacheSubnetGroupsTest {
                 resourceLoader.getResource("testData/aws/expected/ElastiCacheSubnetGroup.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/ElastiCacheSubnetGroup.cmd"));
+        String actual = exportElastiCacheSubnetGroups.getTFImport(getAwsCacheSubnetGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }

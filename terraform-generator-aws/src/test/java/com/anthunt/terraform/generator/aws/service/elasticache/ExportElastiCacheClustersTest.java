@@ -37,22 +37,7 @@ class ExportElastiCacheClustersTest {
         client = amazonClients.getElastiCacheClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportElastiCacheClusters.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getCacheClusters() {
-        List<AWSCacheCluster> awsCacheClusters = exportElastiCacheClusters.listAwsCacheClusters(client);
-        log.debug("cacheClusters => {}", awsCacheClusters);
-    }
-
-    @Test
-    public void getResourceMaps() {
+    private List<AWSCacheCluster> getAwsCacheClusters() {
         List<AWSCacheCluster> awsCacheClusters = List.of(
                 AWSCacheCluster.builder()
                         .cacheCluster(CacheCluster.builder()
@@ -78,6 +63,26 @@ class ExportElastiCacheClustersTest {
                         .tag(Tag.builder().key("Name").value("redis-dev").build())
                         .build()
         );
+        return awsCacheClusters;
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportElastiCacheClusters.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getCacheClusters() {
+        List<AWSCacheCluster> awsCacheClusters = exportElastiCacheClusters.listAwsCacheClusters(client);
+        log.debug("cacheClusters => {}", awsCacheClusters);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSCacheCluster> awsCacheClusters = getAwsCacheClusters();
 
         Maps<Resource> resourceMaps = exportElastiCacheClusters.getResourceMaps(awsCacheClusters);
         String actual = resourceMaps.unmarshall();
@@ -87,6 +92,13 @@ class ExportElastiCacheClustersTest {
                 resourceLoader.getResource("testData/aws/expected/Elasticache.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Elasticache.cmd"));
+        String actual = exportElastiCacheClusters.getTFImport(getAwsCacheClusters()).script();
+
+        assertEquals(expected, actual);
     }
 }
