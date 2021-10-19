@@ -38,23 +38,8 @@ class ExportRdsClusterParameterGroupsTest {
         client = amazonClients.getRdsClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportRdsClusterParameterGroups.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getDBClusterParameterGroups() {
-        List<AWSRdsClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.listAwsRdsClusterParameterGroups(client);
-        log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups = List.of(
+    private List<AWSRdsClusterParameterGroup> getAwsRdsClusterParameterGroups() {
+        return List.of(
                 AWSRdsClusterParameterGroup.builder()
                         .dbClusterParameterGroup(DBClusterParameterGroup.builder()
                                 .dbClusterParameterGroupName("rds-dev-paramgrp")
@@ -80,6 +65,25 @@ class ExportRdsClusterParameterGroupsTest {
                         )
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportRdsClusterParameterGroups.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getDBClusterParameterGroups() {
+        List<AWSRdsClusterParameterGroup> awsDbClusterParameterGroups = exportRdsClusterParameterGroups.listAwsRdsClusterParameterGroups(client);
+        log.debug("awsDbClusterParameterGroups => {}", awsDbClusterParameterGroups);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSRdsClusterParameterGroup> awsRdsClusterParameterGroups = getAwsRdsClusterParameterGroups();
 
         Maps<Resource> resourceMaps = exportRdsClusterParameterGroups.getResourceMaps(awsRdsClusterParameterGroups);
         String actual = resourceMaps.unmarshall();
@@ -89,6 +93,13 @@ class ExportRdsClusterParameterGroupsTest {
                 resourceLoader.getResource("testData/aws/expected/RdsClusterParameterGroup.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RdsClusterParameterGroup.cmd"));
+        String actual = exportRdsClusterParameterGroups.getTFImport(getAwsRdsClusterParameterGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }

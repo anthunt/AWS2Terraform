@@ -9,6 +9,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,8 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRdsSubnetGroup> awsRdsSubnetGroups = listAwsRdsSubnetGroups(client);
+        return getTFImport(awsRdsSubnetGroups);
     }
 
     List<AWSRdsSubnetGroup> listAwsRdsSubnetGroups(RdsClient client) {
@@ -78,8 +78,19 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
                                     .build()
                     );
         });
-
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<AWSRdsSubnetGroup> awsRdsSubnetGroups) {
+        return TFImport.builder()
+                .importLines(awsRdsSubnetGroups.stream()
+                        .map(awsRdsSubnetGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_db_subnet_group",
+                                        awsRdsSubnetGroup.getDbSubnetGroup().dbSubnetGroupName()))
+                                .id(awsRdsSubnetGroup.getDbSubnetGroup().dbSubnetGroupName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
+    }
 }

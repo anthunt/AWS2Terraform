@@ -8,6 +8,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import software.amazon.awssdk.services.rds.model.ListTagsForResourceRequest;
 import software.amazon.awssdk.services.rds.model.OptionGroup;
 import software.amazon.awssdk.services.rds.model.Tag;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,9 +36,8 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
 
     @Override
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = listAwsRdsOptionGroups(client);
+        return getTFImport(awsRdsOptionGroups);
     }
 
     List<AWSRdsOptionGroup> listAwsRdsOptionGroups(RdsClient client) {
@@ -68,11 +69,12 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
                                     .argument("option_group_description", TFString.build(optionGroup.optionGroupDescription()))
                                     .argumentsIf(Optional.ofNullable(optionGroup.options()).isPresent(),
                                             "option",
-                                            optionGroup.options().stream()
+                                            () -> optionGroup.options().stream()
                                                     .map(option -> TFBlock.builder()
                                                             .argument("option_name", TFString.build(option.optionName()))
                                                             .argumentsIf(Optional.ofNullable(option.optionSettings()).isPresent(),
-                                                                    "option_settings ", option.optionSettings().stream()
+                                                                    "option_settings ",
+                                                                    () -> option.optionSettings().stream()
                                                                             .map(optionSetting -> TFBlock.builder()
                                                                                     .argument("name", TFString.build(optionSetting.name()))
                                                                                     .argument("value", TFString.build(optionSetting.value()))
@@ -90,6 +92,19 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
         });
 
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSRdsOptionGroup> awsRdsOptionGroups) {
+        return TFImport.builder()
+                .importLines(awsRdsOptionGroups.stream()
+                        .map(awsRdsOptionGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_db_option_group",
+                                        awsRdsOptionGroup.getOptionGroup().optionGroupName()))
+                                .id(awsRdsOptionGroup.getOptionGroup().optionGroupName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

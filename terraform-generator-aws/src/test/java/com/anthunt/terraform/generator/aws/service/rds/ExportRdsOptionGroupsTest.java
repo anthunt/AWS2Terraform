@@ -40,23 +40,8 @@ class ExportRdsOptionGroupsTest {
         client = amazonClients.getRdsClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportRdsOptionGroups.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void getOptionGroups() {
-        List<AWSRdsOptionGroup> awsRdsOptionGroups = exportRdsOptionGroups.listAwsRdsOptionGroups(client);
-        log.debug("awsRdsOptionGroups => {}", awsRdsOptionGroups);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSRdsOptionGroup> awsRdsOptionGroups = List.of(
+    private List<AWSRdsOptionGroup> getAwsRdsOptionGroups() {
+        return List.of(
                 AWSRdsOptionGroup.builder()
                         .optionGroup(
                                 OptionGroup.builder()
@@ -84,6 +69,25 @@ class ExportRdsOptionGroupsTest {
                         .tag(Tag.builder().key("Name").value("rds-dev-optiongrp").build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportRdsOptionGroups.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void getOptionGroups() {
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = exportRdsOptionGroups.listAwsRdsOptionGroups(client);
+        log.debug("awsRdsOptionGroups => {}", awsRdsOptionGroups);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSRdsOptionGroup> awsRdsOptionGroups = getAwsRdsOptionGroups();
 
         Maps<Resource> resourceMaps = exportRdsOptionGroups.getResourceMaps(awsRdsOptionGroups);
         String actual = resourceMaps.unmarshall();
@@ -93,6 +97,13 @@ class ExportRdsOptionGroupsTest {
                 resourceLoader.getResource("testData/aws/expected/RdsOptionGroup.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RdsOptionGroup.cmd"));
+        String actual = exportRdsOptionGroups.getTFImport(getAwsRdsOptionGroups()).script();
+
+        assertEquals(expected, actual);
     }
 }
