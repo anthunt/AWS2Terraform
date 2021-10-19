@@ -39,6 +39,17 @@ class ExportNatGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
+    private List<NatGateway> getNatGateways() {
+        return List.of(
+                NatGateway.builder()
+                        .natGatewayId("nat-05dba92075d71c408")
+                        .natGatewayAddresses(NatGatewayAddress.builder().allocationId("eipalloc-00233be7c04412bd6").build())
+                        .subnetId("subnet-0c70ad21c05c0c464")
+                        .tags(Tag.builder().key("Name").value("test").build())
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -51,18 +62,20 @@ class ExportNatGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<NatGateway> natGateways = List.of(
-                NatGateway.builder()
-                        .natGatewayAddresses(NatGatewayAddress.builder().allocationId("eipalloc-00233be7c04412bd6").build())
-                        .subnetId("subnet-0c70ad21c05c0c464")
-                        .tags(Tag.builder().key("Name").value("test").build())
-                        .build()
-            );
+        List<NatGateway> natGateways = getNatGateways();
 
         Maps<Resource> resourceMaps = exportNatGateways.getResourceMaps(natGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/NatGateway.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/NatGateway.cmd"));
+        String actual = exportNatGateways.getTFImport(getNatGateways()).script();
+
         assertEquals(expected, actual);
     }
 }

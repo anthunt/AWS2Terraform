@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,8 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<InternetGateway> internetGateways = listInternetGateways(client);
+        return getTFImport(internetGateways);
     }
 
     protected List<InternetGateway> listInternetGateways(Ec2Client client) {
@@ -43,7 +44,6 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
 
     protected Maps<Resource> getResourceMaps(List<InternetGateway> internetGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        int i = 0;
         for (InternetGateway internetGateway : internetGateways) {
 
             List<InternetGatewayAttachment> internetGatewayAttachments = internetGateway.attachments();
@@ -52,7 +52,7 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
                 resourceMapsBuilder.map(
                         Resource.builder()
                                 .api("aws_internet_gateway")
-                                .name("internet_gateway" + i)
+                                .name(internetGateway.internetGatewayId())
                                 .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
                                 .argument("tags", TFMap.build(
                                         internetGateway.tags().stream()
@@ -61,11 +61,20 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
                                 .build()
                 );
             }
-            i++;
-
         }
-
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<InternetGateway> internetGateways) {
+        return TFImport.builder()
+                .importLines(internetGateways.stream()
+                        .map(internetGateway -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_internet_gateway",
+                                        internetGateway.internetGatewayId()))
+                                .id(internetGateway.internetGatewayId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
+    }
 }

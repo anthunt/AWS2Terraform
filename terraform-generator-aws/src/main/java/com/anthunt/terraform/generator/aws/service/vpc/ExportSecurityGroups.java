@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,9 +32,8 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<SecurityGroup> securityGroups = listSecurityGroups(client);
+        return getTFImport(securityGroups);
     }
 
 
@@ -170,8 +171,19 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
                             });
                         })
                         .collect(Collectors.toList()));
-
         return ruleList;
     }
 
+    TFImport getTFImport(List<SecurityGroup> securityGroups) {
+        return TFImport.builder()
+                .importLines(securityGroups.stream()
+                        .map(securityGroup -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_security_group",
+                                        securityGroup.groupName()))
+                                .id(securityGroup.groupId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
+    }
 }

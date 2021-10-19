@@ -8,6 +8,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,9 +32,8 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSVpc> awsVpcs = listVpcs(client);
+        return getTFImport(awsVpcs);
     }
 
     List<AWSVpc> listVpcs(Ec2Client client) {
@@ -57,13 +58,12 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
 
     Maps<Resource> getResourceMaps(List<AWSVpc> awsVpcs) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        int i = 0;
         for (AWSVpc awsVpc : awsVpcs) {
             Vpc vpc = awsVpc.getVpc();
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_vpc")
-                            .name("vpc" + i)
+                            .name(vpc.vpcId())
                             .argument("cidr_block", TFString.build(vpc.cidrBlock()))
                             .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
                             .argument("enable_dns_support", TFBool.build(awsVpc.isEnableDnsSupport()))
@@ -76,11 +76,21 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
                             ))
                             .build()
             );
-
-            i++;
         }
-
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<AWSVpc> awsVpcs) {
+        return TFImport.builder()
+                .importLines(awsVpcs.stream()
+                        .map(awsVpc -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_vpc",
+                                        awsVpc.getVpc().vpcId()))
+                                .id(awsVpc.getVpc().vpcId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 
 }

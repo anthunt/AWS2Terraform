@@ -15,7 +15,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +37,51 @@ class ExportSecurityGroupsTest {
         client = amazonClients.getEc2Client();
     }
 
+    private List<SecurityGroup> getSecurityGroups() {
+        return List.of(
+                SecurityGroup.builder()
+                        .description("test description")
+                        .groupName("sg_test")
+                        .groupId("sg-002efaf20710623d5")
+                        .ipPermissions(
+                                IpPermission.builder()
+                                        .fromPort(3306)
+                                        .ipProtocol("tcp")
+                                        .toPort(3306)
+                                        .userIdGroupPairs(
+                                                UserIdGroupPair.builder()
+                                                        .groupId("sg-002efaf20710623d5")
+                                                        .userId("400661667959")
+                                                        .build(),
+                                                UserIdGroupPair.builder()
+                                                        .groupId("sg-05465424de0e9d80b")
+                                                        .userId("400661667959")
+                                                        .build(),
+                                                UserIdGroupPair.builder()
+                                                        .description("ssh hub to aurora service")
+                                                        .groupId("sg-0575ae95fd6c58c75")
+                                                        .userId("400661667959")
+                                                        .build()
+                                        ).build()
+                        ).ipPermissionsEgress(
+                                IpPermission.builder()
+                                        .ipProtocol("-1")
+                                        .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
+                                        .ipv6Ranges(Ipv6Range.builder().cidrIpv6("::/0").build())
+                                        .build(),
+                                IpPermission.builder()
+                                        .fromPort(3306)
+                                        .ipProtocol("tcp")
+                                        .toPort(3306)
+                                        .userIdGroupPairs(
+                                                UserIdGroupPair.builder()
+                                                        .groupId("sg-002efaf20710623d5")
+                                                        .userId("400661667959")
+                                                        .build()
+                                        ).build()
+                        ).build());
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -49,7 +93,7 @@ class ExportSecurityGroupsTest {
 
     @Test
     @DisabledOnNoAwsCredentials
-    void getSecurityGroups() {
+    void listSecurityGroups() {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
@@ -60,55 +104,20 @@ class ExportSecurityGroupsTest {
     @Test
     void getResourceMaps() {
         // given
-        List<SecurityGroup> securityGroups = new ArrayList<>();
-        SecurityGroup securityGroup = SecurityGroup.builder()
-                .description("test description")
-                .groupName("sg_test")
-                .groupId("sg-002efaf20710623d5")
-                .ipPermissions(
-                        IpPermission.builder()
-                                .fromPort(3306)
-                                .ipProtocol("tcp")
-                                .toPort(3306)
-                                .userIdGroupPairs(
-                                        UserIdGroupPair.builder()
-                                                .groupId("sg-002efaf20710623d5")
-                                                .userId("400661667959")
-                                                .build(),
-                                        UserIdGroupPair.builder()
-                                                .groupId("sg-05465424de0e9d80b")
-                                                .userId("400661667959")
-                                                .build(),
-                                        UserIdGroupPair.builder()
-                                                .description("ssh hub to aurora service")
-                                                .groupId("sg-0575ae95fd6c58c75")
-                                                .userId("400661667959")
-                                                .build()
-                                ).build()
-                ).ipPermissionsEgress(
-                        IpPermission.builder()
-                                .ipProtocol("-1")
-                                .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
-                                .ipv6Ranges(Ipv6Range.builder().cidrIpv6("::/0").build())
-                                .build(),
-                        IpPermission.builder()
-                                .fromPort(3306)
-                                .ipProtocol("tcp")
-                                .toPort(3306)
-                                .userIdGroupPairs(
-                                        UserIdGroupPair.builder()
-                                                .groupId("sg-002efaf20710623d5")
-                                                .userId("400661667959")
-                                                .build()
-                                ).build()
-                ).build();
-
-        securityGroups.add(securityGroup);
+        List<SecurityGroup> securityGroups = getSecurityGroups();
 
         Maps<Resource> resourceMaps = exportSecurityGroups.getResourceMaps(securityGroups);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/SecurityGroup.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/SecurityGroup.cmd"));
+        String actual = exportSecurityGroups.getTFImport(getSecurityGroups()).script();
+
         assertEquals(expected, actual);
     }
 }

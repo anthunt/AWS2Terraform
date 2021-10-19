@@ -39,6 +39,16 @@ class ExportInternetGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
+    private List<InternetGateway> getInternetGateways() {
+        return List.of(
+                InternetGateway.builder()
+                        .internetGatewayId("igw-c0a643a9")
+                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
+                        .tags(Tag.builder().key("Name").value("test").build())
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -49,17 +59,20 @@ class ExportInternetGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<InternetGateway> internetGateways = List.of(
-                InternetGateway.builder()
-                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
-                        .tags(Tag.builder().key("Name").value("test").build())
-                        .build()
-            );
+        List<InternetGateway> internetGateways = getInternetGateways();
 
         Maps<Resource> resourceMaps = exportInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/InternetGateway.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/InternetGateway.cmd"));
+        String actual = exportInternetGateways.getTFImport(getInternetGateways()).script();
+
         assertEquals(expected, actual);
     }
 }

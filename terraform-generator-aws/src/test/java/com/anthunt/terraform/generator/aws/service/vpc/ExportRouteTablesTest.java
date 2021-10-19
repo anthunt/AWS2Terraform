@@ -38,17 +38,8 @@ class ExportRouteTablesTest {
         client = amazonClients.getEc2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportRouteTables.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    void getResourceMaps() {
-        // given
-        List<RouteTable> routeTables = List.of(
+    private List<RouteTable> getRouteTables() {
+        return List.of(
                 RouteTable.builder()
                         .vpcId("vpc-7931b212")
                         .routeTableId("rtb-d6b5fdbd")
@@ -61,12 +52,33 @@ class ExportRouteTablesTest {
                                         .gatewayId("igw-8ecdbbe6")
                                         .build())
                         .build()
-            );
+        );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportRouteTables.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    void getResourceMaps() {
+        // given
+        List<RouteTable> routeTables = getRouteTables();
 
         Maps<Resource> resourceMaps = exportRouteTables.getResourceMaps(routeTables);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RouteTable.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RouteTable.cmd"));
+        String actual = exportRouteTables.getTFImport(getRouteTables()).script();
+
         assertEquals(expected, actual);
     }
 }

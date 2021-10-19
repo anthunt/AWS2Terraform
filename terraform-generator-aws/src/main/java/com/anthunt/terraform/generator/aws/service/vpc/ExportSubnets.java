@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,8 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<Subnet> subnets = listSubnets(client);
+        return getTFImport(subnets);
     }
 
     List<Subnet> listSubnets(Ec2Client client) {
@@ -43,7 +44,6 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
 
     Maps<Resource> getResourceMaps(List<Subnet> subnets) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        int i = 0;
         for (Subnet subnet : subnets) {
             log.debug("subnet => {}", subnet);
 
@@ -69,7 +69,19 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
                             .build()
             );
         }
-
         return resourceMapsBuilder.build();
+    }
+
+    TFImport getTFImport(List<Subnet> subnets) {
+        return TFImport.builder()
+                .importLines(subnets.stream()
+                        .map(subnet -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_subnet",
+                                        subnet.subnetId()))
+                                .id(subnet.subnetId())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

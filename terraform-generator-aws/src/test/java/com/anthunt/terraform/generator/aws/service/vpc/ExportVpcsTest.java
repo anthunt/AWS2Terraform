@@ -38,6 +38,20 @@ class ExportVpcsTest {
         client = amazonClients.getEc2Client();
     }
 
+    private List<AWSVpc> getAwsVpcs() {
+        return List.of(
+                AWSVpc.builder()
+                        .vpc(Vpc.builder()
+                                .vpcId("vpc-a01106c2")
+                                .cidrBlock("172.31.0.0/16")
+                                .instanceTenancy("default")
+                                .build())
+                        .enableDnsSupport(true)
+                        .enableDnsHostnames(true)
+                        .build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     void export() {
@@ -50,21 +64,20 @@ class ExportVpcsTest {
     @Test
     void getResourceMaps() {
         // given
-        List<AWSVpc> vpcs = List.of(
-                AWSVpc.builder()
-                        .vpc(Vpc.builder()
-                                .cidrBlock("172.31.0.0/16")
-                                .instanceTenancy("default")
-                                .build())
-                        .enableDnsSupport(true)
-                        .enableDnsHostnames(true)
-                        .build()
-            );
+        List<AWSVpc> vpcs = getAwsVpcs();
 
         Maps<Resource> resourceMaps = exportvpcs.getResourceMaps(vpcs);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Vpc.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Vpc.cmd"));
+        String actual = exportvpcs.getTFImport(getAwsVpcs()).script();
+
         assertEquals(expected, actual);
     }
 }

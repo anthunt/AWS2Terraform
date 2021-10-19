@@ -37,17 +37,8 @@ class ExportSubnetsTest {
         client = amazonClients.getEc2Client();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportSubnets.export(client, null, null);
-        log.debug("result => {}", export.unmarshall());
-    }
-
-    @Test
-    void getResourceMaps() {
-        // given
-        List<Subnet> subnets = List.of(
+    private List<Subnet> getSubnets() {
+        return List.of(
                 Subnet.builder()
                         .subnetId("subnet-01020304")
                         .availabilityZoneId("apne2-az2")
@@ -71,13 +62,34 @@ class ExportSubnetsTest {
                         .mapPublicIpOnLaunch(true)
                         .assignIpv6AddressOnCreation(false)
                         .vpcId("vpc-7931b212")
-                    .build()
-            );
+                        .build()
+        );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportSubnets.export(client, null, null);
+        log.debug("result => {}", export.unmarshall());
+    }
+
+    @Test
+    void getResourceMaps() {
+        // given
+        List<Subnet> subnets = getSubnets();
 
         Maps<Resource> resourceMaps = exportSubnets.getResourceMaps(subnets);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Subnet.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Subnet.cmd"));
+        String actual = exportSubnets.getTFImport(getSubnets()).script();
+
         assertEquals(expected, actual);
     }
 }
