@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -35,9 +36,8 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<GetRolePolicyResponse> rolePolicies = listRolePolices(client);
+        return getTFImport(rolePolicies);
     }
 
     List<GetRolePolicyResponse> listRolePolices(IamClient client) {
@@ -83,5 +83,20 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
 
     private String decodeURL(String origin) {
         return URLDecoder.decode(origin, StandardCharsets.UTF_8);
+    }
+
+    TFImport getTFImport(List<GetRolePolicyResponse> getRolePolicyResponses) {
+        return TFImport.builder()
+                .importLines(getRolePolicyResponses.stream()
+                        .map(rolePolicyResponse -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_iam_role_policy",
+                                        rolePolicyResponse.policyName()))
+                                .id(MessageFormat.format("{0}:{1}",
+                                        rolePolicyResponse.roleName(),
+                                        rolePolicyResponse.policyName()))
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

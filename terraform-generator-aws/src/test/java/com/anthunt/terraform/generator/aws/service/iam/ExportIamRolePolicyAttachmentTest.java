@@ -30,9 +30,8 @@ class ExportIamRolePolicyAttachmentTest {
         exportIamRolePolicyAttachment = new ExportIamRolePolicyAttachment();
     }
 
-    @Test
-    public void getResourceMaps() {
-        List<AWSRolePolicyAttachment> awsRolePolicyAttachments = List.of(
+    private List<AWSRolePolicyAttachment> getAwsRolePolicyAttachments() {
+        return List.of(
                 AWSRolePolicyAttachment.builder()
                         .roleName("role-packer-base")
                         .policyName("policy-eks-describe")
@@ -42,6 +41,11 @@ class ExportIamRolePolicyAttachmentTest {
                         .policyName("policy-eks-describe1")
                         .build()
         );
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSRolePolicyAttachment> awsRolePolicyAttachments = getAwsRolePolicyAttachments();
         Maps<Resource> resourceMaps = exportIamRolePolicyAttachment.getResourceMaps(awsRolePolicyAttachments);
         String actual = resourceMaps.unmarshall();
 
@@ -52,4 +56,11 @@ class ExportIamRolePolicyAttachmentTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamRolePolicyAttachment.cmd"));
+        String actual = exportIamRolePolicyAttachment.getTFImport(getAwsRolePolicyAttachments()).script();
+
+        assertEquals(expected, actual);
+    }
 }

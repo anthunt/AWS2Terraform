@@ -38,16 +38,8 @@ class ExportIamInstanceProfilesTest {
         client = amazonClients.getIamClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportIamInstanceProfiles.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<InstanceProfile> instanceProfiles = List.of(
+    private List<InstanceProfile> getInstanceProfiles() {
+        return List.of(
                 InstanceProfile.builder()
                         .instanceProfileName("eks-7cbddf86-c0a6-643b-dbdd-85b97c390535")
                         .roles(Role.builder().roleName("eks-cluster-workernode-role").build())
@@ -59,6 +51,18 @@ class ExportIamInstanceProfilesTest {
                         .build()
 
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportIamInstanceProfiles.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<InstanceProfile> instanceProfiles = getInstanceProfiles();
         Maps<Resource> resourceMaps = exportIamInstanceProfiles.getResourceMaps(instanceProfiles);
         String actual = resourceMaps.unmarshall();
 
@@ -69,4 +73,11 @@ class ExportIamInstanceProfilesTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamInstanceProfile.cmd"));
+        String actual = exportIamInstanceProfiles.getTFImport(getInstanceProfiles()).script();
+
+        assertEquals(expected, actual);
+    }
 }

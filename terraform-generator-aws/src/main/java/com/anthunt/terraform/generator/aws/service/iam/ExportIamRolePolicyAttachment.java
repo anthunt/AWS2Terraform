@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicyAttachment;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,8 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSRolePolicyAttachment> awsRolePolicyAttachments = listAwsRolePolicyAttachments(client);
+        return getTFImport(awsRolePolicyAttachments);
     }
 
     List<AWSRolePolicyAttachment> listAwsRolePolicyAttachments(IamClient client) {
@@ -62,7 +62,7 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
             resourceMapsBuilder.map(
                     Resource.builder()
                             .api("aws_iam_role_policy_attachment")
-                            .name(MessageFormat.format("{0}-attach-{1}", awsRolePolicyAttachment.getRoleName(), awsRolePolicyAttachment.getPolicyName()))
+                            .name(getResourceName(awsRolePolicyAttachment.getRoleName(), awsRolePolicyAttachment.getPolicyName()))
                             .argument("role", TFExpression.build(
                                     MessageFormat.format("aws_iam_role.{0}.name", awsRolePolicyAttachment.getRoleName())))
                             .argument("policy_arn", TFExpression.build(
@@ -71,5 +71,26 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
             );
         }
         return resourceMapsBuilder.build();
+    }
+
+    private String getResourceName(String roleName, String policyName) {
+        return MessageFormat.format("{0}-attach-{1}", roleName, policyName);
+    }
+
+    TFImport getTFImport(List<AWSRolePolicyAttachment> awsRolePolicyAttachments) {
+        return TFImport.builder()
+                .importLines(awsRolePolicyAttachments.stream()
+                        .map(awsRolePolicyAttachment -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_iam_role_policy_attachment",
+                                        getResourceName(awsRolePolicyAttachment.getRoleName(),
+                                                awsRolePolicyAttachment.getPolicyName())
+                                ))
+                                .id(MessageFormat.format("{0}/{1}",
+                                        awsRolePolicyAttachment.getRoleName(),
+                                        awsRolePolicyAttachment.getPolicyName()))
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
     }
 }

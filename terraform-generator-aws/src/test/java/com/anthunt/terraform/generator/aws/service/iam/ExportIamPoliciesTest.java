@@ -37,6 +37,21 @@ class ExportIamPoliciesTest {
         client = amazonClients.getIamClient();
     }
 
+    private List<AWSPolicy> getAwsPolicies() {
+        return List.of(
+                AWSPolicy.builder().policy(
+                        Policy.builder()
+                                .policyName("AWSLoadBalancerControllerIAMPolicy")
+                                .policyId("ANPATNPDYKVFHJVH2URK4")
+                                .arn("arn:aws:iam::235090236746:policy/AWSLoadBalancerControllerIAMPolicy")
+                                .path("/")
+                                .description("test")
+                                .build()
+                ).document(TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/input/IamPolicyDocument.json"))
+                ).build()
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     public void getPolices() {
@@ -47,18 +62,7 @@ class ExportIamPoliciesTest {
     @Test
     public void getResourceMaps() {
         //given
-        List<AWSPolicy> awsPolicy = List.of(
-                AWSPolicy.builder().policy(
-                    Policy.builder()
-                    .policyName("AWSLoadBalancerControllerIAMPolicy")
-                            .policyId("ANPATNPDYKVFHJVH2URK4")
-                            .arn("arn:aws:iam::235090236746:policy/AWSLoadBalancerControllerIAMPolicy")
-                            .path("/")
-                            .description("test")
-                    .build()
-                ).document(TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/input/IamPolicyDocument.json"))
-                ).build()
-        );
+        List<AWSPolicy> awsPolicy = getAwsPolicies();
 
         Maps<Resource> resourceMaps = exportIamPolicies.getResourceMaps(awsPolicy);
 
@@ -66,6 +70,14 @@ class ExportIamPoliciesTest {
         log.debug("actual => \n{}", actual);
 
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamPolicy.tf"));
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamPolicy.cmd"));
+        String actual = exportIamPolicies.getTFImport(getAwsPolicies()).script();
+
         assertEquals(expected, actual);
     }
 }

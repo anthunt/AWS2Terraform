@@ -1,0 +1,1 @@
+terraform import aws_iam_role_policy.policy-eks-describe role-packer-base:policy-eks-describe

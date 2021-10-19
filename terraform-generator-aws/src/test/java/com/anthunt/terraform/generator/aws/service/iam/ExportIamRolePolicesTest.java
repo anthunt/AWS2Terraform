@@ -41,6 +41,19 @@ class ExportIamRolePolicesTest {
         client = amazonClients.getIamClient();
     }
 
+    private List<GetRolePolicyResponse> getGetRolePolicyResponses() {
+        return List.of(
+                GetRolePolicyResponse.builder()
+                        .roleName("role-packer-base")
+                        .policyName("policy-eks-describe")
+                        .policyDocument(URLEncoder.encode(TestDataFileUtils.asString(
+                                        resourceLoader.getResource("testData/aws/input/IamRolePolicyDocument.json")),
+                                StandardCharsets.UTF_8))
+                        .build()
+
+        );
+    }
+
     @Test
     @DisabledOnNoAwsCredentials
     public void getRolePolices() {
@@ -61,16 +74,7 @@ class ExportIamRolePolicesTest {
 
     @Test
     public void getResourceMaps() {
-        List<GetRolePolicyResponse> rolePolices = List.of(
-                GetRolePolicyResponse.builder()
-                        .roleName("role-packer-base")
-                        .policyName("policy-eks-describe")
-                        .policyDocument(URLEncoder.encode(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/aws/input/IamRolePolicyDocument.json")),
-                                        StandardCharsets.UTF_8))
-                        .build()
-
-        );
+        List<GetRolePolicyResponse> rolePolices = getGetRolePolicyResponses();
         Maps<Resource> resourceMaps = exportIamRolePolices.getResourceMaps(rolePolices);
         String actual = resourceMaps.unmarshall();
 
@@ -81,4 +85,11 @@ class ExportIamRolePolicesTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamRolePolicy.cmd"));
+        String actual = exportIamRolePolices.getTFImport(getGetRolePolicyResponses()).script();
+
+        assertEquals(expected, actual);
+    }
 }
