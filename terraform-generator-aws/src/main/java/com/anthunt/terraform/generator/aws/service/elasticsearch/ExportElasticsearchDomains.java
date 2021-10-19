@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.elasticsearch.model.AWSElasti
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
+import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.elasticsearch.ElasticsearchClient;
 import software.amazon.awssdk.services.elasticsearch.model.*;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,9 +33,8 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
 
     @Override
     protected TFImport scriptImport(ElasticsearchClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        //TODO:Need to be implemented
-        log.warn("Import Script is not implemented, yet!");
-        return TFImport.builder().build();
+        List<AWSElasticsearchDomain> awsElasticsearchDomains = listAwsElasticsearchDomains(client);
+        return getTFImport(awsElasticsearchDomains);
     }
 
     List<AWSElasticsearchDomain> listAwsElasticsearchDomains(ElasticsearchClient client) {
@@ -56,7 +57,7 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
 
     Maps<Resource> getResourceMaps(List<AWSElasticsearchDomain> awsElasticsearchDomains) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsElasticsearchDomains.stream().forEach(awsElasticsearchDomain -> {
+        awsElasticsearchDomains.forEach(awsElasticsearchDomain -> {
             ElasticsearchDomainStatus domainStatus = awsElasticsearchDomain.getElasticsearchDomainStatus();
             List<Tag> tags = awsElasticsearchDomain.getTags();
             resourceMapsBuilder.map(
@@ -158,7 +159,9 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
                                     .argument("ebs_enabled",
                                             TFBool.build(domainStatus.ebsOptions().ebsEnabled()))
                                     .argument("iops",
-                                            Optional.ofNullable(domainStatus.ebsOptions().iops()).map(iops -> TFNumber.build(iops)).orElse(TFNumber.build(null)))
+                                            Optional.ofNullable(domainStatus.ebsOptions().iops())
+                                                    .map(TFNumber::build)
+                                                    .orElse(TFNumber.build(null)))
                                     .argument("volume_size",
                                             TFNumber.build(domainStatus.ebsOptions()
                                                     .volumeSize()))
@@ -187,4 +190,16 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
         return resourceMapsBuilder.build();
     }
 
+    TFImport getTFImport(List<AWSElasticsearchDomain> awsElasticsearchDomains) {
+        return TFImport.builder()
+                .importLines(awsElasticsearchDomains.stream()
+                        .map(awsElasticsearchDomain -> TFImportLine.builder()
+                                .address(MessageFormat.format("{0}.{1}",
+                                        "aws_elasticsearch_domain",
+                                        awsElasticsearchDomain.getElasticsearchDomainStatus().domainName()))
+                                .id(awsElasticsearchDomain.getElasticsearchDomainStatus().domainName())
+                                .build()
+                        ).collect(Collectors.toList()))
+                .build();
+    }
 }

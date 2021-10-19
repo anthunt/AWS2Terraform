@@ -38,23 +38,8 @@ class ExportElasticsearchDomainsTest {
         client = amazonClients.getElasticsearchClient();
     }
 
-    @Test
-    @DisabledOnNoAwsCredentials
-    void export() {
-        Maps<Resource> export = exportElasticsearchDomains.export(client, null, null);
-        log.debug("result => \n{}", export.unmarshall());
-    }
-
-    @Test
-    @DisabledOnNoAwsCredentials
-    public void listAwsElasticsearchDomains() {
-        List<AWSElasticsearchDomain> awsElasticsearchDomains = exportElasticsearchDomains.listAwsElasticsearchDomains(client);
-        log.debug("awsElasticsearchDomains => {}", awsElasticsearchDomains);
-    }
-
-    @Test
-    public void getResourceMaps() {
-        List<AWSElasticsearchDomain> awsElasticsearchDomains = List.of(
+    private List<AWSElasticsearchDomain> getAwsElasticsearchDomains() {
+        return List.of(
                 AWSElasticsearchDomain.builder()
                         .elasticsearchDomainStatus(ElasticsearchDomainStatus.builder()
                                 .domainName("test-domain")
@@ -82,6 +67,25 @@ class ExportElasticsearchDomainsTest {
                         .tag(Tag.builder().key("Name").value("Test-ES").build())
                         .build()
         );
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    void export() {
+        Maps<Resource> export = exportElasticsearchDomains.export(client, null, null);
+        log.debug("result => \n{}", export.unmarshall());
+    }
+
+    @Test
+    @DisabledOnNoAwsCredentials
+    public void listAwsElasticsearchDomains() {
+        List<AWSElasticsearchDomain> awsElasticsearchDomains = exportElasticsearchDomains.listAwsElasticsearchDomains(client);
+        log.debug("awsElasticsearchDomains => {}", awsElasticsearchDomains);
+    }
+
+    @Test
+    public void getResourceMaps() {
+        List<AWSElasticsearchDomain> awsElasticsearchDomains = getAwsElasticsearchDomains();
 
         Maps<Resource> resourceMaps = exportElasticsearchDomains.getResourceMaps(awsElasticsearchDomains);
         String actual = resourceMaps.unmarshall();
@@ -91,6 +95,13 @@ class ExportElasticsearchDomainsTest {
                 resourceLoader.getResource("testData/aws/expected/Elasticsearch.tf")
         );
         assertEquals(expected, actual);
+    }
 
+    @Test
+    public void getTFImport() {
+        String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Elasticsearch.cmd"));
+        String actual = exportElasticsearchDomains.getTFImport(getAwsElasticsearchDomains()).script();
+
+        assertEquals(expected, actual);
     }
 }
