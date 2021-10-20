@@ -76,21 +76,40 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
                             ))
                             .build()
             );
+            vpc.cidrBlockAssociationSet().forEach(cidrBlockAssociation ->
+                    Resource.builder()
+                            .api("aws_vpc_ipv4_cidr_block_association")
+                            .name(cidrBlockAssociation.associationId())
+                            .argument("vpc_id", TFString.build(vpc.vpcId()))
+                            .argument("cidr_block", TFString.build(cidrBlockAssociation.cidrBlock()))
+                            .build()
+            );
         }
         return resourceMapsBuilder.build();
     }
 
     TFImport getTFImport(List<AWSVpc> awsVpcs) {
-        return TFImport.builder()
-                .importLines(awsVpcs.stream()
-                        .map(awsVpc -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_vpc",
-                                        awsVpc.getVpc().vpcId()))
-                                .id(awsVpc.getVpc().vpcId())
-                                .build()
-                        ).collect(Collectors.toList()))
-                .build();
+        TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
+        awsVpcs.forEach(awsVpc -> {
+                    Vpc vpc = awsVpc.getVpc();
+                    tfImportBuilder.importLine(TFImportLine.builder()
+                            .address(MessageFormat.format("{0}.{1}",
+                                    "aws_vpc",
+                                    vpc.vpcId()))
+                            .id(vpc.vpcId())
+                            .build()
+                    );
+                    vpc.cidrBlockAssociationSet().forEach(cidrBlockAssociation ->
+                            tfImportBuilder.importLine(TFImportLine.builder()
+                                    .address(MessageFormat.format("{0}.{1}",
+                                            "aws_vpc_ipv4_cidr_block_association",
+                                            cidrBlockAssociation.associationId()))
+                                    .id(cidrBlockAssociation.associationId())
+                                    .build())
+                    );
+                }
+        );
+        return tfImportBuilder.build();
     }
 
 }
