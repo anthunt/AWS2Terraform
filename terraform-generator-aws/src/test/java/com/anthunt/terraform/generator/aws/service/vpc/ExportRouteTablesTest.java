@@ -39,6 +39,7 @@ class ExportRouteTablesTest {
     }
 
     private List<RouteTable> getRouteTables() {
+        //noinspection unchecked
         return List.of(
                 RouteTable.builder()
                         .vpcId("vpc-7931b212")
@@ -51,6 +52,20 @@ class ExportRouteTablesTest {
                                         .destinationCidrBlock("0.0.0.0/0")
                                         .gatewayId("igw-8ecdbbe6")
                                         .build())
+                        .associations(builder -> builder.gatewayId("igw-8ecdbbe6").routeTableId("rtb-d6b5fdbd"))
+                        .build(),
+                RouteTable.builder()
+                        .vpcId("vpc-8931b212")
+                        .routeTableId("rtb-e6b5fdbd")
+                        .routes(Route.builder()
+                                        .destinationCidrBlock("172.31.0.0/16")
+                                        .gatewayId("local")
+                                        .build(),
+                                Route.builder()
+                                        .destinationCidrBlock("0.0.0.0/0")
+                                        .gatewayId("igw-8ecdbbe6")
+                                        .build())
+                        .associations(builder -> builder.subnetId("subnet-02c7511faa4344f83").routeTableId("rtb-e6b5fdbd"))
                         .build()
         );
     }
