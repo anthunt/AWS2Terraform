@@ -142,7 +142,7 @@ class ExportLoadBalancersTest {
     @DisabledOnNoAwsCredentials
     public void getLoadBalancers() {
         List<AWSLoadBalancer> loadBalancers = exportLoadBalancers.listAwsLoadBalancers(client);
-        log.debug("polices => {}", loadBalancers);
+        log.debug("loadBalancers => {}", loadBalancers);
     }
 
     @Test

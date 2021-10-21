@@ -37,7 +37,7 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
     List<AWSLoadBalancer> listAwsLoadBalancers(ElasticLoadBalancingV2Client client) {
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
-        return describeLoadBalancersResponse.loadBalancers().stream()
+        List<AWSLoadBalancer> awsLoadBalancers = describeLoadBalancersResponse.loadBalancers().stream()
                 .map(loadBalancer -> AWSLoadBalancer.builder()
                         .loadBalancer(loadBalancer)
                         .loadBalancerAttributes(
@@ -56,6 +56,14 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
                 .peek(o -> log.debug("LoadBalancerAttributes => {}", o.getLoadBalancerAttributes()))
                 .peek(o -> log.debug("TagDescriptions => {}", o.getTags()))
                 .collect(Collectors.toList());
+//        return awsLoadBalancers;
+        return awsLoadBalancers.stream()
+                .filter(awsLoadBalancer -> awsLoadBalancer.getTags().stream()
+                        .noneMatch(tag ->
+                                tag.key().startsWith("kubernetes.io/cluster/") &&
+                                        tag.value().equals("owned"))
+                )
+                .collect(Collectors.toList());
     }
 
     Maps<Resource> getResourceMaps(List<AWSLoadBalancer> awsLoadBalancers) {
@@ -64,7 +72,6 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
             LoadBalancer loadBalancer = awsLoadBalancer.getLoadBalancer();
             List<LoadBalancerAttribute> attributes = awsLoadBalancer.getLoadBalancerAttributes();
             List<Tag> tags = awsLoadBalancer.getTags();
-            int blockIndex = 0;
             resourceMapsBuilder.map(
                             Resource.builder()
                                     .api("aws_lb")

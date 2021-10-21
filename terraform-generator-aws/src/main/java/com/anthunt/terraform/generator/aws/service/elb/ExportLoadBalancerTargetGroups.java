@@ -37,7 +37,7 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
     List<AWSTargetGroup> listAwsTagetGroups(ElasticLoadBalancingV2Client client) {
 
         DescribeTargetGroupsResponse describeTargetGroupsResponse = client.describeTargetGroups();
-        return describeTargetGroupsResponse.targetGroups()
+        List<AWSTargetGroup> awsTargetGroups = describeTargetGroupsResponse.targetGroups()
                 .stream()
                 .peek(targetGroup -> log.debug("targetGroup => {}", targetGroup))
                 .map(targetGroup -> AWSTargetGroup.builder()
@@ -54,7 +54,21 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                         .targetHealthDescriptions().stream()
                                         .map(TargetHealthDescription::target)
                                         .collect(Collectors.toList()))
+                        .tags(
+                                client.describeTags(DescribeTagsRequest.builder()
+                                                .resourceArns(targetGroup.targetGroupArn())
+                                                .build())
+                                        .tagDescriptions().stream()
+                                        .flatMap(o -> o.tags().stream())
+                                        .collect(Collectors.toList()))
                         .build())
+                .collect(Collectors.toList());
+        return awsTargetGroups.stream()
+                .filter(awsTargetGroup -> awsTargetGroup.getTags().stream()
+                        .noneMatch(tag ->
+                                tag.key().startsWith("kubernetes.io/cluster/") &&
+                                        tag.value().equals("owned"))
+                )
                 .collect(Collectors.toList());
     }
 
@@ -85,40 +99,53 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                     .argument("enabled", TFBool.build(targetGroup.healthCheckEnabled()))
                                     .argument("port", TFNumber.build(targetGroup.healthCheckPort()))
                                     .argument("protocol", TFString.build(targetGroup.protocolAsString()))
+                                    .argument("proxy_protocol_v2", TFBool.build(attributes.stream()
+                                            .filter(a -> a.key().equals("proxy_protocol_v2.enabled"))
+                                            .map(a -> Boolean.valueOf(a.value()))
+                                            .findFirst().orElse(false)))
+                                    .argument("stickiness", TFBool.build(attributes.stream()
+                                            .filter(a -> a.key().equals("stickiness.enabled"))
+                                            .map(a -> Boolean.valueOf(a.value()))
+                                            .findFirst().orElse(false)))
                                     .argument("path", TFString.build(targetGroup.healthCheckPath()))
                                     .argument("healthy_threshold", TFNumber.build(targetGroup.healthyThresholdCount()))
                                     .argument("unhealthy_threshold", TFNumber.build(targetGroup.unhealthyThresholdCount()))
                                     .argument("interval", TFNumber.build(targetGroup.healthCheckIntervalSeconds()))
+                                    .argument("tags", TFMap.builder()
+                                            .maps(awsTargetGroup.getTags().stream()
+                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value()))))
+                                            .build())
                                     .build()
-                            ).build());
+                            ).build()
+            );
 
             awsTargetGroup.getTargetDescriptions().forEach(targetDescription ->
                     resourceMapsBuilder.map(
-                                    Resource.builder()
-                                            .api("aws_lb_target_group_attachment")
-                                            .name(MessageFormat.format("{0}-{1}", targetGroup.targetGroupName(), targetDescription.id())
-                                                    .replaceAll("\\.", "-"))
-                                            .argument("target_group_arn ", TFExpression.build(
-                                                    MessageFormat.format("aws_lb_target_group.{0}.arn",
-                                                            targetGroup.targetGroupName())))
-                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
-                                                    "target_id", TFExpression.build(
-                                                            MessageFormat.format("aws_instance.{0}.id",
-                                                                    targetDescription.id())))
-                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
-                                                    "target_id", TFString.build(targetDescription.id()))
-                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
-                                                    "target_id", TFExpression.build(
-                                                            MessageFormat.format("aws_lambda_function.{0}.arn",
-                                                                    targetDescription.id())))
-                                            .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
-                                                    "port", TFNumber.build(targetDescription.port()))
-                                            //Todo: not implemented
-                                            .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
-                                                    "depends_on", TFExpression.build(
-                                                            MessageFormat.format("aws_lambda_permission.{0}",
-                                                                    "xxxx")))
-                                            .build())
+                            Resource.builder()
+                                    .api("aws_lb_target_group_attachment")
+                                    .name(MessageFormat.format("{0}-{1}", targetGroup.targetGroupName(), targetDescription.id())
+                                            .replaceAll("\\.", "-"))
+                                    .argument("target_group_arn ", TFExpression.build(
+                                            MessageFormat.format("aws_lb_target_group.{0}.arn",
+                                                    targetGroup.targetGroupName())))
+                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
+                                            "target_id", TFExpression.build(
+                                                    MessageFormat.format("aws_instance.{0}.id",
+                                                            targetDescription.id())))
+                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
+                                            "target_id", TFString.build(targetDescription.id()))
+                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
+                                            "target_id", TFExpression.build(
+                                                    MessageFormat.format("aws_lambda_function.{0}.arn",
+                                                            targetDescription.id())))
+                                    .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
+                                            "port", TFNumber.build(targetDescription.port()))
+                                    //Todo: not implemented
+//                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
+//                                            "depends_on", TFExpression.build(
+//                                                    MessageFormat.format("aws_lambda_permission.{0}",
+//                                                            "xxxx")))
+                                    .build())
             );
         }
         return resourceMapsBuilder.build();
