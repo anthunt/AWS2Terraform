@@ -9,10 +9,14 @@ resource aws_lb_target_group k8s-ingressn-ingressn-1dab2d3f88 {
 		enabled = true
 		port = 30035
 		protocol = "TCP"
+		proxy_protocol_v2 = false
+		stickiness = false
 		path = "/healthz"
 		healthy_threshold = 2
 		unhealthy_threshold = 2
 		interval = 10
+		tags = {
+		}
 	}
 }
 
@@ -39,10 +43,14 @@ resource aws_lb_target_group tg-dev-service-was {
 		enabled = true
 		port = traffic-port
 		protocol = "HTTP"
+		proxy_protocol_v2 = false
+		stickiness = false
 		path = "/health"
 		healthy_threshold = 5
 		unhealthy_threshold = 2
 		interval = 30
+		tags = {
+		}
 	}
 }
 

@@ -17,5 +17,7 @@ public class AWSTargetGroup {
     private List<TargetGroupAttribute> targetGroupAttributes;
     @Singular
     private List<TargetDescription> targetDescriptions;
+    @Singular
+    private List<Tag> tags;
 
 }
