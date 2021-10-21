@@ -121,17 +121,24 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
                                     .map(type -> TFString.builder().isLineIndent(false).value(type.toString())
                                             .build())
                                     .collect(Collectors.toList())))
-                            .argument("encryption_config", TFBlock.builder()
-                                    .argument("provider", TFBlock.builder()
-                                            .argument("key_arn", TFString.build(cluster.encryptionConfig().stream()
-                                                    .findFirst().get().provider().keyArn()))
-                                            .build())
-                                    .argument("resources", TFList.build(cluster.encryptionConfig().stream()
-                                            .findFirst().get().resources().stream()
-                                            .map(resource -> TFString.builder().isLineIndent(false).value(resource)
-                                                    .build())
-                                            .collect(Collectors.toList())))
-                                    .build())
+                            .argumentIf(Optional.ofNullable(cluster.encryptionConfig()).isPresent(),
+                                    "encryption_config",
+                                    () -> {
+                                        List<EncryptionConfig> encryptionConfigs = cluster.encryptionConfig();
+                                        return TFBlock.builder()
+                                                .argument("provider", TFBlock.builder()
+                                                        .argument("key_arn", TFString.build(encryptionConfigs.stream()
+                                                                .findFirst()
+                                                                .map(encryptionConfig -> encryptionConfig.provider().keyArn())
+                                                                .orElse(null)))
+                                                        .build())
+                                                .argument("resources", TFList.build(encryptionConfigs.stream()
+                                                        .flatMap(encryptionConfig -> encryptionConfig.resources().stream())
+                                                        .map(resource -> TFString.builder().isLineIndent(false).value(resource)
+                                                                .build())
+                                                        .collect(Collectors.toList())))
+                                                .build();
+                                    })
                             .argument("tags", TFMap.build(
                                     tags.entrySet().stream()
                                             .collect(Collectors.toMap(Map.Entry::getKey, tag -> TFString.build(tag.getValue())))
