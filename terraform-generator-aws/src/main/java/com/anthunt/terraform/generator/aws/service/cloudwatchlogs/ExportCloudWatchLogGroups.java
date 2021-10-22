@@ -18,7 +18,6 @@ import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRes
 import software.amazon.awssdk.services.cloudwatchlogs.model.ListTagsLogGroupRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,8 +58,8 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
 
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_cloudwatch_log_group")
-                                    .name(getResourceName(logGroup.logGroupName()))
+                                    .api(awsLogGroup.getTerraformResourceName())
+                                    .name(awsLogGroup.getResourceName())
                                     .argument("name", TFString.build(logGroup.logGroupName()))
                                     .argument("retention_in_days", Optional.ofNullable(logGroup.retentionInDays())
                                             .map(TFNumber::build)
@@ -76,24 +75,13 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
         return resourceMapsBuilder.build();
     }
 
-    private String getResourceName(String logGroupName) {
-        return logGroupName.startsWith("/") ?
-                logGroupName.substring(1).replaceAll("/", "-")
-                : logGroupName.replaceAll("/", "-");
-    }
-
     TFImport getTFImport(List<AWSLogGroup> awsLogGroups) {
         return TFImport.builder()
                 .importLines(awsLogGroups.stream()
-                        .map(awsLogGroup -> {
-                            LogGroup logGroup = awsLogGroup.getLogGroup();
-                            return TFImportLine.builder()
-                                    .address(MessageFormat.format("{0}.{1}",
-                                            "aws_cloudwatch_log_group",
-                                            getResourceName(logGroup.logGroupName())))
-                                    .id(logGroup.logGroupName())
-                                    .build();
-                        })
+                        .map(awsLogGroup -> TFImportLine.builder()
+                                .address(awsLogGroup.getTerraformAddress())
+                                .id(awsLogGroup.getResourceId())
+                                .build())
                         .collect(Collectors.toList()))
                 .build();
     }

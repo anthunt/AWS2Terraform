@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.text.MessageFormat;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,7 +75,7 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                 Instance instance = awsInstance.getInstance();
                 resourceMapsBuilder.map(
                         Resource.builder()
-                                .api("aws_instance")
+                                .api(awsInstance.getTerraformResourceName())
                                 .name(instance.instanceId())
                                 .argument("ami", TFString.build(instance.imageId()))
                                 .argument("placement_group", TFString.build(instance.placement().groupName()))
@@ -168,10 +167,8 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                 .importLines(awsReservations.stream().flatMap(awsReservation
                                 -> awsReservation.getInstances().stream())
                         .map(awsInstance -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_instance",
-                                        awsInstance.getInstance().instanceId()))
-                                .id(awsInstance.getInstance().instanceId())
+                                .address(awsInstance.getTerraformAddress())
+                                .id(awsInstance.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.cloudwatchlogs;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.cloudwatchlogs.model.AWSResourcePolicy;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -37,12 +38,16 @@ class ExportResourcePolicesTest {
         client = amazonClients.getCloudWatchLogGroupClient();
     }
 
-    private List<ResourcePolicy> getResourcePolicies() {
+    private List<AWSResourcePolicy> getResourcePolicies() {
         return List.of(
-                ResourcePolicy.builder()
-                        .policyName("es_log_resource_policy")
-                        .policyDocument(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/aws/input/CloudWatchLogResourcePolicyDocument.json")))
+                AWSResourcePolicy.builder()
+                        .resourcePolicy(
+                                ResourcePolicy.builder()
+                                        .policyName("es_log_resource_policy")
+                                        .policyDocument(TestDataFileUtils.asString(
+                                                resourceLoader.getResource("testData/aws/input/CloudWatchLogResourcePolicyDocument.json")))
+                                        .build()
+                        )
                         .build()
         );
     }
@@ -56,9 +61,9 @@ class ExportResourcePolicesTest {
 
     @Test
     public void getResourceMaps() {
-        List<ResourcePolicy> resourcePolicies = getResourcePolicies();
+        List<AWSResourcePolicy> awsResourcePolicies = getResourcePolicies();
 
-        Maps<Resource> resourceMaps = exportResourcePolicies.getResourceMaps(resourcePolicies);
+        Maps<Resource> resourceMaps = exportResourcePolicies.getResourceMaps(awsResourcePolicies);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.ec2;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSLaunchTemplateVersion;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -13,7 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.*;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
+import software.amazon.awssdk.services.ec2.model.ResponseLaunchTemplateData;
+import software.amazon.awssdk.services.ec2.model.ShutdownBehavior;
 
 import java.util.Base64;
 import java.util.List;
@@ -38,29 +42,31 @@ class ExportLaunchTemplateTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<LaunchTemplateVersion> getLaunchTemplateVersions() {
-        List<LaunchTemplateVersion> awsEksClusters = List.of(
-                LaunchTemplateVersion.builder()
-                        .launchTemplateName("LT-DEV-DLS")
-                        .launchTemplateId("lt-0c6296fcff64943d6")
-                        .launchTemplateData(ResponseLaunchTemplateData.builder()
-                                .disableApiTermination(true)
-                                .ebsOptimized(false)
-                                .imageId("ami-08c64544f5cfcddd0")
-                                .instanceInitiatedShutdownBehavior(ShutdownBehavior.STOP)
-                                .instanceType(InstanceType.M5_XLARGE)
-                                .keyName("DEV-KEYPAIR")
-                                .iamInstanceProfile(builder -> builder.build())
-                                .networkInterfaces(builder -> builder.associatePublicIpAddress(false))
-                                .userData(Base64.getEncoder().encodeToString(
-                                        TestDataFileUtils.asString(resourceLoader
-                                                        .getResource("testData/aws/input/LaunchTemplateUserData.txt"))
-                                                .getBytes()
-                                ))
+    private List<AWSLaunchTemplateVersion> getAwsLaunchTemplateVersions() {
+        return List.of(
+                AWSLaunchTemplateVersion.builder()
+                        .launchTemplateVersion(LaunchTemplateVersion.builder()
+                                .launchTemplateName("LT-DEV-DLS")
+                                .launchTemplateId("lt-0c6296fcff64943d6")
+                                .launchTemplateData(ResponseLaunchTemplateData.builder()
+                                        .disableApiTermination(true)
+                                        .ebsOptimized(false)
+                                        .imageId("ami-08c64544f5cfcddd0")
+                                        .instanceInitiatedShutdownBehavior(ShutdownBehavior.STOP)
+                                        .instanceType(InstanceType.M5_XLARGE)
+                                        .keyName("DEV-KEYPAIR")
+                                        .iamInstanceProfile(builder -> builder.build())
+                                        .networkInterfaces(builder -> builder.associatePublicIpAddress(false))
+                                        .userData(Base64.getEncoder().encodeToString(
+                                                TestDataFileUtils.asString(resourceLoader
+                                                                .getResource("testData/aws/input/LaunchTemplateUserData.txt"))
+                                                        .getBytes()
+                                        ))
+                                        .build())
                                 .build())
                         .build()
+
         );
-        return awsEksClusters;
     }
 
     @Test
@@ -73,14 +79,14 @@ class ExportLaunchTemplateTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void listLaunchTemplateVersions() {
-        List<LaunchTemplateVersion> launchTemplateVersions = exportlaunchTemplates.listLaunchTemplateVersions(client);
-        log.debug("launchTemplateVersions => {}", launchTemplateVersions);
+        List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = exportlaunchTemplates.listAwsLaunchTemplateVersion(client);
+        log.debug("awsLaunchTemplateVersions => {}", awsLaunchTemplateVersions);
     }
 
     @Test
     public void getResourceMaps() {
-        List<LaunchTemplateVersion> launchTemplateVersions = getLaunchTemplateVersions();
-        Maps<Resource> resourceMaps = exportlaunchTemplates.getResourceMaps(launchTemplateVersions);
+        List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = getAwsLaunchTemplateVersions();
+        Maps<Resource> resourceMaps = exportlaunchTemplates.getResourceMaps(awsLaunchTemplateVersions);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -93,7 +99,7 @@ class ExportLaunchTemplateTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/LaunchTemplate.cmd"));
-        String actual = exportlaunchTemplates.getTFImport(getLaunchTemplateVersions()).script();
+        String actual = exportlaunchTemplates.getTFImport(getAwsLaunchTemplateVersions()).script();
 
         assertEquals(expected, actual);
     }
