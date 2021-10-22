@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.apigateway;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSAccount;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -35,9 +36,10 @@ class ExportApiGatewayAccountTest {
         client = amazonClients.getApiGatewayClient();
     }
 
-    private GetAccountResponse getGetAccountResponse() {
-        return GetAccountResponse.builder()
-                .cloudwatchRoleArn("arn:aws:iam::100020003000:role/APIGatewayPushToCloudWatchLogs")
+    private AWSAccount getAwsAccount() {
+        return AWSAccount.builder().account(GetAccountResponse.builder()
+                        .cloudwatchRoleArn("arn:aws:iam::100020003000:role/APIGatewayPushToCloudWatchLogs")
+                        .build())
                 .build();
     }
 
@@ -50,9 +52,9 @@ class ExportApiGatewayAccountTest {
 
     @Test
     public void getResourceMaps() {
-        GetAccountResponse account = getGetAccountResponse();
+        AWSAccount awsAccount = getAwsAccount();
 
-        Maps<Resource> resourceMaps = exportApiGatewayAccount.getResourceMaps(account);
+        Maps<Resource> resourceMaps = exportApiGatewayAccount.getResourceMaps(awsAccount);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -65,7 +67,7 @@ class ExportApiGatewayAccountTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Apigateway.cmd"));
-        String actual = exportApiGatewayAccount.getTFImport(getGetAccountResponse()).script();
+        String actual = exportApiGatewayAccount.getTFImport(getAwsAccount()).script();
 
         assertEquals(expected, actual);
     }

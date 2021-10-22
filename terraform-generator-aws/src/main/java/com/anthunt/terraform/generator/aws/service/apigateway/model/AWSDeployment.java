@@ -3,23 +3,19 @@ package com.anthunt.terraform.generator.aws.service.apigateway.model;
 import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 import lombok.ToString;
-import software.amazon.awssdk.services.apigateway.model.RestApi;
+import software.amazon.awssdk.services.apigateway.model.GetDeploymentResponse;
 
-import java.util.List;
+import java.text.MessageFormat;
 
 @Data
 @ToString
 @Builder
-public class AWSRestApiResource implements TerraformSource {
+public class AWSDeployment implements TerraformSource {
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_deployment";
+    private GetDeploymentResponse deployment;
 
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_resource";
-
-    private RestApi restApi;
-
-    @Singular
-    private List<AWSResource> awsResources;
+    private String restApiName;
 
     @Override
     public String getTerraformResourceName() {
@@ -33,6 +29,6 @@ public class AWSRestApiResource implements TerraformSource {
 
     @Override
     public String getResourceName() {
-        return restApi.id();
+        return MessageFormat.format("{0}-{1}", restApiName, deployment.id());
     }
 }

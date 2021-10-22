@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.apigateway;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSDeployment;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSRestApi;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSStage;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
@@ -66,9 +67,13 @@ class ExportApiGatewayRestApisTest {
                                         .deploymentId("0t5yci")
                                         .tracingEnabled(false)
                                         .build())
-                                .deployment(GetDeploymentResponse.builder()
-                                        .id("0t5yci")
-                                        .description("test deploy")
+                                .awsDeployment(AWSDeployment.builder()
+                                        .restApiName("PetStore")
+                                        .deployment(
+                                                GetDeploymentResponse.builder()
+                                                        .id("0t5yci")
+                                                        .description("test deploy")
+                                                        .build())
                                         .build())
                                 .build())
                         .build());

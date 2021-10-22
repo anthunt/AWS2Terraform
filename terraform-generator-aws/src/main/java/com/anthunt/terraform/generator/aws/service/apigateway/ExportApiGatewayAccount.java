@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.apigateway;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSAccount;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.apigateway.ApiGatewayClient;
 import software.amazon.awssdk.services.apigateway.model.GetAccountResponse;
 
-import java.text.MessageFormat;
 import java.util.Optional;
 
 @Slf4j
@@ -22,29 +22,30 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
 
     @Override
     protected Maps<Resource> export(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        GetAccountResponse account = getAccount(client);
-        return getResourceMaps(account);
+        AWSAccount awsAccount = getAccount(client);
+        return getResourceMaps(awsAccount);
     }
 
     @Override
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        GetAccountResponse account = getAccount(client);
-        return getTFImport(account);
+        AWSAccount awsAccount = getAccount(client);
+        return getTFImport(awsAccount);
     }
 
-    GetAccountResponse getAccount(ApiGatewayClient client) {
-        return client.getAccount();
+    AWSAccount getAccount(ApiGatewayClient client) {
+        return AWSAccount.builder().account(client.getAccount()).build();
     }
 
-    Maps<Resource> getResourceMaps(GetAccountResponse accountResponse) {
+    Maps<Resource> getResourceMaps(AWSAccount awsAccount) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
+        GetAccountResponse account = awsAccount.getAccount();
 
-        if (Optional.ofNullable(accountResponse.cloudwatchRoleArn()).isPresent()) {
+        if (Optional.ofNullable(account.cloudwatchRoleArn()).isPresent()) {
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_api_gateway_account")
-                            .name(getResourceName(accountResponse))
-                            .argument("cloudwatch_role_arn", TFString.build(accountResponse.cloudwatchRoleArn()))
+                            .api(awsAccount.getTerraformResourceName())
+                            .name(awsAccount.getResourceName())
+                            .argument("cloudwatch_role_arn", TFString.build(account.cloudwatchRoleArn()))
                             .build()
             );
         }
@@ -53,19 +54,11 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String getResourceName(GetAccountResponse accountResponse) {
-        return MessageFormat.format("{0}-{1}",
-                "account",
-                accountResponse.cloudwatchRoleArn().split(":")[4]);
-    }
-
-    TFImport getTFImport(GetAccountResponse account) {
+    TFImport getTFImport(AWSAccount awsAccount) {
         return TFImport.builder()
                 .importLine(TFImportLine.builder()
-                        .address(MessageFormat.format("{0}.{1}",
-                                "aws_api_gateway_account",
-                                getResourceName(account)))
-                        .id("api-gateway-account")
+                        .address(awsAccount.getTerraformAddress())
+                        .id(awsAccount.getResourceId())
                         .build())
                 .build();
     }

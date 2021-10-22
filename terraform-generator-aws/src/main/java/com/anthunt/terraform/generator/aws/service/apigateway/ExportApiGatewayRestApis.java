@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.apigateway;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSDeployment;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSRestApi;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSStage;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
@@ -48,10 +49,13 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
                                 .item().stream()
                                 .map(stage -> AWSStage.builder()
                                         .stage(stage)
-                                        .deployment(client.getDeployment(GetDeploymentRequest.builder()
-                                                .restApiId(restApi.id())
-                                                .deploymentId(stage.deploymentId())
-                                                .build()))
+                                        .awsDeployment(AWSDeployment.builder()
+                                                .restApiName(restApi.name())
+                                                .deployment(client.getDeployment(GetDeploymentRequest.builder()
+                                                        .restApiId(restApi.id())
+                                                        .deploymentId(stage.deploymentId())
+                                                        .build()))
+                                                .build())
                                         .build())
                                 .collect(Collectors.toList()))
 
@@ -66,8 +70,8 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
 
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_api_gateway_rest_api")
-                                    .name(restApi.name())
+                                    .api(awsRestApi.getTerraformResourceName())
+                                    .name(awsRestApi.getResourceName())
                                     .argument("name", TFString.build(restApi.name()))
                                     .argument("description", TFString.build(restApi.description()))
                                     .argument("api_key_source", TFString.build(restApi.apiKeySourceAsString()))
@@ -96,8 +100,8 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
                         Stage stage = awsStage.getStage();
                         resourceMapsBuilder.map(
                                 Resource.builder()
-                                        .api("aws_api_gateway_stage")
-                                        .name(stage.stageName())
+                                        .api(awsStage.getTerraformResourceName())
+                                        .name(awsStage.getResourceName())
                                         .argument("rest_api_id", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("deployment_id", TFExpression.build(
@@ -112,12 +116,13 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
                                                         .build())
                                         .build());
 
-                        GetDeploymentResponse deployment = awsStage.getDeployment();
+                        AWSDeployment awsDeployment = awsStage.getAwsDeployment();
+                        GetDeploymentResponse deployment = awsDeployment.getDeployment();
 
                         resourceMapsBuilder.map(
                                 Resource.builder()
-                                        .api("aws_api_gateway_deployment")
-                                        .name(MessageFormat.format("{0}-{1}", restApi.name(), deployment.id()))
+                                        .api(awsDeployment.getTerraformResourceName())
+                                        .name(awsDeployment.getResourceName())
                                         .argument("rest_api_id", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("stage_name", TFString.build(stage.stageName()))
@@ -135,12 +140,12 @@ public class ExportApiGatewayRestApis extends AbstractExport<ApiGatewayClient> {
         return TFImport.builder()
                 .importLines(awsRestApis.stream()
                         .map(awsRestApi -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_launch_template",
-                                        awsRestApi.getRestApi().name()))
-                                .id(awsRestApi.getRestApi().id())
+                                .address(awsRestApi.getTerraformAddress())
+                                .id(awsRestApi.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
+        //TODO: aws_api_gateway_stage import 추가
+        //TODO: aws_api_gateway_deployment import 추가
     }
 }

@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.apigateway;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSIntegration;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSMethod;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSResource;
 import com.anthunt.terraform.generator.aws.service.apigateway.model.AWSRestApiResource;
@@ -52,18 +53,27 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                 .items().stream()
                                 .map(resource -> AWSResource.builder()
                                         .resource(resource)
+                                        .restApiName(restApi.name())
+                                        .restApiId(restApi.id())
                                         .awsMethods(resource.resourceMethods().keySet().stream()
                                                 .map(methodName -> AWSMethod.builder()
+                                                        .restApiId(restApi.id())
+                                                        .resourceId(resource.id())
                                                         .method(client.getMethod(GetMethodRequest.builder()
                                                                 .restApiId(restApi.id())
                                                                 .resourceId(resource.id())
                                                                 .httpMethod(methodName)
                                                                 .build()))
-                                                        .integration(client.getIntegration(GetIntegrationRequest.builder()
+                                                        .awsIntegration(AWSIntegration.builder()
+                                                                .restApiName(restApi.name())
                                                                 .restApiId(restApi.id())
                                                                 .resourceId(resource.id())
-                                                                .httpMethod(methodName)
-                                                                .build()))
+                                                                .integration(client.getIntegration(GetIntegrationRequest.builder()
+                                                                        .restApiId(restApi.id())
+                                                                        .resourceId(resource.id())
+                                                                        .httpMethod(methodName)
+                                                                        .build()))
+                                                                .build())
                                                         .build())
                                                 .peek(method -> log.debug("method => {}", method))
                                                 .collect(Collectors.toList()))
@@ -91,8 +101,8 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                         software.amazon.awssdk.services.apigateway.model.Resource resource = awsResource.getResource();
                         resourceMapsBuilder.map(
                                 Resource.builder()
-                                        .api("aws_api_gateway_resource")
-                                        .name(getApiGatewayResourceName(restApi.name(), resource.id()))
+                                        .api(awsRestApiResource.getTerraformResourceName())
+                                        .name(awsResource.getResourceName())
                                         .argument("rest_api_id ", TFExpression.build(
                                                 MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                         .argument("parent_id", resource.parentId().equals(rootResourceId) ?
@@ -102,11 +112,10 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                         .build());
                         awsResource.getAwsMethods().forEach(awsMethod -> {
                                     GetMethodResponse method = awsMethod.getMethod();
-                                    GetIntegrationResponse integration = awsMethod.getIntegration();
                                     resourceMapsBuilder.map(
                                             Resource.builder()
-                                                    .api("aws_api_gateway_method")
-                                                    .name(getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod()))
+                                                    .api(awsMethod.getTerraformResourceName())
+                                                    .name(awsMethod.getResourceName())
                                                     .argument("rest_api_id", TFExpression.build(
                                                             MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                                     .argument("resource_id", TFExpression.build(
@@ -120,10 +129,13 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
                                                     ))
                                                     .build());
 
+                                    AWSIntegration awsIntegration = awsMethod.getAwsIntegration();
+                                    GetIntegrationResponse integration = awsIntegration.getIntegration();
+
                                     resourceMapsBuilder.map(
                                             Resource.builder()
-                                                    .api("aws_api_gateway_integration")
-                                                    .name(getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod()))
+                                                    .api(awsIntegration.getTerraformResourceName())
+                                                    .name(awsIntegration.getResourceName())
                                                     .argument("rest_api_id", TFExpression.build(
                                                             MessageFormat.format("aws_api_gateway_rest_api.{0}.id", restApi.name())))
                                                     .argument("resource_id", TFExpression.build(
@@ -146,62 +158,34 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
         return resourceMapsBuilder.build();
     }
 
-    private String getApiGatewayMethodResourceName(String restApiName, String resourceId, String httpMethod) {
-        return MessageFormat.format("{0}-{1}-{2}", restApiName, resourceId, httpMethod);
-    }
-
     TFImport getTFImport(List<AWSRestApiResource> awsRestApiResources) {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
 
         for (AWSRestApiResource awsRestApiResource : awsRestApiResources) {
-            RestApi restApi = awsRestApiResource.getRestApi();
 
             awsRestApiResource.getAwsResources().stream()
                     .filter(awsResource -> awsResource.getResource().parentId() != null)
                     .forEach(awsResource -> {
                         tfImportBuilder.importLine(TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_api_gateway_resource",
-                                        getApiGatewayResourceName(restApi.name(), awsResource.getResource().id())))
-                                .id(MessageFormat.format("{0}/{1}",
-                                        restApi.id(),
-                                        awsResource.getResource().id()))
+                                .address(awsResource.getTerraformAddress())
+                                .id(awsResource.getResourceId())
                                 .build());
 
                         awsResource.getAwsMethods().forEach(awsMethod -> {
-                            GetMethodResponse method = awsMethod.getMethod();
-                            GetIntegrationResponse integration = awsMethod.getIntegration();
+                            AWSIntegration awsIntegration = awsMethod.getAwsIntegration();
 
                             tfImportBuilder.importLine(TFImportLine.builder()
-                                    .address(MessageFormat.format("{0}.{1}",
-                                            "aws_api_gateway_method",
-                                            getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod())
-                                    ))
-                                    .id(MessageFormat.format("{0}/{1}/{2}",
-                                            restApi.name(),
-                                            awsResource.getResource().id(),
-                                            method.httpMethod()))
+                                    .address(awsMethod.getTerraformAddress())
+                                    .id(awsMethod.getResourceId())
                                     .build());
 
                             tfImportBuilder.importLine(TFImportLine.builder()
-                                    .address(MessageFormat.format("{0}.{1}",
-                                            "aws_api_gateway_integration",
-                                            getApiGatewayMethodResourceName(restApi.name(), awsResource.getResource().id(), method.httpMethod())
-                                    ))
-                                    .id(MessageFormat.format("{0}/{1}/{2}",
-                                            restApi.name(),
-                                            awsResource.getResource().id(),
-                                            awsMethod.getMethod().httpMethod()))
+                                    .address(awsIntegration.getTerraformAddress())
+                                    .id(awsIntegration.getResourceId())
                                     .build());
                         });
                     });
         }
         return tfImportBuilder.build();
-    }
-
-    private String getApiGatewayResourceName(String restApiName, String resourceId) {
-        return MessageFormat.format("{0}-{1}",
-                restApiName,
-                resourceId);
     }
 }
