@@ -104,8 +104,12 @@ public class Resource extends AbstractMarshaller<Resource> {
         public ResourceBuilder argumentsIf(BooleanSupplier booleanSupplier, String argumentKey, List<AbstractMarshaller<?>> argumentValues) {
             int inx = 0;
             for (AbstractMarshaller<?> argumentValue : argumentValues) {
-                this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
-                inx++;
+                if (argumentValues.size() > 1) {
+                    this.argumentIf(booleanSupplier, argumentKey + "$" + inx, argumentValue);
+                    inx++;
+                } else {
+                    this.argumentIf(booleanSupplier, argumentKey, argumentValue);
+                }
             }
             return this;
         }
@@ -122,7 +126,7 @@ public class Resource extends AbstractMarshaller<Resource> {
             if (tfArgumentsBuilder == null) {
                 tfArgumentsBuilder = TFArguments.builder();
             }
-            arguments.getArguments().entrySet().stream()
+            arguments.getArguments().entrySet()
                     .forEach(entry -> tfArgumentsBuilder.argument(entry.getKey(), entry.getValue()));
             return this;
         }
