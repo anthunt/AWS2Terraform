@@ -4,19 +4,16 @@ import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 
 @Data
 @ToString
 @Builder
-public class AWSInstance implements TerraformSource {
+public class AWSLaunchTemplateVersion implements TerraformSource {
 
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_instance";
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_launch_template";
 
-    private Instance instance;
-    private Boolean disableApiTermination;
-    private String shutdownBehavior;
-    private String userData;
+    private LaunchTemplateVersion launchTemplateVersion;
 
     @Override
     public String getTerraformResourceName() {
@@ -25,11 +22,11 @@ public class AWSInstance implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return instance.instanceId();
+        return launchTemplateVersion.launchTemplateId();
     }
 
     @Override
     public String getResourceName() {
-        return instance.instanceId();
+        return launchTemplateVersion.launchTemplateName();
     }
 }

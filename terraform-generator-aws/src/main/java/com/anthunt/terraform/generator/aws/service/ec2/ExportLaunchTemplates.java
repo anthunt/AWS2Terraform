@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.ec2;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.ec2.model.AWSLaunchTemplateVersion;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -11,9 +12,7 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplatesResponse;
-import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
-import software.amazon.awssdk.services.ec2.model.ResponseLaunchTemplateData;
+import software.amazon.awssdk.services.ec2.model.*;
 
 import java.text.MessageFormat;
 import java.util.Base64;
@@ -27,39 +26,44 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<LaunchTemplateVersion> launchTemplateVersions = listLaunchTemplateVersions(client);
-        return getResourceMaps(launchTemplateVersions);
+        List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = listAwsLaunchTemplateVersion(client);
+        return getResourceMaps(awsLaunchTemplateVersions);
     }
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<LaunchTemplateVersion> launchTemplateVersions = listLaunchTemplateVersions(client);
-        return getTFImport(launchTemplateVersions);
+        List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = listAwsLaunchTemplateVersion(client);
+        return getTFImport(awsLaunchTemplateVersions);
     }
 
-    List<LaunchTemplateVersion> listLaunchTemplateVersions(Ec2Client client) {
+    List<AWSLaunchTemplateVersion> listAwsLaunchTemplateVersion(Ec2Client client) {
 
         DescribeLaunchTemplatesResponse describeLaunchTemplatesResponse = client.describeLaunchTemplates();
 
         return describeLaunchTemplatesResponse.launchTemplates().stream()
-                .map(launchTemplate -> client.describeLaunchTemplateVersions(builder -> builder
-                                .launchTemplateId(launchTemplate.launchTemplateId())
-                                .versions(launchTemplate.latestVersionNumber().toString()).build())
-                        .launchTemplateVersions().stream().findFirst().get())
+                .map(launchTemplate ->
+                        AWSLaunchTemplateVersion.builder()
+                                .launchTemplateVersion(client.describeLaunchTemplateVersions(builder -> builder
+                                                .launchTemplateId(launchTemplate.launchTemplateId())
+                                                .versions(launchTemplate.latestVersionNumber().toString()).build())
+                                        .launchTemplateVersions().stream().findFirst().get())
+                                .build()
+                )
                 .peek(launchTemplateVersion -> log.debug("launchTemplateVersion=>{}", launchTemplateVersion))
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<LaunchTemplateVersion> launchTemplateVersions) {
+    Maps<Resource> getResourceMaps(List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
-        for (LaunchTemplateVersion version : launchTemplateVersions) {
-            ResponseLaunchTemplateData data = version.launchTemplateData();
+        for (AWSLaunchTemplateVersion awsLaunchTemplateVersion : awsLaunchTemplateVersions) {
+            ResponseLaunchTemplateData data = awsLaunchTemplateVersion.getLaunchTemplateVersion().launchTemplateData();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_launch_template")
-                            .name(version.launchTemplateName())
-                            .argument("name", TFString.build(version.launchTemplateName()))
+                            .api(awsLaunchTemplateVersion.getTerraformResourceName())
+                            .name(awsLaunchTemplateVersion.getResourceName())
+                            .argument("name", TFString.build(awsLaunchTemplateVersion
+                                    .getLaunchTemplateVersion().launchTemplateName()))
                             .argument("disable_api_termination", TFBool.build(data.disableApiTermination()))
                             .argument("ebs_optimized", TFBool.build(data.ebsOptimized()))
                             .argument("image_id", TFString.build(data.imageId()))
@@ -71,11 +75,11 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
                             .argument("ram_disk_id", TFString.build(data.ramDiskId()))
                             .argument("vpc_security_group_ids",
                                     TFList.build(data.securityGroupIds().stream()
-                                            .map(id -> TFString.build(id))
+                                            .map(TFString::build)
                                             .collect(Collectors.toList())))
                             .argumentsIf(Optional.ofNullable(data.blockDeviceMappings()).isPresent(),
                                     "block_device_mappings",
-                                    data.blockDeviceMappings().stream()
+                                    () -> data.blockDeviceMappings().stream()
                                             .map(blockDevice -> TFBlock.builder()
                                                     .argument("device_name",
                                                             TFString.build(blockDevice.deviceName()))
@@ -114,7 +118,7 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
                                             .argument("type ",
                                                     TFString.build(data.elasticGpuSpecifications().stream()
                                                             .findFirst()
-                                                            .map(r -> r.type())
+                                                            .map(ElasticGpuSpecificationResponse::type)
                                                             .orElse(null)))
                                             .build())
                             .argumentIf(Optional.ofNullable(data.elasticInferenceAccelerators()).isPresent(),
@@ -123,7 +127,7 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
                                             .argument("type ",
                                                     TFString.build(data.elasticInferenceAccelerators().stream()
                                                             .findFirst()
-                                                            .map(r -> r.type())
+                                                            .map(LaunchTemplateElasticInferenceAcceleratorResponse::type)
                                                             .orElse(null)))
                                             .build())
                             .argumentIf(Optional.ofNullable(data.iamInstanceProfile()).isPresent(),
@@ -144,7 +148,7 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
                                             .argument("market_type",
                                                     TFString.build(data.licenseSpecifications().stream()
                                                             .findFirst()
-                                                            .map(r -> r.licenseConfigurationArn())
+                                                            .map(LaunchTemplateLicenseConfiguration::licenseConfigurationArn)
                                                             .orElse(null)))
                                             .build())
                             .argumentIf(Optional.ofNullable(data.metadataOptions()).isPresent(),
@@ -190,14 +194,12 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
         return resourceMapsBuilder.build();
     }
 
-    TFImport getTFImport(List<LaunchTemplateVersion> launchTemplateVersions) {
+    TFImport getTFImport(List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions) {
         return TFImport.builder()
-                .importLines(launchTemplateVersions.stream()
+                .importLines(awsLaunchTemplateVersions.stream()
                         .map(launchTemplateVersion -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_launch_template",
-                                        launchTemplateVersion.launchTemplateName()))
-                                .id(launchTemplateVersion.launchTemplateId())
+                                .address(launchTemplateVersion.getTerraformAddress())
+                                .id(launchTemplateVersion.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
