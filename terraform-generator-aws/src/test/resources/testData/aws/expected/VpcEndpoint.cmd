@@ -1,0 +1,1 @@
+terraform import aws_vpc_endpoint.com-amazonaws-ap-northeast-2-s3 vpce-00012b7ff8c5d5a426
