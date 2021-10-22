@@ -48,7 +48,7 @@ resource aws_api_gateway_integration PetStore-mvv3y4-OPTIONS {
 	connection_type = null
 	connection_id = null
 	uri = null
-	integration_http_method = null
+	integration_http_method = "OPTIONS"
 	request_parameters = {
 	}
 }
@@ -127,7 +127,7 @@ resource aws_api_gateway_integration PetStore-px3r5v-OPTIONS {
 	connection_type = null
 	connection_id = null
 	uri = null
-	integration_http_method = null
+	integration_http_method = "OPTIONS"
 	request_parameters = {
 	}
 }

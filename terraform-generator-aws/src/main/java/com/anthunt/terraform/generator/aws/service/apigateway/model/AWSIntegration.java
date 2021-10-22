@@ -4,26 +4,21 @@ import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import software.amazon.awssdk.services.apigateway.model.GetMethodResponse;
+import software.amazon.awssdk.services.apigateway.model.GetIntegrationResponse;
 
 import java.text.MessageFormat;
 
 @Data
 @ToString
 @Builder
-public class AWSMethod implements TerraformSource {
+public class AWSIntegration implements TerraformSource {
 
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_method";
-
-    private String restApiId;
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_integration";
 
     private String restApiName;
-
+    private String restApiId;
     private String resourceId;
-
-    private GetMethodResponse method;
-
-    private AWSIntegration awsIntegration;
+    private GetIntegrationResponse integration;
 
     @Override
     public String getTerraformResourceName() {
@@ -32,11 +27,11 @@ public class AWSMethod implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return MessageFormat.format("{0}/{1}/{2}", restApiName, resourceId, method.httpMethod());
+        return MessageFormat.format("{0}/{1}/{2}", restApiName, resourceId, integration.httpMethod());
     }
 
     @Override
     public String getResourceName() {
-        return MessageFormat.format("{0}-{1}-{2}", restApiName, resourceId, method.httpMethod());
+        return MessageFormat.format("{0}-{1}-{2}", restApiName, resourceId, integration.httpMethod());
     }
 }

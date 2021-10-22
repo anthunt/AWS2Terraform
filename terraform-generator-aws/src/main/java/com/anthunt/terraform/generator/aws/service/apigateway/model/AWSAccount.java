@@ -3,23 +3,19 @@ package com.anthunt.terraform.generator.aws.service.apigateway.model;
 import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Singular;
 import lombok.ToString;
-import software.amazon.awssdk.services.apigateway.model.RestApi;
+import software.amazon.awssdk.services.apigateway.model.GetAccountResponse;
 
-import java.util.List;
+import java.text.MessageFormat;
 
 @Data
 @ToString
 @Builder
-public class AWSRestApiResource implements TerraformSource {
+public class AWSAccount implements TerraformSource {
 
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_resource";
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_api_gateway_account";
 
-    private RestApi restApi;
-
-    @Singular
-    private List<AWSResource> awsResources;
+    private GetAccountResponse account;
 
     @Override
     public String getTerraformResourceName() {
@@ -28,11 +24,13 @@ public class AWSRestApiResource implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return null;
+        return "api-gateway-account";
     }
 
     @Override
     public String getResourceName() {
-        return restApi.id();
+        return MessageFormat.format("{0}-{1}",
+                "account",
+                account.cloudwatchRoleArn().split(":")[4]);
     }
 }
