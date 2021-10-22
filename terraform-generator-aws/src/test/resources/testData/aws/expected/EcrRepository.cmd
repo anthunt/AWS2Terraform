@@ -1,2 +1,2 @@
-terraform import aws_ecr_repository.envoyproxy/envoy envoyproxy/envoy
+terraform import aws_ecr_repository.envoyproxy-envoy envoyproxy/envoy
 terraform import aws_ecr_repository.openjdk openjdk

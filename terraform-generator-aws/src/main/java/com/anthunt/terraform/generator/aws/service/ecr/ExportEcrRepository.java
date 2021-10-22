@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.ecr;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.ecr.model.AWSRepository;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -16,7 +17,6 @@ import software.amazon.awssdk.services.ecr.EcrClient;
 import software.amazon.awssdk.services.ecr.model.DescribeRepositoriesResponse;
 import software.amazon.awssdk.services.ecr.model.Repository;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,29 +26,33 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
 
     @Override
     protected Maps<Resource> export(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<Repository> repositories = listRepositories(client);
-        return getResourceMaps(repositories);
+        List<AWSRepository> awsRepositories = listAwsRepositories(client);
+        return getResourceMaps(awsRepositories);
     }
 
     @Override
     protected TFImport scriptImport(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<Repository> repositories = listRepositories(client);
-        return getTFImport(repositories);
+        List<AWSRepository> awsRepositories = listAwsRepositories(client);
+        return getTFImport(awsRepositories);
     }
 
-    List<Repository> listRepositories(EcrClient client) {
+    List<AWSRepository> listAwsRepositories(EcrClient client) {
         DescribeRepositoriesResponse describeRepositoriesResponse = client.describeRepositories();
-        return describeRepositoriesResponse.repositories();
+        return describeRepositoriesResponse.repositories().stream()
+                .map(repository -> AWSRepository.builder()
+                        .repository(repository)
+                        .build())
+                .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<Repository> repositories) {
+    Maps<Resource> getResourceMaps(List<AWSRepository> awsRepositories) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (Repository repository : repositories) {
-
+        for (AWSRepository awsRepository : awsRepositories) {
+            Repository repository = awsRepository.getRepository();
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_ecr_repository")
-                                    .name(repository.repositoryName().replaceAll("/", "-"))
+                                    .api(awsRepository.getTerraformResourceName())
+                                    .name(awsRepository.getResourceName())
                                     .argument("name", TFString.build(repository.repositoryName()))
                                     .argument("encryption_configuration", TFMap.builder()
                                             .map("encryption_type", TFString.build(repository.encryptionConfiguration().encryptionType().toString()))
@@ -64,14 +68,12 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
         return resourceMapsBuilder.build();
     }
 
-    TFImport getTFImport(List<Repository> repositories) {
+    TFImport getTFImport(List<AWSRepository> awsRepositories) {
         return TFImport.builder()
-                .importLines(repositories.stream()
-                        .map(repository -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_ecr_repository",
-                                        repository.repositoryName()))
-                                .id(repository.repositoryName())
+                .importLines(awsRepositories.stream()
+                        .map(awsRepository -> TFImportLine.builder()
+                                .address(awsRepository.getTerraformAddress())
+                                .id(awsRepository.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
