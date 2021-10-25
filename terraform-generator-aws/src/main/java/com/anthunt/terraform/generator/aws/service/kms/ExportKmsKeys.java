@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.kms;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsAlias;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKey;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKeyPolicy;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
@@ -19,7 +20,6 @@ import software.amazon.awssdk.services.kms.model.*;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,10 +60,13 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
                                         .build())
                                 .collect(Collectors.toList())
                         )
-                        .aliases(client.listAliases(ListAliasesRequest.builder()
+                        .awsKmsAliases(client.listAliases(ListAliasesRequest.builder()
                                         .keyId(key.keyId())
+                                        .build()).aliases().stream()
+                                .map(entry -> AWSKmsAlias.builder()
+                                        .alias(entry)
                                         .build())
-                                .aliases())
+                                .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -75,8 +78,8 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
             List<AWSKmsKeyPolicy> awsKeyPolicies = awsKmsKey.getAwsKeyPolicies();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_kms_key")
-                            .name(getResourceName(keyMetadata.keyId()))
+                            .api(awsKmsKey.getTerraformResourceName())
+                            .name(awsKmsKey.getResourceName())
                             .argument("description", TFString.build(keyMetadata.description()))
                             .argument("key_usage", TFString.build(keyMetadata.keyUsageAsString()))
                             .argument("deletion_window_in_days", TFNumber.builder()
@@ -98,30 +101,21 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
                             .build()
             );
 
-            awsKmsKey.getAliases().forEach(aliasListEntry ->
-                    resourceMapsBuilder.map(
-                            Resource.builder()
-                                    .api("aws_kms_alias")
-                                    .name(getKmsAliasResourceName(aliasListEntry.aliasName()))
-                                    .argument("name", TFString.build(aliasListEntry.aliasName()))
-                                    .argument("target_key_id", TFString.build(aliasListEntry.targetKeyId()))
-                                    .build()
-                    )
+            List<AWSKmsAlias> awsKmsAliases = awsKmsKey.getAwsKmsAliases();
+            awsKmsAliases.forEach(awsKmsAlias -> {
+                AliasListEntry aliasListEntry = awsKmsAlias.getAlias();
+                        resourceMapsBuilder.map(
+                                Resource.builder()
+                                        .api(awsKmsAlias.getTerraformResourceName())
+                                        .name(awsKmsAlias.getResourceName())
+                                        .argument("name", TFString.build(aliasListEntry.aliasName()))
+                                        .argument("target_key_id", TFString.build(aliasListEntry.targetKeyId()))
+                                        .build()
+                        );
+                    }
             );
         }
         return resourceMapsBuilder.build();
-    }
-
-    private String getKmsAliasResourceName(String aliasName) {
-        return aliasName.startsWith("alias/") ? aliasName.split("/")[1] : aliasName;
-    }
-
-    private String getResourceName(String keyId) {
-        return MessageFormat.format("key-{0}", keyId);
-    }
-
-    private String decodeURL(String origin) {
-        return URLDecoder.decode(origin, StandardCharsets.UTF_8);
     }
 
     TFImport getTFImport(List<AWSKmsKey> awsKmsKeys) {
@@ -129,18 +123,15 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
 
         awsKmsKeys.forEach(awsKmsKey -> {
                     tfImportBuilder.importLine(TFImportLine.builder()
-                            .address(MessageFormat.format("{0}.{1}",
-                                    "aws_kms_key",
-                                    getResourceName(awsKmsKey.getKeyMetadata().keyId())))
-                            .id(awsKmsKey.getKeyMetadata().keyId())
+                            .address(awsKmsKey.getTerraformAddress())
+                            .id(awsKmsKey.getResourceId())
                             .build());
 
-                    awsKmsKey.getAliases().forEach(alias ->
+            List<AWSKmsAlias> awsKmsAliases = awsKmsKey.getAwsKmsAliases();
+            awsKmsAliases.forEach(awsKmsAlias ->
                             tfImportBuilder.importLine(TFImportLine.builder()
-                                    .address(MessageFormat.format("{0}.{1}",
-                                            "aws_kms_alias",
-                                            getResourceName(getKmsAliasResourceName(alias.aliasName()))))
-                                    .id(awsKmsKey.getKeyMetadata().keyId())
+                                    .address(awsKmsAlias.getTerraformAddress())
+                                    .id(awsKmsAlias.getResourceId())
                                     .build())
                     );
                 }
