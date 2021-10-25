@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.iam;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicy;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
@@ -41,16 +42,17 @@ class ExportIamRolePolicesTest {
         client = amazonClients.getIamClient();
     }
 
-    private List<GetRolePolicyResponse> getGetRolePolicyResponses() {
+    private List<AWSRolePolicy> getAwsRolePolicies() {
         return List.of(
-                GetRolePolicyResponse.builder()
-                        .roleName("role-packer-base")
-                        .policyName("policy-eks-describe")
-                        .policyDocument(URLEncoder.encode(TestDataFileUtils.asString(
-                                        resourceLoader.getResource("testData/aws/input/IamRolePolicyDocument.json")),
-                                StandardCharsets.UTF_8))
+                AWSRolePolicy.builder()
+                        .rolePolicy(GetRolePolicyResponse.builder()
+                                .roleName("role-packer-base")
+                                .policyName("policy-eks-describe")
+                                .policyDocument(URLEncoder.encode(TestDataFileUtils.asString(
+                                                resourceLoader.getResource("testData/aws/input/IamRolePolicyDocument.json")),
+                                        StandardCharsets.UTF_8))
+                                .build())
                         .build()
-
         );
     }
 
@@ -58,24 +60,25 @@ class ExportIamRolePolicesTest {
     @DisabledOnNoAwsCredentials
     public void getRolePolices() {
 
-        List<GetRolePolicyResponse> rolePolices = exportIamRolePolices.listRolePolices(client);
+        List<AWSRolePolicy> awsRolePolicies = exportIamRolePolices.listRolePolices(client);
 
-        log.debug("roles => {}", rolePolices);
-        rolePolices.stream()
-                .map(rolePolicy ->
-                        GetRolePolicyResponse.builder()
-                                .policyName(rolePolicy.policyName())
-                                .roleName(rolePolicy.roleName())
-                                .policyDocument(JsonUtils.toPrettyFormat(
-                                        URLDecoder.decode(rolePolicy.policyDocument(), StandardCharsets.UTF_8)))
-                                .build())
+        log.debug("roles => {}", awsRolePolicies);
+        awsRolePolicies.stream()
+                .map(awsRolePolicy -> {
+                    GetRolePolicyResponse rolePolicy = awsRolePolicy.getRolePolicy();
+                    return GetRolePolicyResponse.builder()
+                            .policyName(rolePolicy.policyName())
+                            .roleName(rolePolicy.roleName())
+                            .policyDocument(JsonUtils.toPrettyFormat(
+                                    URLDecoder.decode(rolePolicy.policyDocument(), StandardCharsets.UTF_8)))
+                            .build();
+                })
                 .forEach(role -> log.debug("role => {}", role.toString()));
     }
 
     @Test
     public void getResourceMaps() {
-        List<GetRolePolicyResponse> rolePolices = getGetRolePolicyResponses();
-        Maps<Resource> resourceMaps = exportIamRolePolices.getResourceMaps(rolePolices);
+        Maps<Resource> resourceMaps = exportIamRolePolices.getResourceMaps(getAwsRolePolicies());
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -88,7 +91,7 @@ class ExportIamRolePolicesTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamRolePolicy.cmd"));
-        String actual = exportIamRolePolices.getTFImport(getGetRolePolicyResponses()).script();
+        String actual = exportIamRolePolices.getTFImport(getAwsRolePolicies()).script();
 
         assertEquals(expected, actual);
     }
