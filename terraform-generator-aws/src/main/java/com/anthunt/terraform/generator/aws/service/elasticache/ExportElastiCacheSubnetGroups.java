@@ -55,13 +55,13 @@ public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheCli
 
     Maps<Resource> getResourceMaps(List<AWSCacheSubnetGroup> awsCacheSubnetGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsCacheSubnetGroups.forEach(AWSCacheSubnetGroup -> {
-            CacheSubnetGroup cacheSubnetGroup = AWSCacheSubnetGroup.getCacheSubnetGroup();
-            List<Tag> tags = AWSCacheSubnetGroup.getTags();
+        awsCacheSubnetGroups.forEach(awsCacheSubnetGroup -> {
+            CacheSubnetGroup cacheSubnetGroup = awsCacheSubnetGroup.getCacheSubnetGroup();
+            List<Tag> tags = awsCacheSubnetGroup.getTags();
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_elasticache_subnet_group")
-                                    .name(cacheSubnetGroup.cacheSubnetGroupName())
+                                    .api(awsCacheSubnetGroup.getTerraformResourceName())
+                                    .name(awsCacheSubnetGroup.getResourceName())
                                     .argument("name", TFString.build(cacheSubnetGroup.cacheSubnetGroupName()))
                                     .argument("subnet_ids", TFList.builder().isLineIndent(false)
                                             .lists(cacheSubnetGroup.subnets().stream()
@@ -88,10 +88,8 @@ public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheCli
         return TFImport.builder()
                 .importLines(awsCacheSubnetGroups.stream()
                         .map(awsCacheSubnetGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_elasticache_subnet_group",
-                                        awsCacheSubnetGroup.getCacheSubnetGroup().cacheSubnetGroupName()))
-                                .id(awsCacheSubnetGroup.getCacheSubnetGroup().cacheSubnetGroupName())
+                                .address(awsCacheSubnetGroup.getTerraformAddress())
+                                .id(awsCacheSubnetGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

@@ -54,13 +54,13 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
 
     Maps<Resource> getResourceMaps(List<AWSCacheCluster> awsCacheClusters) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsCacheClusters.stream().forEach(awsCacheCluster -> {
+        awsCacheClusters.forEach(awsCacheCluster -> {
             CacheCluster cacheCluster = awsCacheCluster.getCacheCluster();
             List<Tag> tags = awsCacheCluster.getTags();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_elasticache_cluster")
-                            .name(cacheCluster.cacheClusterId())
+                            .api(awsCacheCluster.getTerraformResourceName())
+                            .name(awsCacheCluster.getResourceName())
                             .argument("cluster_id", TFString.build(cacheCluster.cacheClusterId()))
                             .argument("node_type", TFString.build(cacheCluster.cacheNodeType()))
                             .argument("num_cache_nodes", TFNumber.build(cacheCluster.numCacheNodes()))
@@ -93,10 +93,8 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
         return TFImport.builder()
                 .importLines(awsCacheClusters.stream()
                         .map(awsCacheCluster -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_elasticache_cluster",
-                                        awsCacheCluster.getCacheCluster().cacheClusterId()))
-                                .id(awsCacheCluster.getCacheCluster().cacheClusterId())
+                                .address(awsCacheCluster.getTerraformAddress())
+                                .id(awsCacheCluster.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

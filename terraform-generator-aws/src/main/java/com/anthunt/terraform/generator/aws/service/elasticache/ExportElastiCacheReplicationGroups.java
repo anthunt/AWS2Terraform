@@ -58,14 +58,14 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
 
     Maps<Resource> getResourceMaps(List<AWSCacheReplicationGroup> awsCacheReplicationGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        awsCacheReplicationGroups.stream().forEach(awsCacheReplicationGroup -> {
+        awsCacheReplicationGroups.forEach(awsCacheReplicationGroup -> {
             ReplicationGroup replicationGroup = awsCacheReplicationGroup.getReplicationGroup();
             CacheCluster cacheCluster = awsCacheReplicationGroup.getCacheClusters().stream().findFirst().get();
             List<Tag> tags = awsCacheReplicationGroup.getTags();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_elasticache_replication_group")
-                            .name(replicationGroup.replicationGroupId())
+                            .api(awsCacheReplicationGroup.getTerraformResourceName())
+                            .name(awsCacheReplicationGroup.getResourceName())
                             .argument("replication_group_id", TFString.build(replicationGroup.replicationGroupId()))
                             .argument("replication_group_description", TFString.build(replicationGroup.description()))
                             .argument("node_type", TFString.build(replicationGroup.cacheNodeType()))
@@ -78,7 +78,7 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
                             .argument("auth_token", TFBool.build(replicationGroup.authTokenEnabled()))
                             .argument("auto_minor_version_upgrade", TFBool.build(cacheCluster.autoMinorVersionUpgrade()))
                             .argument("automatic_failover_enabled", TFString.build(replicationGroup.automaticFailoverAsString()))
-                            .argument("number_cache_clusters", TFNumber.build(awsCacheReplicationGroup.getCacheClusters().stream().count()))
+                            .argument("number_cache_clusters", TFNumber.build(awsCacheReplicationGroup.getCacheClusters().size()))
                             .argument("snapshot_retention_limit", TFString.build(replicationGroup.snapshotRetentionLimit().toString()))
                             .argument("snapshot_window", TFString.build(replicationGroup.snapshotWindow()))
                             .argument("subnet_group_name", TFString.build(cacheCluster.cacheSubnetGroupName()))
@@ -90,9 +90,9 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
                             .argumentIf(replicationGroup.clusterEnabled(),
                                     "cluster_mode",
                                     TFBlock.builder()
-                                            .argument("num_node_groups", TFNumber.build(replicationGroup.nodeGroups().stream().count()))
+                                            .argument("num_node_groups", TFNumber.build(replicationGroup.nodeGroups().size()))
                                             .argument("replicas_per_node_group", TFNumber.build(replicationGroup.nodeGroups().stream()
-                                                    .findFirst().get().nodeGroupMembers().stream().count()))
+                                                    .findFirst().get().nodeGroupMembers().size()))
                                             .build()
                             )
                             .argument("tags", TFMap.build(
@@ -110,10 +110,8 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
         return TFImport.builder()
                 .importLines(awsCacheReplicationGroups.stream()
                         .map(awsCacheReplicationGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_elasticache_replication_group",
-                                        awsCacheReplicationGroup.getReplicationGroup().replicationGroupId()))
-                                .id(awsCacheReplicationGroup.getReplicationGroup().replicationGroupId())
+                                .address(awsCacheReplicationGroup.getTerraformAddress())
+                                .id(awsCacheReplicationGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
