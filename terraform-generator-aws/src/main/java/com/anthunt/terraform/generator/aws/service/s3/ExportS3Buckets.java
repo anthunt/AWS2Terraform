@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -102,10 +101,10 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
             List<Tag> tags = awsBucket.getTags();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_s3_bucket")
-                            .name(bucket.name())
+                            .api(awsBucket.getTerraformResourceName())
+                            .name(awsBucket.getResourceName())
                             .argument("bucket", TFString.build(bucket.name()))
-                            .argumentsIf(acl != null,
+                            .argumentsIf(Optional.ofNullable(acl).isPresent(),
                                     "grant",
                                     () -> acl.grants().stream()
                                             .map(grant -> TFBlock.builder()
@@ -279,10 +278,8 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
         return TFImport.builder()
                 .importLines(awsBuckets.stream()
                         .map(awsBucket -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_s3_bucket",
-                                        awsBucket.getBucket().name()))
-                                .id(awsBucket.getBucket().name())
+                                .address(awsBucket.getTerraformAddress())
+                                .id(awsBucket.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
