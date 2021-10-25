@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.*;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,8 +64,8 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
             List<Tag> tags = awsDbClusterParameterGroup.getTags();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_rds_cluster_parameter_group")
-                            .name(parameterGroup.dbClusterParameterGroupName())
+                            .api(awsDbClusterParameterGroup.getTerraformResourceName())
+                            .name(awsDbClusterParameterGroup.getResourceName())
                             .argument("name", TFString.build(parameterGroup.dbClusterParameterGroupName()))
                             .argument("family", TFString.build(parameterGroup.dbParameterGroupFamily()))
                             .argument("description", TFString.build(parameterGroup.description()))
@@ -93,10 +92,8 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
         return TFImport.builder()
                 .importLines(awsRdsClusterParameterGroups.stream()
                         .map(awsRdsClusterParameterGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_rds_cluster_parameter_group",
-                                        awsRdsClusterParameterGroup.getDbClusterParameterGroup().dbClusterParameterGroupName()))
-                                .id(awsRdsClusterParameterGroup.getDbClusterParameterGroup().dbClusterParameterGroupName())
+                                .address(awsRdsClusterParameterGroup.getTerraformAddress())
+                                .id(awsRdsClusterParameterGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
