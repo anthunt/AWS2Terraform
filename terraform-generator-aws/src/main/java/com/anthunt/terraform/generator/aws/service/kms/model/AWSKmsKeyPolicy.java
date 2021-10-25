@@ -10,5 +10,4 @@ import lombok.ToString;
 public class AWSKmsKeyPolicy {
     private String name;
     private String policy;
-
 }

@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.kms;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsAlias;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKey;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKeyPolicy;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
@@ -55,9 +56,11 @@ class ExportKmsKeysTest {
                                 .policy(TestDataFileUtils.asString(
                                         resourceLoader.getResource("testData/aws/input/KmsKeyPolicyDocument.json")))
                                 .build())
-                        .alias(AliasListEntry.builder()
-                                .aliasName("alias/DEV-RDS-KMS")
-                                .targetKeyId("13c8b4cd-15dc-4e15-84d7-4ee98788fe5e")
+                        .awsKmsAlias(AWSKmsAlias.builder()
+                                .alias(AliasListEntry.builder()
+                                        .aliasName("alias/DEV-RDS-KMS")
+                                        .targetKeyId("13c8b4cd-15dc-4e15-84d7-4ee98788fe5e")
+                                        .build())
                                 .build())
                         .build());
     }
