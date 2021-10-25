@@ -60,8 +60,8 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
             List<Tag> tags = awsRdsSubnetGroup.getTags();
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_db_subnet_group")
-                                    .name(dbSubnetGroup.dbSubnetGroupName())
+                                    .api(awsRdsSubnetGroup.getTerraformResourceName())
+                                    .name(awsRdsSubnetGroup.getResourceName())
                                     .argument("name", TFString.build(dbSubnetGroup.dbSubnetGroupName()))
                                     .argument("subnet_ids", TFList.builder().isLineIndent(false)
                                             .lists(dbSubnetGroup.subnets().stream()
@@ -85,10 +85,8 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
         return TFImport.builder()
                 .importLines(awsRdsSubnetGroups.stream()
                         .map(awsRdsSubnetGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_db_subnet_group",
-                                        awsRdsSubnetGroup.getDbSubnetGroup().dbSubnetGroupName()))
-                                .id(awsRdsSubnetGroup.getDbSubnetGroup().dbSubnetGroupName())
+                                .address(awsRdsSubnetGroup.getTerraformAddress())
+                                .id(awsRdsSubnetGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

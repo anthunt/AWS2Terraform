@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.service.rds;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsInstance;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -59,19 +60,22 @@ class ExportRdsClustersTest {
                                 .deletionProtection(true)
                                 .tagList(Tag.builder().key("Name").value("rds-dev").build())
                                 .build())
-                        .dbClusterInstances(List.of(DBInstance.builder()
-                                .dbInstanceIdentifier("rds-dev-cluster-instance-1")
-                                .dbClusterIdentifier("rds-dev-cluster")
-                                .availabilityZone("ap-northeast-2c")
-                                .dbInstanceClass("db.t3.medium")
-                                .engine("aurora-postgresql")
-                                .engineVersion("11.9")
-                                .dbSubnetGroup(DBSubnetGroup.builder().dbSubnetGroupName("rdsgrp-dev").build())
-                                .monitoringInterval(60)
-                                .monitoringRoleArn("arn:aws:iam::100020003000:role/rds-monitoring-role")
-                                .performanceInsightsEnabled(true)
-                                .tagList(Tag.builder().key("Name").value("rds-dev").build())
-                                .build()))
+                        .awsRdsInstances(List.of(AWSRdsInstance.builder()
+                                .dbInstance(DBInstance.builder()
+                                        .dbInstanceIdentifier("rds-dev-cluster-instance-1")
+                                        .dbClusterIdentifier("rds-dev-cluster")
+                                        .availabilityZone("ap-northeast-2c")
+                                        .dbInstanceClass("db.t3.medium")
+                                        .engine("aurora-postgresql")
+                                        .engineVersion("11.9")
+                                        .dbSubnetGroup(DBSubnetGroup.builder().dbSubnetGroupName("rdsgrp-dev").build())
+                                        .monitoringInterval(60)
+                                        .monitoringRoleArn("arn:aws:iam::100020003000:role/rds-monitoring-role")
+                                        .performanceInsightsEnabled(true)
+                                        .tagList(Tag.builder().key("Name").value("rds-dev").build())
+                                        .build())
+                                .build())
+                        )
                         .build()
         );
     }

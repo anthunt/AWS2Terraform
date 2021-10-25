@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
+import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsInstance;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -43,12 +44,16 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                 .peek(dbCuster -> log.debug("dbCuster => {}", dbCuster))
                 .map(dbCuster -> AWSRdsCluster.builder()
                         .dbCluster(dbCuster)
-                        .dbClusterInstances(OptionalUtils.getExceptionAsOptional(() ->
+                        .awsRdsInstances(OptionalUtils.getExceptionAsOptional(() ->
                                         client.describeDBInstances(DescribeDbInstancesRequest.builder()
                                                         .filters(f -> f.name("db-cluster-id")
                                                                 .values(dbCuster.dbClusterArn()))
                                                         .build())
-                                                .dbInstances())
+                                                .dbInstances().stream()
+                                                .map(dbInstance -> AWSRdsInstance.builder()
+                                                        .dbInstance(dbInstance)
+                                                        .build())
+                                                .collect(Collectors.toList()))
                                 .orElse(null))
                         .build())
                 .collect(Collectors.toList());
@@ -58,11 +63,11 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         awsRdsClusters.forEach(awsDbCluster -> {
             DBCluster dbCluster = awsDbCluster.getDbCluster();
-            List<DBInstance> dbClusterInstances = awsDbCluster.getDbClusterInstances();
+            List<AWSRdsInstance> awsRdsInstances = awsDbCluster.getAwsRdsInstances();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_rds_cluster")
-                            .name(dbCluster.dbClusterIdentifier())
+                            .api(awsDbCluster.getTerraformResourceName())
+                            .name(awsDbCluster.getResourceName())
                             .argument("cluster_identifier", TFString.build(dbCluster.dbClusterIdentifier()))
                             .argument("engine", TFString.build(dbCluster.engine()))
                             .argument("engine_version", TFString.build(dbCluster.engineVersion()))
@@ -93,32 +98,34 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
                             ))
                             .build());
 
-            dbClusterInstances.forEach(dbInstance ->
-                    resourceMapsBuilder.map(
-                            Resource.builder()
-                                    .api("aws_rds_cluster_instance")
-                                    .name(dbInstance.dbInstanceIdentifier())
-                                    .argument("identifier", TFString.build(dbInstance.dbInstanceIdentifier()))
-                                    .argument("cluster_identifier", TFString.build(dbInstance.dbClusterIdentifier()))
-                                    .argument("availability_zone", TFString.build(dbInstance.availabilityZone()))
-                                    .argument("instance_class", TFString.build(dbInstance.dbInstanceClass()))
-                                    .argument("engine", TFString.build(dbInstance.engine()))
-                                    .argument("engine_version", TFString.build(dbInstance.engineVersion()))
-                                    .argument("db_subnet_group_name", TFString.build(dbInstance.dbSubnetGroup().dbSubnetGroupName()))
-                                    .argument("monitoring_interval", TFNumber.build(dbInstance.monitoringInterval().toString()))
-                                    .argument("monitoring_role_arn", TFString.build(dbInstance.monitoringRoleArn()))
-                                    .argument("performance_insights_enabled", TFBool.build(dbInstance.performanceInsightsEnabled()))
-                                    .argument("tags", TFMap.build(
-                                            dbInstance.tagList().stream()
-                                                    .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value()))))
-                                    )
-                                    .argument("depends_on", TFList.builder().list(
-                                                    TFExpression.builder().isLineIndent(false)
-                                                            .expression(MessageFormat.format("aws_rds_cluster.{0}", dbInstance.dbClusterIdentifier()))
-                                                            .build())
-                                            .build()
-                                    )
-                                    .build())
+            awsRdsInstances.forEach(awsRdsInstance -> {
+                        DBInstance dbInstance = awsRdsInstance.getDbInstance();
+                        resourceMapsBuilder.map(
+                                Resource.builder()
+                                        .api(awsRdsInstance.getTerraformResourceName())
+                                        .name(awsRdsInstance.getResourceName())
+                                        .argument("identifier", TFString.build(dbInstance.dbInstanceIdentifier()))
+                                        .argument("cluster_identifier", TFString.build(dbInstance.dbClusterIdentifier()))
+                                        .argument("availability_zone", TFString.build(dbInstance.availabilityZone()))
+                                        .argument("instance_class", TFString.build(dbInstance.dbInstanceClass()))
+                                        .argument("engine", TFString.build(dbInstance.engine()))
+                                        .argument("engine_version", TFString.build(dbInstance.engineVersion()))
+                                        .argument("db_subnet_group_name", TFString.build(dbInstance.dbSubnetGroup().dbSubnetGroupName()))
+                                        .argument("monitoring_interval", TFNumber.build(dbInstance.monitoringInterval().toString()))
+                                        .argument("monitoring_role_arn", TFString.build(dbInstance.monitoringRoleArn()))
+                                        .argument("performance_insights_enabled", TFBool.build(dbInstance.performanceInsightsEnabled()))
+                                        .argument("tags", TFMap.build(
+                                                dbInstance.tagList().stream()
+                                                        .collect(Collectors.toMap(Tag::key, tag -> TFString.build(tag.value()))))
+                                        )
+                                        .argument("depends_on", TFList.builder().list(
+                                                        TFExpression.builder().isLineIndent(false)
+                                                                .expression(MessageFormat.format("aws_rds_cluster.{0}", dbInstance.dbClusterIdentifier()))
+                                                                .build())
+                                                .build()
+                                        )
+                                        .build());
+                    }
             );
         });
 
@@ -128,21 +135,16 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
     TFImport getTFImport(List<AWSRdsCluster> awsRdsClusters) {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
         awsRdsClusters.forEach(awsRdsCluster -> {
-                    List<DBInstance> dbClusterInstances = awsRdsCluster.getDbClusterInstances();
-                    DBCluster dbCluster = awsRdsCluster.getDbCluster();
+                    List<AWSRdsInstance> awsRdsInstances = awsRdsCluster.getAwsRdsInstances();
                     tfImportBuilder.importLine(TFImportLine.builder()
-                            .address(MessageFormat.format("{0}.{1}",
-                                    "aws_rds_cluster",
-                                    dbCluster.dbClusterIdentifier()))
-                            .id(dbCluster.dbClusterIdentifier())
+                            .address(awsRdsCluster.getTerraformAddress())
+                            .id(awsRdsCluster.getResourceId())
                             .build()
                     );
-                    dbClusterInstances.forEach(dbInstance ->
+                    awsRdsInstances.forEach(awsRdsInstance ->
                             tfImportBuilder.importLine(TFImportLine.builder()
-                                    .address(MessageFormat.format("{0}.{1}",
-                                            "aws_rds_cluster_instance",
-                                            dbInstance.dbInstanceIdentifier()))
-                                    .id(dbInstance.dbInstanceIdentifier())
+                                    .address(awsRdsInstance.getTerraformAddress())
+                                    .id(awsRdsInstance.getResourceId())
                                     .build()
                             )
                     );

@@ -14,9 +14,11 @@ import com.anthunt.terraform.generator.core.model.terraform.nodes.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.rds.RdsClient;
-import software.amazon.awssdk.services.rds.model.*;
+import software.amazon.awssdk.services.rds.model.DescribeOptionGroupsResponse;
+import software.amazon.awssdk.services.rds.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.rds.model.OptionGroup;
+import software.amazon.awssdk.services.rds.model.Tag;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,8 +63,8 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
 
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_db_option_group")
-                            .name(getResourceName(optionGroup.optionGroupName()))
+                            .api(awsRdsOptionGroup.getTerraformResourceName())
+                            .name(awsRdsOptionGroup.getResourceName())
                             .argument("name", TFString.build(optionGroup.optionGroupName()))
                             .argument("engine_name", TFString.build(optionGroup.engineName()))
                             .argument("major_engine_version", TFString.build(optionGroup.majorEngineVersion()))
@@ -94,22 +96,13 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String getResourceName(String optionGroupName) {
-        return optionGroupName;
-    }
-
     TFImport getTFImport(List<AWSRdsOptionGroup> awsRdsOptionGroups) {
         return TFImport.builder()
                 .importLines(awsRdsOptionGroups.stream()
-                        .map(awsRdsOptionGroup -> {
-                                    OptionGroup optionGroup = awsRdsOptionGroup.getOptionGroup();
-                                    return TFImportLine.builder()
-                                            .address(MessageFormat.format("{0}.{1}",
-                                                    "aws_db_option_group",
-                                                    getResourceName(optionGroup.optionGroupName())))
-                                            .id(optionGroup.optionGroupName())
-                                            .build();
-                                }
+                        .map(awsRdsOptionGroup -> TFImportLine.builder()
+                                .address(awsRdsOptionGroup.getTerraformAddress())
+                                .id(awsRdsOptionGroup.getResourceId())
+                                .build()
                         ).collect(Collectors.toList()))
                 .build();
     }
