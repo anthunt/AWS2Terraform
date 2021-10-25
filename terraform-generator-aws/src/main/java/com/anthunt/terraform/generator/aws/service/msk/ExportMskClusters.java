@@ -53,8 +53,8 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
 //            Map<String, String> tags = awsEksCluster.getTags();
             resourceMapsBuilder
                     .map(Resource.builder()
-                            .api("aws_msk_cluster")
-                            .name(cluster.clusterName())
+                            .api(awsMskCluster.getTerraformResourceName())
+                            .name(awsMskCluster.getResourceName())
                             .argument("cluster_name", TFString.build(cluster.clusterName()))
                             .argument("kafka_version", TFString.build(cluster.currentBrokerSoftwareInfo().kafkaVersion()))
                             .argument("number_of_broker_nodes", TFNumber.build(cluster.numberOfBrokerNodes()))
@@ -94,10 +94,8 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
         return TFImport.builder()
                 .importLines(awsMskClusters.stream()
                         .map(awsMskCluster -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_msk_cluster",
-                                        awsMskCluster.getClusterInfo().clusterName()))
-                                .id(awsMskCluster.getClusterInfo().clusterArn())
+                                .address(awsMskCluster.getTerraformAddress())
+                                .id(awsMskCluster.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
