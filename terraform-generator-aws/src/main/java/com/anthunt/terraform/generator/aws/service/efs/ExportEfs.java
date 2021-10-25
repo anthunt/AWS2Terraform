@@ -3,8 +3,12 @@ package com.anthunt.terraform.generator.aws.service.efs;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSBackupPolicy;
 import com.anthunt.terraform.generator.aws.service.efs.model.AWSEfs;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSFileSystemPolicy;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSMountTarget;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
+import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -44,57 +48,48 @@ public class ExportEfs extends AbstractExport<EfsClient> {
 //                .peek(fileSystem -> log.debug("fileSystem => {}", fileSystem))
                 .map(fileSystem -> AWSEfs.builder()
                         .fileSystemDescription(fileSystem)
-                        .backupPolicyStatus(getBackupPolicyStatus(client, fileSystem.fileSystemId()))
-                        .fileSystemPolicy(getFileSystemPolicy(client, fileSystem.fileSystemId()))
-                        .mountTargets(getMountTargets(client, fileSystem.fileSystemId()))
+                        .awsBackupPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSBackupPolicy.builder()
+                                        .backupPolicy(client.describeBackupPolicy(DescribeBackupPolicyRequest.builder()
+                                                        .fileSystemId(fileSystem.fileSystemId())
+                                                        .build())
+                                                .backupPolicy()
+                                        )
+                                        .build())
+                                .orElse(null))
+                        .awsFileSystemPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSFileSystemPolicy.builder()
+                                .fileSystemDescription(fileSystem)
+                                .fileSystemPolicy(
+                                        URLDecoder.decode(
+                                                client.describeFileSystemPolicy(DescribeFileSystemPolicyRequest.builder()
+                                                                .fileSystemId(fileSystem.fileSystemId())
+                                                                .build())
+                                                        .policy()
+                                                , StandardCharsets.UTF_8))
+                                .build()).orElse(null))
+                        .awsMountTargets(OptionalUtils.getExceptionAsOptional(() ->
+                                        client.describeMountTargets(DescribeMountTargetsRequest.builder()
+                                                        .fileSystemId(fileSystem.fileSystemId())
+                                                        .build())
+                                                .mountTargets().stream()
+                                                .map(mountTarget -> AWSMountTarget.builder()
+                                                        .mountTarget(mountTarget)
+                                                        .build())
+                                                .collect(Collectors.toList()))
+                                .orElse(null))
                         .build())
-                .peek(AWSEfs -> log.debug("fileSystemPolicy => {}", AWSEfs.getFileSystemPolicy()))
+                .peek(AWSEfs -> log.debug("fileSystemPolicy => {}", AWSEfs.getAwsFileSystemPolicy()))
                 .collect(Collectors.toList());
 
-    }
-
-    private String getBackupPolicyStatus(EfsClient client, String fileSystemId) {
-        try {
-            return client.describeBackupPolicy(DescribeBackupPolicyRequest.builder()
-                    .fileSystemId(fileSystemId)
-                    .build()).backupPolicy().statusAsString();
-        } catch (PolicyNotFoundException e) {
-            // normal case
-            return null;
-        }
-    }
-
-    private String getFileSystemPolicy(EfsClient client, String fileSystemId) {
-        try {
-            return URLDecoder.decode(client.describeFileSystemPolicy(DescribeFileSystemPolicyRequest.builder()
-                    .fileSystemId(fileSystemId)
-                    .build()).policy(), StandardCharsets.UTF_8);
-        } catch (PolicyNotFoundException e) {
-            // normal case
-            return null;
-        }
-    }
-
-    private List<MountTargetDescription> getMountTargets(EfsClient client, String fileSystemId) {
-        try {
-            return client.describeMountTargets(DescribeMountTargetsRequest.builder()
-                    .fileSystemId(fileSystemId)
-                    .build()).mountTargets();
-        } catch (MountTargetNotFoundException e) {
-            // normal case
-            return null;
-        }
     }
 
     Maps<Resource> getResourceMaps(List<AWSEfs> awsEfses) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
         for (AWSEfs awsEfs : awsEfses) {
             FileSystemDescription fileSystem = awsEfs.getFileSystemDescription();
-
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_efs_file_system")
-                                    .name(getEfsFileSystemResourceName(fileSystem))
+                                    .api(awsEfs.getTerraformResourceName())
+                                    .name(awsEfs.getResourceName())
                                     .argument("encrypted", TFBool.build(fileSystem.encrypted()))
                                     .argument("kms_key_id", TFString.build(fileSystem.kmsKeyId()))
                                     .argument("performance_mode", TFString.build(fileSystem.performanceModeAsString()))
@@ -108,51 +103,58 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                                     ))
                                     .build())
                     .build();
-            if (awsEfs.getMountTargets() != null) {
-                awsEfs.getMountTargets().forEach(mountTarget ->
-                        resourceMapsBuilder.map(
-                                        Resource.builder()
-                                                .api("aws_efs_mount_target")
-                                                .name(getEfsMountTargetResourceName(mountTarget))
-                                                .argument("file_system_id", TFExpression.builder()
-                                                        .expression(MessageFormat.format("aws_efs_file_system.{0}.id",
-                                                                getEfsFileSystemResourceName(fileSystem)))
-                                                        .build())
-                                                .argument("subnet_id", TFExpression.builder()
-                                                        .expression(MessageFormat.format("aws_subnet.{0}.id", mountTarget.subnetId()))
-                                                        .build())
-                                                .build())
-                                .build()
+            
+            List<AWSMountTarget> awsMountTargets = awsEfs.getAwsMountTargets();
+            if (awsMountTargets != null) {
+                awsMountTargets.forEach(awsMountTarget -> {
+                    MountTargetDescription mountTarget = awsMountTarget.getMountTarget();
+                    resourceMapsBuilder.map(
+                                            Resource.builder()
+                                                    .api(awsMountTarget.getTerraformResourceName())
+                                                    .name(awsMountTarget.getResourceName())
+                                                    .argument("file_system_id", TFExpression.builder()
+                                                            .expression(MessageFormat.format("aws_efs_file_system.{0}.id",
+                                                                    awsEfs.getResourceName()))
+                                                            .build())
+                                                    .argument("subnet_id", TFExpression.builder()
+                                                            .expression(MessageFormat.format("aws_subnet.{0}.id", mountTarget.subnetId()))
+                                                            .build())
+                                                    .build())
+                                    .build();
+                        }
                 );
 
             }
-            if (awsEfs.getFileSystemPolicy() != null) {
+
+            AWSFileSystemPolicy awsFileSystemPolicy = awsEfs.getAwsFileSystemPolicy();
+            if (awsFileSystemPolicy != null) {
                 resourceMapsBuilder.map(
                                 Resource.builder()
-                                        .api("aws_efs_file_system_policy")
-                                        .name(getEfsFileSystemPolicyResourceName(fileSystem))
+                                        .api(awsFileSystemPolicy.getTerraformResourceName())
+                                        .name(awsFileSystemPolicy.getResourceName())
                                         .argument("file_system_id", TFExpression.builder()
                                                 .expression(MessageFormat.format("aws_efs_file_system.{0}.id",
-                                                        getEfsFileSystemResourceName(fileSystem)))
+                                                        awsEfs.getResourceName()))
                                                 .build())
                                         .argument("policy", TFString.builder().isMultiline(true).value(
-                                                        JsonUtils.toPrettyFormat(awsEfs.getFileSystemPolicy()))
+                                                        JsonUtils.toPrettyFormat(awsFileSystemPolicy.getFileSystemPolicy()))
                                                 .build())
                                         .build())
                         .build();
             }
 
-            if (awsEfs.getBackupPolicyStatus() != null) {
+            AWSBackupPolicy awsBackupPolicy = awsEfs.getAwsBackupPolicy();
+            if (Optional.ofNullable(awsBackupPolicy).isPresent()) {
                 resourceMapsBuilder.map(
                                 Resource.builder()
-                                        .api("aws_efs_backup_policy")
-                                        .name(getEfsBackupPolicyResourceName(fileSystem))
+                                        .api(awsBackupPolicy.getTerraformResourceName())
+                                        .name(awsBackupPolicy.getResourceName())
                                         .argument("file_system_id", TFExpression.builder()
                                                 .expression(MessageFormat.format("aws_efs_file_system.{0}.id",
-                                                        getEfsFileSystemResourceName(fileSystem)))
+                                                        awsEfs.getResourceName()))
                                                 .build())
                                         .argument("backup_policy", TFMap.builder()
-                                                .map("status", TFString.build(awsEfs.getBackupPolicyStatus()))
+                                                .map("status", TFString.build(awsBackupPolicy.getBackupPolicy().statusAsString()))
                                                 .build())
                                         .build())
                         .build();
@@ -161,59 +163,36 @@ public class ExportEfs extends AbstractExport<EfsClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String getEfsMountTargetResourceName(MountTargetDescription mountTarget) {
-        return mountTarget.mountTargetId();
-    }
-
-    private String getEfsBackupPolicyResourceName(FileSystemDescription fileSystem) {
-        return getEfsFileSystemResourceName(fileSystem);
-    }
-
-    private String getEfsFileSystemPolicyResourceName(FileSystemDescription fileSystem) {
-        return getEfsFileSystemResourceName(fileSystem) + "-policy";
-    }
-
-    private String getEfsFileSystemResourceName(FileSystemDescription fileSystem) {
-        return fileSystem.tags().stream()
-                .filter(tag -> tag.key().equals("Name"))
-                .findFirst()
-                .map(Tag::value).orElse(fileSystem.fileSystemId());
-    }
-
     TFImport getTFImport(List<AWSEfs> awsEfses) {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
         awsEfses.forEach(awsEfs -> {
             tfImportBuilder.importLine(TFImportLine.builder()
-                    .address(MessageFormat.format("{0}.{1}",
-                            "aws_efs_file_system",
-                            getEfsFileSystemResourceName(awsEfs.getFileSystemDescription())))
-                    .id(awsEfs.getFileSystemDescription().fileSystemId())
+                    .address(awsEfs.getTerraformAddress())
+                    .id(awsEfs.getResourceId())
                     .build());
 
-            if (awsEfs.getMountTargets() != null) {
-                awsEfs.getMountTargets().forEach(mountTarget -> tfImportBuilder.importLine(TFImportLine.builder()
-                        .address(MessageFormat.format("{0}.{1}",
-                                "aws_efs_mount_target",
-                                getEfsMountTargetResourceName(mountTarget)))
-                        .id(mountTarget.mountTargetId())
+            List<AWSMountTarget> awsMountTargets = awsEfs.getAwsMountTargets();
+
+            if (Optional.ofNullable(awsMountTargets).isPresent()) {
+                awsMountTargets.forEach(awsMountTarget -> tfImportBuilder.importLine(TFImportLine.builder()
+                        .address(awsMountTarget.getTerraformAddress())
+                        .id(awsMountTarget.getResourceId())
                         .build()));
             }
 
-            if (awsEfs.getFileSystemPolicy() != null) {
+            AWSFileSystemPolicy awsFileSystemPolicy = awsEfs.getAwsFileSystemPolicy();
+            if (Optional.ofNullable(awsFileSystemPolicy).isPresent()) {
                 tfImportBuilder.importLine(TFImportLine.builder()
-                        .address(MessageFormat.format("{0}.{1}",
-                                "aws_efs_file_system_policy",
-                                getEfsFileSystemPolicyResourceName(awsEfs.getFileSystemDescription())))
-                        .id(awsEfs.getFileSystemDescription().fileSystemId())
+                        .address(awsFileSystemPolicy.getTerraformAddress())
+                        .id(awsFileSystemPolicy.getResourceId())
                         .build());
             }
 
-            if (awsEfs.getBackupPolicyStatus() != null) {
+            AWSBackupPolicy awsBackupPolicy = awsEfs.getAwsBackupPolicy();
+            if (Optional.ofNullable(awsBackupPolicy).isPresent()) {
                 tfImportBuilder.importLine(TFImportLine.builder()
-                        .address(MessageFormat.format("{0}.{1}",
-                                "aws_efs_backup_policy",
-                                getEfsBackupPolicyResourceName(awsEfs.getFileSystemDescription())))
-                        .id(awsEfs.getFileSystemDescription().fileSystemId())
+                        .address(awsBackupPolicy.getTerraformAddress())
+                        .id(awsBackupPolicy.getResourceId())
                         .build());
             }
 

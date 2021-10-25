@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.ecr;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.ecr.model.AWSRepository;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -19,7 +20,7 @@ import software.amazon.awssdk.services.ecr.model.Repository;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
@@ -39,32 +40,35 @@ class ExportEcrRepositoryTest {
         client = amazonClients.getEcrClient();
     }
 
-    private List<Repository> getRepositories() {
-        List<Repository> repositories = List.of(
-                Repository.builder()
-                        .repositoryName("envoyproxy/envoy")
-                        .encryptionConfiguration(EncryptionConfiguration.builder()
-                                .encryptionType("AES256")
-                                .kmsKey(null)
-                                .build())
-                        .imageTagMutability("MUTABLE")
-                        .imageScanningConfiguration(ImageScanningConfiguration.builder()
-                                .scanOnPush(false)
+    private List<AWSRepository> getRepositories() {
+        return List.of(
+                AWSRepository.builder()
+                        .repository(Repository.builder()
+                                .repositoryName("envoyproxy/envoy")
+                                .encryptionConfiguration(EncryptionConfiguration.builder()
+                                        .encryptionType("AES256")
+                                        .kmsKey(null)
+                                        .build())
+                                .imageTagMutability("MUTABLE")
+                                .imageScanningConfiguration(ImageScanningConfiguration.builder()
+                                        .scanOnPush(false)
+                                        .build())
                                 .build())
                         .build(),
-                Repository.builder()
-                        .repositoryName("openjdk")
-                        .encryptionConfiguration(EncryptionConfiguration.builder()
-                                .encryptionType("AES256")
-                                .kmsKey(null)
-                                .build())
-                        .imageTagMutability("MUTABLE")
-                        .imageScanningConfiguration(ImageScanningConfiguration.builder()
-                                .scanOnPush(false)
+                AWSRepository.builder()
+                        .repository(Repository.builder()
+                                .repositoryName("openjdk")
+                                .encryptionConfiguration(EncryptionConfiguration.builder()
+                                        .encryptionType("AES256")
+                                        .kmsKey(null)
+                                        .build())
+                                .imageTagMutability("MUTABLE")
+                                .imageScanningConfiguration(ImageScanningConfiguration.builder()
+                                        .scanOnPush(false)
+                                        .build())
                                 .build())
                         .build()
         );
-        return repositories;
     }
 
     @Test
@@ -76,9 +80,9 @@ class ExportEcrRepositoryTest {
 
     @Test
     public void getResourceMaps() {
-        List<Repository> repositories = getRepositories();
+        List<AWSRepository> awsRepositories = getRepositories();
 
-        Maps<Resource> resourceMaps = exportEcrRepository.getResourceMaps(repositories);
+        Maps<Resource> resourceMaps = exportEcrRepository.getResourceMaps(awsRepositories);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);

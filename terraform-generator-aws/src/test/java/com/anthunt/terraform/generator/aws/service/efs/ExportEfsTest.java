@@ -1,7 +1,10 @@
 package com.anthunt.terraform.generator.aws.service.efs;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSBackupPolicy;
 import com.anthunt.terraform.generator.aws.service.efs.model.AWSEfs;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSFileSystemPolicy;
+import com.anthunt.terraform.generator.aws.service.efs.model.AWSMountTarget;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -14,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.efs.EfsClient;
+import software.amazon.awssdk.services.efs.model.BackupPolicy;
 import software.amazon.awssdk.services.efs.model.FileSystemDescription;
 import software.amazon.awssdk.services.efs.model.MountTargetDescription;
 import software.amazon.awssdk.services.efs.model.Tag;
@@ -41,39 +45,52 @@ class ExportEfsTest {
     }
 
     private List<AWSEfs> getAwsEfs() {
+        FileSystemDescription fileSystemDescription1 = FileSystemDescription.builder()
+                .fileSystemId("fs-5af144c6")
+                .encrypted(true)
+                .kmsKeyId("arn:aws:kms:ap-northeast-2:100020003000:key/1000ffff-2210-472f-ad29-2c2f4ef0c4e2")
+                .performanceMode("generalPurpose")
+                .throughputMode("bursting")
+                .provisionedThroughputInMibps(null)
+                .tags(Tag.builder().key("Name").value("efs-test-app").build(),
+                        Tag.builder().key("aws:elasticfilesystem:default-backup").value("enabled").build())
+                .build();
+        FileSystemDescription fileSystemDescription2 = FileSystemDescription.builder()
+                .fileSystemId("fs-6fa144c6")
+                .encrypted(false)
+                .kmsKeyId(null)
+                .performanceMode("generalPurpose")
+                .throughputMode("bursting")
+                .provisionedThroughputInMibps(null)
+                .build();
         return List.of(
-                AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
-                                .fileSystemId("fs-5af144c6")
-                                .encrypted(true)
-                                .kmsKeyId("arn:aws:kms:ap-northeast-2:100020003000:key/1000ffff-2210-472f-ad29-2c2f4ef0c4e2")
-                                .performanceMode("generalPurpose")
-                                .throughputMode("bursting")
-                                .provisionedThroughputInMibps(null)
-                                .tags(Tag.builder().key("Name").value("efs-test-app").build(),
-                                        Tag.builder().key("aws:elasticfilesystem:default-backup").value("enabled").build())
+                AWSEfs.builder().fileSystemDescription(fileSystemDescription1)
+                        .awsBackupPolicy(AWSBackupPolicy.builder()
+                                .fileSystemDescription(fileSystemDescription1)
+                                .backupPolicy(BackupPolicy.builder()
+                                        .status("ENABLED")
+                                        .build()).build())
+                        .awsFileSystemPolicy(AWSFileSystemPolicy.builder()
+                                .fileSystemDescription(fileSystemDescription1)
+                                .fileSystemPolicy(TestDataFileUtils.asString(
+                                        resourceLoader.getResource("testData/aws/input/FileSystemPolicyDocument.json")))
                                 .build())
-                        .backupPolicyStatus("ENABLED")
-                        .fileSystemPolicy(TestDataFileUtils.asString(
-                                resourceLoader.getResource("testData/aws/input/FileSystemPolicyDocument.json")))
-                        .mountTargets(List.of(
-                                MountTargetDescription.builder()
-                                        .mountTargetId("fsmt-01020304")
-                                        .subnetId("subnet-01020304")
+                        .awsMountTargets(List.of(
+                                AWSMountTarget.builder()
+                                        .mountTarget(MountTargetDescription.builder()
+                                                .mountTargetId("fsmt-01020304")
+                                                .subnetId("subnet-01020304")
+                                                .build())
                                         .build(),
-                                MountTargetDescription.builder()
-                                        .mountTargetId("fsmt-02030405")
-                                        .subnetId("subnet-02020304")
+                                AWSMountTarget.builder()
+                                        .mountTarget(MountTargetDescription.builder()
+                                                .mountTargetId("fsmt-02030405")
+                                                .subnetId("subnet-02020304")
+                                                .build())
                                         .build()
                         ))
                         .build(),
-                AWSEfs.builder().fileSystemDescription(FileSystemDescription.builder()
-                                .fileSystemId("fs-6fa144c6")
-                                .encrypted(false)
-                                .kmsKeyId(null)
-                                .performanceMode("generalPurpose")
-                                .throughputMode("bursting")
-                                .provisionedThroughputInMibps(null)
-                                .build())
+                AWSEfs.builder().fileSystemDescription(fileSystemDescription2)
                         .build()
         );
     }

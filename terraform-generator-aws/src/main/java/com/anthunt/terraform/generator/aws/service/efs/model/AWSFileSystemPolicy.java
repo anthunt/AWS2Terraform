@@ -7,19 +7,16 @@ import lombok.ToString;
 import software.amazon.awssdk.services.efs.model.FileSystemDescription;
 import software.amazon.awssdk.services.efs.model.Tag;
 
-import java.util.List;
-
 @Data
 @Builder
 @ToString
-public class AWSEfs implements TerraformSource {
+public class AWSFileSystemPolicy implements TerraformSource {
 
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_efs_file_system";
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_efs_file_system_policy";
+
+    private String fileSystemPolicy;
 
     private FileSystemDescription fileSystemDescription;
-    private AWSBackupPolicy awsBackupPolicy;
-    private AWSFileSystemPolicy awsFileSystemPolicy;
-    private List<AWSMountTarget> awsMountTargets;
 
     @Override
     public String getTerraformResourceName() {
@@ -36,6 +33,8 @@ public class AWSEfs implements TerraformSource {
         return fileSystemDescription.tags().stream()
                 .filter(tag -> tag.key().equals("Name"))
                 .findFirst()
-                .map(Tag::value).orElse(fileSystemDescription.fileSystemId());
+                .map(Tag::value)
+                .orElse(fileSystemDescription.fileSystemId());
+
     }
 }
