@@ -90,7 +90,7 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
             Map<String, String> tags = awsEksCluster.getTags();
             resourceMapsBuilder
                     .map(Resource.builder()
-                            .api("aws_eks_cluster")
+                            .api(awsEksCluster.getTerraformResourceName())
                             .name(cluster.name())
                             .argument("name", TFString.build(cluster.name()))
                             .argument("role_arn", TFString.build(cluster.roleArn()))
@@ -161,7 +161,7 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
                         log.debug("nodegroup.diskSize => {}", nodegroup.diskSize());
                         resourceMapsBuilder
                                 .map(Resource.builder()
-                                        .api("aws_eks_node_group")
+                                        .api(awsEksNodegroup.getTerraformResourceName())
                                         .name(nodegroup.nodegroupName())
 
                                         .argument("cluster_name", TFString.build(nodegroup.clusterName()))
@@ -175,7 +175,7 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
                                         .argument("ami_type", TFString.build(nodegroup.amiTypeAsString()))
                                         .argument("capacity_type", TFString.build(nodegroup.capacityTypeAsString()))
                                         .argument("disk_size", TFNumber.build(Optional.ofNullable(nodegroup.diskSize())
-                                                .map(diskSize -> diskSize.toString()).orElse(null)))
+                                                .map(Object::toString).orElse(null)))
                                         .argument("instance_types", TFList.build(nodegroup.instanceTypes().stream()
                                                 .map(instanceType -> TFString.builder().isLineIndent(false).value(instanceType)
                                                         .build())
@@ -239,12 +239,11 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
         return TFImport.builder()
                 .importLines(awsEksClusters.stream()
                         .map(awsEksCluster -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_eks_cluster",
-                                        awsEksCluster.getCluster().name()))
-                                .id(awsEksCluster.getCluster().name())
+                                .address(awsEksCluster.getTerraformAddress())
+                                .id(awsEksCluster.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
+        //TODO: add import AWSEKSNodeGroup
     }
 }

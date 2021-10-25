@@ -112,7 +112,7 @@ public class ExportEfs extends AbstractExport<EfsClient> {
                 awsEfs.getMountTargets().forEach(mountTarget ->
                         resourceMapsBuilder.map(
                                         Resource.builder()
-                                                .api("aws_efs_mount_target")
+                                                .api(awsEfs.getTerraformResourceName())
                                                 .name(getEfsMountTargetResourceName(mountTarget))
                                                 .argument("file_system_id", TFExpression.builder()
                                                         .expression(MessageFormat.format("aws_efs_file_system.{0}.id",
@@ -184,10 +184,8 @@ public class ExportEfs extends AbstractExport<EfsClient> {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
         awsEfses.forEach(awsEfs -> {
             tfImportBuilder.importLine(TFImportLine.builder()
-                    .address(MessageFormat.format("{0}.{1}",
-                            "aws_efs_file_system",
-                            getEfsFileSystemResourceName(awsEfs.getFileSystemDescription())))
-                    .id(awsEfs.getFileSystemDescription().fileSystemId())
+                    .address(awsEfs.getTerraformAddress())
+                    .id(awsEfs.getResourceId())
                     .build());
 
             if (awsEfs.getMountTargets() != null) {
