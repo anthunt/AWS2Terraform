@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.elb;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroupAttachment;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -47,13 +48,17 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                                                 .targetGroupArn(targetGroup.targetGroupArn())
                                                 .build())
                                         .attributes())
-                        .targetDescriptions(
+                        .awsTargetGroupAttachments(
                                 client.describeTargetHealth(DescribeTargetHealthRequest.builder()
                                                 .targetGroupArn(targetGroup.targetGroupArn())
                                                 .build())
                                         .targetHealthDescriptions().stream()
-                                        .map(TargetHealthDescription::target)
-                                        .collect(Collectors.toList()))
+                                        .map(targetHealthDescription -> AWSTargetGroupAttachment.builder()
+                                                .targetGroupName(targetGroup.targetGroupName())
+                                                .targetDescription(targetHealthDescription.target())
+                                                .build())
+                                        .collect(Collectors.toList())
+                        )
                         .tags(
                                 client.describeTags(DescribeTagsRequest.builder()
                                                 .resourceArns(targetGroup.targetGroupArn())
@@ -81,8 +86,8 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
 
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_lb_target_group")
-                            .name(targetGroup.targetGroupName())
+                            .api(awsTargetGroup.getTerraformResourceName())
+                            .name(awsTargetGroup.getResourceName())
                             .argument("name", TFString.build(targetGroup.targetGroupName()))
                             .argument("port", TFNumber.build(targetGroup.port()))
                             .argument("protocol", TFString.build(targetGroup.protocolAsString()))
@@ -119,33 +124,36 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
                             ).build()
             );
 
-            awsTargetGroup.getTargetDescriptions().forEach(targetDescription ->
-                    resourceMapsBuilder.map(
-                            Resource.builder()
-                                    .api("aws_lb_target_group_attachment")
-                                    .name(MessageFormat.format("{0}-{1}", targetGroup.targetGroupName(), targetDescription.id())
-                                            .replaceAll("\\.", "-"))
-                                    .argument("target_group_arn ", TFExpression.build(
-                                            MessageFormat.format("aws_lb_target_group.{0}.arn",
-                                                    targetGroup.targetGroupName())))
-                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
-                                            "target_id", TFExpression.build(
-                                                    MessageFormat.format("aws_instance.{0}.id",
-                                                            targetDescription.id())))
-                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
-                                            "target_id", TFString.build(targetDescription.id()))
-                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
-                                            "target_id", TFExpression.build(
-                                                    MessageFormat.format("aws_lambda_function.{0}.arn",
-                                                            targetDescription.id())))
-                                    .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
-                                            "port", TFNumber.build(targetDescription.port()))
-                                    //Todo: not implemented
+            List<AWSTargetGroupAttachment> awsTargetGroupAttachments = awsTargetGroup.getAwsTargetGroupAttachments();
+
+            awsTargetGroupAttachments.forEach(awsTargetGroupAttachment -> {
+                        TargetDescription targetDescription = awsTargetGroupAttachment.getTargetDescription();
+                        resourceMapsBuilder.map(
+                                Resource.builder()
+                                        .api(awsTargetGroupAttachment.getTerraformResourceName())
+                                        .name(awsTargetGroupAttachment.getResourceName())
+                                        .argument("target_group_arn ", TFExpression.build(
+                                                MessageFormat.format("aws_lb_target_group.{0}.arn",
+                                                        targetGroup.targetGroupName())))
+                                        .argumentIf(targetGroup.targetType() == TargetTypeEnum.INSTANCE,
+                                                "target_id", TFExpression.build(
+                                                        MessageFormat.format("aws_instance.{0}.id",
+                                                                targetDescription.id())))
+                                        .argumentIf(targetGroup.targetType() == TargetTypeEnum.IP,
+                                                "target_id", TFString.build(targetDescription.id()))
+                                        .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
+                                                "target_id", TFExpression.build(
+                                                        MessageFormat.format("aws_lambda_function.{0}.arn",
+                                                                targetDescription.id())))
+                                        .argumentIf(targetGroup.targetType() != TargetTypeEnum.LAMBDA,
+                                                "port", TFNumber.build(targetDescription.port()))
+                                        //Todo: not implemented
 //                                    .argumentIf(targetGroup.targetType() == TargetTypeEnum.LAMBDA,
 //                                            "depends_on", TFExpression.build(
 //                                                    MessageFormat.format("aws_lambda_permission.{0}",
 //                                                            "xxxx")))
-                                    .build())
+                                        .build());
+                    }
             );
         }
         return resourceMapsBuilder.build();
@@ -155,13 +163,12 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
         return TFImport.builder()
                 .importLines(awsTargetGroups.stream()
                         .map(awsTargetGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_lb_target_group",
-                                        awsTargetGroup.getTargetGroup().targetGroupName()))
-                                .id(awsTargetGroup.getTargetGroup().targetGroupArn())
+                                .address(awsTargetGroup.getTerraformAddress())
+                                .id(awsTargetGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
+        // Target Group Attachments cannot be imported.
     }
 
 }

@@ -62,8 +62,8 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
             List<Tag> tags = awsElasticsearchDomain.getTags();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_elasticsearch_domain")
-                            .name(domainStatus.domainName())
+                            .api(awsElasticsearchDomain.getTerraformResourceName())
+                            .name(awsElasticsearchDomain.getResourceName())
                             .argument("domain_name", TFString.build(domainStatus.domainName()))
                             .argument("elasticsearch_version", TFString.build(domainStatus.elasticsearchVersion()))
                             .argument("cluster_config", TFBlock.builder()
@@ -194,10 +194,8 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
         return TFImport.builder()
                 .importLines(awsElasticsearchDomains.stream()
                         .map(awsElasticsearchDomain -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_elasticsearch_domain",
-                                        awsElasticsearchDomain.getElasticsearchDomainStatus().domainName()))
-                                .id(awsElasticsearchDomain.getElasticsearchDomainStatus().domainName())
+                                .address(awsElasticsearchDomain.getTerraformAddress())
+                                .id(awsElasticsearchDomain.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

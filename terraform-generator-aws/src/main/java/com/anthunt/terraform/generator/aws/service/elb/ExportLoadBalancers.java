@@ -74,8 +74,8 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
             List<Tag> tags = awsLoadBalancer.getTags();
             resourceMapsBuilder.map(
                             Resource.builder()
-                                    .api("aws_lb")
-                                    .name(loadBalancer.loadBalancerName())
+                                    .api(awsLoadBalancer.getTerraformResourceName())
+                                    .name(awsLoadBalancer.getResourceName())
                                     .argument("name", TFString.build(loadBalancer.loadBalancerName()))
                                     .argument("internal", TFBool.build(loadBalancer.scheme() == LoadBalancerSchemeEnum.INTERNAL))
                                     .argument("load_balancer_type", TFString.build(loadBalancer.typeAsString()))
@@ -151,10 +151,8 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
         return TFImport.builder()
                 .importLines(awsLoadBalancers.stream()
                         .map(awsLoadBalancer -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_lb",
-                                        awsLoadBalancer.getLoadBalancer().loadBalancerName()))
-                                .id(awsLoadBalancer.getLoadBalancer().loadBalancerArn())
+                                .address(awsLoadBalancer.getTerraformAddress())
+                                .id(awsLoadBalancer.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
