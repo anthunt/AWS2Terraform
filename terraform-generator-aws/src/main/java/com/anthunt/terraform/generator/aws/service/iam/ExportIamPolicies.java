@@ -19,7 +19,6 @@ import software.amazon.awssdk.services.iam.model.Policy;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -65,8 +64,8 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
             String document = awsPolicy.getDocument();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_iam_policy")
-                            .name(policy.policyName())
+                            .api(awsPolicy.getTerraformResourceName())
+                            .name(awsPolicy.getResourceName())
                             .argument("name", TFString.build(policy.policyName()))
                             .argument("path", TFString.build(policy.path()))
                             .argument("description", TFString.build(policy.description()))
@@ -85,10 +84,8 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
         return TFImport.builder()
                 .importLines(awsPolicies.stream()
                         .map(awsPolicy -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_iam_policy",
-                                        awsPolicy.getPolicy().policyName()))
-                                .id(awsPolicy.getPolicy().arn())
+                                .address(awsPolicy.getTerraformAddress())
+                                .id(awsPolicy.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

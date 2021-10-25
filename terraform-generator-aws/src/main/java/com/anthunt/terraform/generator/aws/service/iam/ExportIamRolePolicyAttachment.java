@@ -61,8 +61,8 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
         for (AWSRolePolicyAttachment awsRolePolicyAttachment : awsRolePolicyAttachments) {
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_iam_role_policy_attachment")
-                            .name(getResourceName(awsRolePolicyAttachment.getRoleName(), awsRolePolicyAttachment.getPolicyName()))
+                            .api(awsRolePolicyAttachment.getTerraformResourceName())
+                            .name(awsRolePolicyAttachment.getResourceName())
                             .argument("role", TFExpression.build(
                                     MessageFormat.format("aws_iam_role.{0}.name", awsRolePolicyAttachment.getRoleName())))
                             .argument("policy_arn", TFExpression.build(
@@ -73,22 +73,12 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String getResourceName(String roleName, String policyName) {
-        return MessageFormat.format("{0}-attach-{1}", roleName, policyName);
-    }
-
     TFImport getTFImport(List<AWSRolePolicyAttachment> awsRolePolicyAttachments) {
         return TFImport.builder()
                 .importLines(awsRolePolicyAttachments.stream()
                         .map(awsRolePolicyAttachment -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_iam_role_policy_attachment",
-                                        getResourceName(awsRolePolicyAttachment.getRoleName(),
-                                                awsRolePolicyAttachment.getPolicyName())
-                                ))
-                                .id(MessageFormat.format("{0}/{1}",
-                                        awsRolePolicyAttachment.getRoleName(),
-                                        awsRolePolicyAttachment.getPolicyName()))
+                                .address(awsRolePolicyAttachment.getTerraformAddress())
+                                .id(awsRolePolicyAttachment.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

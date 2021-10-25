@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.iam;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSInstanceProfile;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -38,18 +39,21 @@ class ExportIamInstanceProfilesTest {
         client = amazonClients.getIamClient();
     }
 
-    private List<InstanceProfile> getInstanceProfiles() {
+    private List<AWSInstanceProfile> getInstanceProfiles() {
         return List.of(
-                InstanceProfile.builder()
-                        .instanceProfileName("eks-7cbddf86-c0a6-643b-dbdd-85b97c390535")
-                        .roles(Role.builder().roleName("eks-cluster-workernode-role").build())
+                AWSInstanceProfile.builder()
+                        .instanceProfile(InstanceProfile.builder()
+                                .instanceProfileName("eks-7cbddf86-c0a6-643b-dbdd-85b97c390535")
+                                .roles(Role.builder().roleName("eks-cluster-workernode-role").build())
+                                .build())
                         .build(),
-                InstanceProfile.builder()
-                        .instanceProfileName("role-packer-base")
-                        .roles(Role.builder().roleName("role-packer-base").build(),
-                                Role.builder().roleName("role-packer-base2").build())
+                AWSInstanceProfile.builder()
+                        .instanceProfile(InstanceProfile.builder()
+                                .instanceProfileName("role-packer-base")
+                                .roles(Role.builder().roleName("role-packer-base").build(),
+                                        Role.builder().roleName("role-packer-base2").build())
+                                .build())
                         .build()
-
         );
     }
 
@@ -62,7 +66,7 @@ class ExportIamInstanceProfilesTest {
 
     @Test
     public void getResourceMaps() {
-        List<InstanceProfile> instanceProfiles = getInstanceProfiles();
+        List<AWSInstanceProfile> instanceProfiles = getInstanceProfiles();
         Maps<Resource> resourceMaps = exportIamInstanceProfiles.getResourceMaps(instanceProfiles);
         String actual = resourceMaps.unmarshall();
 

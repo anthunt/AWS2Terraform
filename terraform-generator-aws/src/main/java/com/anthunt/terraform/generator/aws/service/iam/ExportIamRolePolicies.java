@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicy;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -30,17 +31,17 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
 
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<GetRolePolicyResponse> rolePolicies = listRolePolices(client);
+        List<AWSRolePolicy> rolePolicies = listRolePolices(client);
         return getResourceMaps(rolePolicies);
     }
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<GetRolePolicyResponse> rolePolicies = listRolePolices(client);
-        return getTFImport(rolePolicies);
+        List<AWSRolePolicy> awsRolePolicies = listRolePolices(client);
+        return getTFImport(awsRolePolicies);
     }
 
-    List<GetRolePolicyResponse> listRolePolices(IamClient client) {
+    List<AWSRolePolicy> listRolePolices(IamClient client) {
         ListRolesResponse listPoliciesResponse = client.listRoles();
         return listPoliciesResponse.roles().stream()
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))
@@ -51,24 +52,27 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
                                         .build())
                                 .policyNames()
                                 .stream()
-                                .map(policyName -> client.getRolePolicy(
-                                        GetRolePolicyRequest.builder()
-                                                .roleName(role.roleName())
-                                                .policyName(policyName)
-                                                .build())
+                                .map(policyName -> AWSRolePolicy.builder()
+                                                .rolePolicy(client.getRolePolicy(
+                                                        GetRolePolicyRequest.builder()
+                                                                .roleName(role.roleName())
+                                                                .policyName(policyName)
+                                                                .build()))
+                                                        .build()
                                 )
                                 .peek(rolePolicy -> log.debug("rolePolicy => {}", rolePolicy))
                 )
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<GetRolePolicyResponse> rolePolicies) {
+    Maps<Resource> getResourceMaps(List<AWSRolePolicy> awsRolePolicies) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (GetRolePolicyResponse rolePolicy : rolePolicies) {
+        for (AWSRolePolicy awsRolePolicy : awsRolePolicies) {
+            GetRolePolicyResponse rolePolicy = awsRolePolicy.getRolePolicy();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_iam_role_policy")
-                            .name(rolePolicy.policyName())
+                            .api(awsRolePolicy.getTerraformResourceName())
+                            .name(awsRolePolicy.getResourceName())
                             .argument("name", TFString.build(rolePolicy.policyName()))
                             .argument("role", TFExpression.build(
                                     MessageFormat.format("aws_iam_role.{0}.id", rolePolicy.roleName())))
@@ -81,20 +85,12 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String decodeURL(String origin) {
-        return URLDecoder.decode(origin, StandardCharsets.UTF_8);
-    }
-
-    TFImport getTFImport(List<GetRolePolicyResponse> getRolePolicyResponses) {
+    TFImport getTFImport(List<AWSRolePolicy> awsRolePolicies) {
         return TFImport.builder()
-                .importLines(getRolePolicyResponses.stream()
-                        .map(rolePolicyResponse -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_iam_role_policy",
-                                        rolePolicyResponse.policyName()))
-                                .id(MessageFormat.format("{0}:{1}",
-                                        rolePolicyResponse.roleName(),
-                                        rolePolicyResponse.policyName()))
+                .importLines(awsRolePolicies.stream()
+                        .map(awsRolePolicy -> TFImportLine.builder()
+                                .address(awsRolePolicy.getTerraformAddress())
+                                .id(awsRolePolicy.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

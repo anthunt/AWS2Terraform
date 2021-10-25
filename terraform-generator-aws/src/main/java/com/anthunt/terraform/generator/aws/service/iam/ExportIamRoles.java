@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.iam;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.iam.model.AWSRole;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -17,7 +18,6 @@ import software.amazon.awssdk.services.iam.model.Role;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,31 +27,32 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
 
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<Role> roles = listRoles(client);
-        return getResourceMaps(roles);
+        List<AWSRole> awsRoles = listAwsRoles(client);
+        return getResourceMaps(awsRoles);
     }
 
     @Override
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<Role> roles = listRoles(client);
-        return getTFImport(roles);
+        List<AWSRole> awsRoles = listAwsRoles(client);
+        return getTFImport(awsRoles);
     }
 
-    List<Role> listRoles(IamClient client) {
+    List<AWSRole> listAwsRoles(IamClient client) {
         ListRolesResponse listPoliciesResponse = client.listRoles();
         return listPoliciesResponse.roles().stream()
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))
+                .map(role -> AWSRole.builder().role(role).build())
                 .collect(Collectors.toList());
     }
 
-    Maps<Resource> getResourceMaps(List<Role> roles) {
+    Maps<Resource> getResourceMaps(List<AWSRole> roles) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (Role role : roles) {
-
+        for (AWSRole awsRole : roles) {
+            Role role = awsRole.getRole();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_iam_role")
-                            .name(role.roleName())
+                            .api(awsRole.getTerraformResourceName())
+                            .name(awsRole.getResourceName())
                             .argument("name", TFString.build(role.roleName()))
                             .argument("path", TFString.build(role.path()))
                             .argument("description", TFString.build(role.description()))
@@ -64,18 +65,12 @@ public class ExportIamRoles extends AbstractExport<IamClient> {
         return resourceMapsBuilder.build();
     }
 
-    private String decodeURL(String origin) {
-        return URLDecoder.decode(origin, StandardCharsets.UTF_8);
-    }
-
-    TFImport getTFImport(List<Role> roles) {
+    TFImport getTFImport(List<AWSRole> awsRoles) {
         return TFImport.builder()
-                .importLines(roles.stream()
-                        .map(role -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_iam_role",
-                                        role.roleName()))
-                                .id(role.roleName())
+                .importLines(awsRoles.stream()
+                        .map(awsRole -> TFImportLine.builder()
+                                .address(awsRole.getTerraformAddress())
+                                .id(awsRole.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
