@@ -15,7 +15,7 @@ buildscript {
 
 allprojects {
     group 'com.anthunt.terraform'
-    version '0.0.1-SNAPSHOT'
+    version '0.0.3-SNAPSHOT'
 }
 
 subprojects {
