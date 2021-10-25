@@ -70,8 +70,8 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
             LoadBalancer loadBalancer = awsListener.getLoadBalancer();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_lb_listener")
-                            .name(getResourceName(loadBalancer.loadBalancerName(), listener.port(), listener.protocolAsString()))
+                            .api(awsListener.getTerraformResourceName())
+                            .name(awsListener.getResourceName())
                             .argument("load_balancer_arn", TFExpression.build(
                                     MessageFormat.format("aws_lb.{0}.arn", loadBalancer.loadBalancerName())))
                             .argument("port", TFNumber.build(listener.port()))
@@ -103,12 +103,8 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
         return TFImport.builder()
                 .importLines(awsListeners.stream()
                         .map(awsListener -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_lb_listener",
-                                        getResourceName(awsListener.getLoadBalancer().loadBalancerName(),
-                                                awsListener.getListener().port(),
-                                                awsListener.getListener().protocolAsString())))
-                                .id(awsListener.getListener().listenerArn())
+                                .address(awsListener.getTerraformAddress())
+                                .id(awsListener.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

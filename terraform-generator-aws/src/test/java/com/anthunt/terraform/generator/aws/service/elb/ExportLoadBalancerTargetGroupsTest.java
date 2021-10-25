@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.service.elb;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroupAttachment;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -59,13 +60,19 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .key("deregistration_delay.timeout_seconds")
                                 .value("300")
                                 .build())
-                        .targetDescription(TargetDescription.builder()
-                                .id("i-00015ef3e99e66157")
-                                .port(30832)
+                        .awsTargetGroupAttachment(AWSTargetGroupAttachment.builder()
+                                .targetGroupName("k8s-ingressn-ingressn-1dab2d3f88")
+                                .targetDescription(TargetDescription.builder()
+                                        .id("i-00015ef3e99e66157")
+                                        .port(30832)
+                                        .build())
                                 .build())
-                        .targetDescription(TargetDescription.builder()
-                                .id("i-00025ef3e99e66157")
-                                .port(30832)
+                        .awsTargetGroupAttachment(AWSTargetGroupAttachment.builder()
+                                .targetGroupName("k8s-ingressn-ingressn-1dab2d3f88")
+                                .targetDescription(TargetDescription.builder()
+                                        .id("i-00025ef3e99e66157")
+                                        .port(30832)
+                                        .build())
                                 .build())
                         .build(),
                 AWSTargetGroup.builder()
@@ -88,9 +95,12 @@ class ExportLoadBalancerTargetGroupsTest {
                                 .key("deregistration_delay.timeout_seconds")
                                 .value("300")
                                 .build())
-                        .targetDescription(TargetDescription.builder()
-                                .id("10.100.1.10")
-                                .port(8080)
+                        .awsTargetGroupAttachment(AWSTargetGroupAttachment.builder()
+                                .targetGroupName("tg-dev-service-was")
+                                .targetDescription(TargetDescription.builder()
+                                        .id("10.100.1.10")
+                                        .port(8080)
+                                        .build())
                                 .build())
                         .build()
         );
