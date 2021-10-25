@@ -20,7 +20,7 @@ resource aws_efs_mount_target fsmt-02030405 {
 	subnet_id = aws_subnet.subnet-02020304.id
 }
 
-resource aws_efs_file_system_policy efs-test-app-policy {
+resource aws_efs_file_system_policy efs-test-app {
 	file_system_id = aws_efs_file_system.efs-test-app.id
 	policy = <<EOF
 {

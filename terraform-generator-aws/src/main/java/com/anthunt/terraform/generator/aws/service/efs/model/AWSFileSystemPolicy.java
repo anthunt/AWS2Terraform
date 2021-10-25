@@ -4,6 +4,8 @@ import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
+import software.amazon.awssdk.services.efs.model.FileSystemDescription;
+import software.amazon.awssdk.services.efs.model.Tag;
 
 @Data
 @Builder
@@ -14,8 +16,7 @@ public class AWSFileSystemPolicy implements TerraformSource {
 
     private String fileSystemPolicy;
 
-    private String fileSystemId;
-
+    private FileSystemDescription fileSystemDescription;
 
     @Override
     public String getTerraformResourceName() {
@@ -24,11 +25,16 @@ public class AWSFileSystemPolicy implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return fileSystemId;
+        return fileSystemDescription.fileSystemId();
     }
 
     @Override
     public String getResourceName() {
-        return fileSystemId;
+        return fileSystemDescription.tags().stream()
+                .filter(tag -> tag.key().equals("Name"))
+                .findFirst()
+                .map(Tag::value)
+                .orElse(fileSystemDescription.fileSystemId());
+
     }
 }
