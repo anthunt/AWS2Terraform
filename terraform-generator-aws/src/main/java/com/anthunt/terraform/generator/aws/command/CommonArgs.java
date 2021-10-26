@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.command;
 
 import com.beust.jcommander.Parameter;
-import lombok.Data;
+import lombok.*;
 
 @Data
 public class CommonArgs {
@@ -15,10 +15,10 @@ public class CommonArgs {
     @Parameter(names = {"help"}, description = "display usage informations.", help = true)
     private boolean isHelp = false;
 
-    @Parameter(names = {"-P", "--profile"}, description = CommonArgs.PROFILE_HELP, required = true)
+    @Parameter(names = {"-P", "--profile"}, description = CommonArgs.PROFILE_HELP)
     private String profile;
 
-    @Parameter(names = {"-R", "--region"}, description = CommonArgs.REGION_HELP, required = true)
+    @Parameter(names = {"-R", "--region"}, description = CommonArgs.REGION_HELP)
     private String region;
 
     @Parameter(names = {"-E", "--explicit"}, description = CommonArgs.EXPLICIT_HELP)
@@ -41,5 +41,4 @@ public class CommonArgs {
 
     @Parameter(names = {"-D", "--delete-output-directory"}, description = "delete output directory before generate.")
     private boolean isDeleteOutputDirectory = true;
-
 }

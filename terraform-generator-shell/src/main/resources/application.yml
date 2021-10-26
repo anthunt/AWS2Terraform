@@ -2,4 +2,4 @@ logging:
   level:
     org.jline: ERROR
     org.springframework: ERROR
-    com.anthunt.terraform.generator: ERROR
+    com.anthunt.terraform.generator: INFO
