@@ -4,16 +4,14 @@ import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.Subnet;
 
 @Data
 @ToString
 @Builder
-public class AWSVpc implements TerraformSource {
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_vpc";
-    private Vpc vpc;
-    private boolean enableDnsSupport;
-    private boolean enableDnsHostnames;
+public class AWSSubnet implements TerraformSource {
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_subnet";
+    private Subnet subnet;
 
     @Override
     public String getTerraformResourceName() {
@@ -22,11 +20,11 @@ public class AWSVpc implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return vpc.vpcId();
+        return subnet.subnetId();
     }
 
     @Override
     public String getResourceName() {
-        return vpc.vpcId();
+        return subnet.subnetId();
     }
 }

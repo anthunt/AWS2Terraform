@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSEgressOnlyInternetGateway;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -31,6 +32,7 @@ class ExportEgressOnlyInternetGatewaysTest {
     private ResourceLoader resourceLoader;
 
     private static Ec2Client client;
+
     @BeforeAll
     public static void beforeAll() {
         exportEgressOnlyInternetGateways = new ExportEgressOnlyInternetGateways();
@@ -38,12 +40,15 @@ class ExportEgressOnlyInternetGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<EgressOnlyInternetGateway> getEgressOnlyInternetGateways() {
+    private List<AWSEgressOnlyInternetGateway> getAwsEgressOnlyInternetGateways() {
         return List.of(
-                EgressOnlyInternetGateway.builder()
-                        .egressOnlyInternetGatewayId("eigw-015e0e244e24dfe8a")
-                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
-                        .tags(Tag.builder().key("Name").value("test").build())
+                AWSEgressOnlyInternetGateway.builder()
+                        .egressOnlyInternetGateway(
+                                EgressOnlyInternetGateway.builder()
+                                        .egressOnlyInternetGatewayId("eigw-015e0e244e24dfe8a")
+                                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
+                                        .tags(Tag.builder().key("Name").value("test").build())
+                                        .build())
                         .build()
         );
     }
@@ -58,7 +63,7 @@ class ExportEgressOnlyInternetGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<EgressOnlyInternetGateway> internetGateways = getEgressOnlyInternetGateways();
+        List<AWSEgressOnlyInternetGateway> internetGateways = getAwsEgressOnlyInternetGateways();
 
         Maps<Resource> resourceMaps = exportEgressOnlyInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
@@ -70,7 +75,7 @@ class ExportEgressOnlyInternetGatewaysTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EgressOnlyInternetGateway.cmd"));
-        String actual = exportEgressOnlyInternetGateways.getTFImport(getEgressOnlyInternetGateways()).script();
+        String actual = exportEgressOnlyInternetGateways.getTFImport(getAwsEgressOnlyInternetGateways()).script();
 
         assertEquals(expected, actual);
     }

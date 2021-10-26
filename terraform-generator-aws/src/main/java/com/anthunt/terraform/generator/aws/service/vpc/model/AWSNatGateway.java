@@ -4,16 +4,14 @@ import com.anthunt.terraform.generator.core.model.terraform.TerraformSource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.ToString;
-import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.NatGateway;
 
 @Data
 @ToString
 @Builder
-public class AWSVpc implements TerraformSource {
-    private static final String TERRAFORM_RESOURCE_NAME = "aws_vpc";
-    private Vpc vpc;
-    private boolean enableDnsSupport;
-    private boolean enableDnsHostnames;
+public class AWSNatGateway implements TerraformSource {
+    private static final String TERRAFORM_RESOURCE_NAME = "aws_nat_gateway";
+    private NatGateway natGateway;
 
     @Override
     public String getTerraformResourceName() {
@@ -22,11 +20,11 @@ public class AWSVpc implements TerraformSource {
 
     @Override
     public String getResourceId() {
-        return vpc.vpcId();
+        return natGateway.natGatewayId();
     }
 
     @Override
     public String getResourceName() {
-        return vpc.vpcId();
+        return natGateway.natGatewayId();
     }
 }

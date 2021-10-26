@@ -75,9 +75,7 @@ public class ExportVpcEndpoints extends AbstractExport<Ec2Client> {
         TFImport.TFImportBuilder tfImportBuilder = TFImport.builder();
         awsVpcEndpoints.forEach(awsVpcEndpoint -> tfImportBuilder.importLine(
                 TFImportLine.builder()
-                        .address(MessageFormat.format("{0}.{1}",
-                                awsVpcEndpoint.getTerraformResourceName(),
-                                awsVpcEndpoint.getResourceName()))
+                        .address(awsVpcEndpoint.getTerraformAddress())
                         .id(awsVpcEndpoint.getResourceId())
                         .build()
         ));

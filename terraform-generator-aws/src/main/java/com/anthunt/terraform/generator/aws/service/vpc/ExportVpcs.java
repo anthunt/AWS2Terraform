@@ -62,8 +62,8 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
             Vpc vpc = awsVpc.getVpc();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_vpc")
-                            .name(vpc.vpcId())
+                            .api(awsVpc.getTerraformResourceName())
+                            .name(awsVpc.getResourceName())
                             .argument("cidr_block", TFString.build(vpc.cidrBlock()))
                             .argument("instance_tenancy", TFString.build(vpc.instanceTenancyAsString()))
                             .argument("enable_dns_support", TFBool.build(awsVpc.isEnableDnsSupport()))
@@ -93,10 +93,8 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
         awsVpcs.forEach(awsVpc -> {
                     Vpc vpc = awsVpc.getVpc();
                     tfImportBuilder.importLine(TFImportLine.builder()
-                            .address(MessageFormat.format("{0}.{1}",
-                                    "aws_vpc",
-                                    vpc.vpcId()))
-                            .id(vpc.vpcId())
+                            .address(awsVpc.getTerraformAddress())
+                            .id(awsVpc.getResourceId())
                             .build()
                     );
                     vpc.cidrBlockAssociationSet().forEach(cidrBlockAssociation ->
