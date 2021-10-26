@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSNatGateway;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -39,13 +40,15 @@ class ExportNatGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<NatGateway> getNatGateways() {
+    private List<AWSNatGateway> getNatGateways() {
         return List.of(
-                NatGateway.builder()
-                        .natGatewayId("nat-05dba92075d71c408")
-                        .natGatewayAddresses(NatGatewayAddress.builder().allocationId("eipalloc-00233be7c04412bd6").build())
-                        .subnetId("subnet-0c70ad21c05c0c464")
-                        .tags(Tag.builder().key("Name").value("test").build())
+                AWSNatGateway.builder()
+                        .natGateway(NatGateway.builder()
+                                .natGatewayId("nat-05dba92075d71c408")
+                                .natGatewayAddresses(NatGatewayAddress.builder().allocationId("eipalloc-00233be7c04412bd6").build())
+                                .subnetId("subnet-0c70ad21c05c0c464")
+                                .tags(Tag.builder().key("Name").value("test").build())
+                                .build())
                         .build()
         );
     }
@@ -62,9 +65,7 @@ class ExportNatGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<NatGateway> natGateways = getNatGateways();
-
-        Maps<Resource> resourceMaps = exportNatGateways.getResourceMaps(natGateways);
+        Maps<Resource> resourceMaps = exportNatGateways.getResourceMaps(getNatGateways());
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/NatGateway.tf"));

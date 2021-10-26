@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSSecurityGroup;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,22 +26,22 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<SecurityGroup> securityGroups = listSecurityGroups(client);
-        return getResourceMaps(securityGroups);
+        List<AWSSecurityGroup> awsSecurityGroups = listAwsSecurityGroups(client);
+        return getResourceMaps(awsSecurityGroups);
     }
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<SecurityGroup> securityGroups = listSecurityGroups(client);
-        return getTFImport(securityGroups);
+        List<AWSSecurityGroup> awsSecurityGroups = listAwsSecurityGroups(client);
+        return getTFImport(awsSecurityGroups);
     }
 
 
-    List<SecurityGroup> listSecurityGroups(Ec2Client client) {
+    List<AWSSecurityGroup> listAwsSecurityGroups(Ec2Client client) {
         DescribeVpcsResponse describeVpcsResponse = client.describeVpcs();
         List<Vpc> vpcs = describeVpcsResponse.vpcs();
 
-        List<SecurityGroup> securityGroups = new ArrayList<>();
+        List<AWSSecurityGroup> awsSecurityGroups = new ArrayList<>();
         for (Vpc vpc : vpcs) {
 
             List<Tag> names = vpc.tags().stream().filter(s -> "Name".equals(s.key())).collect(Collectors.toList());
@@ -55,19 +55,24 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
                             .filters(Filter.builder().name("vpc-id").values(vpc.vpcId()).build())
                             .build()
             );
-            securityGroups.addAll(describeSecurityGroupResponse.securityGroups());
+            awsSecurityGroups.addAll(describeSecurityGroupResponse.securityGroups().stream()
+                    .map(securityGroup -> AWSSecurityGroup.builder()
+                            .securityGroup(securityGroup)
+                            .build())
+                    .collect(Collectors.toList()));
         }
-        return securityGroups;
+        return awsSecurityGroups;
     }
 
-    Maps<Resource> getResourceMaps(List<SecurityGroup> securityGroups) {
+    Maps<Resource> getResourceMaps(List<AWSSecurityGroup> awsSecurityGroups) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
 
-        for (SecurityGroup securityGroup : securityGroups) {
+        for (AWSSecurityGroup awsSecurityGroup : awsSecurityGroups) {
+            SecurityGroup securityGroup = awsSecurityGroup.getSecurityGroup();
             resourceMapsBuilder.map(
                     Resource.builder()
-                            .api("aws_security_group")
-                            .name(securityGroup.groupName())
+                            .api(awsSecurityGroup.getTerraformResourceName())
+                            .name(awsSecurityGroup.getResourceName())
                             .argument("name", TFString.build(securityGroup.groupName()))
                             .argument("description", TFString.build(securityGroup.description()))
                             .argument("vpc_id", TFString.build(securityGroup.vpcId()))
@@ -174,14 +179,12 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
         return ruleList;
     }
 
-    TFImport getTFImport(List<SecurityGroup> securityGroups) {
+    TFImport getTFImport(List<AWSSecurityGroup> awsSecurityGroups) {
         return TFImport.builder()
-                .importLines(securityGroups.stream()
-                        .map(securityGroup -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_security_group",
-                                        securityGroup.groupName()))
-                                .id(securityGroup.groupId())
+                .importLines(awsSecurityGroups.stream()
+                        .map(awsSecurityGroup -> TFImportLine.builder()
+                                .address(awsSecurityGroup.getTerraformAddress())
+                                .id(awsSecurityGroup.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

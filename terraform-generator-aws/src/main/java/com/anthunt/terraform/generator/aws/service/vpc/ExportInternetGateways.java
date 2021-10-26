@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSInternetGateway;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -17,7 +18,6 @@ import software.amazon.awssdk.services.ec2.model.InternetGateway;
 import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,32 +27,37 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<InternetGateway> internetGateways = listInternetGateways(client);
+        List<AWSInternetGateway> internetGateways = listAwsInternetGateways(client);
         return getResourceMaps(internetGateways);
     }
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<InternetGateway> internetGateways = listInternetGateways(client);
-        return getTFImport(internetGateways);
+        List<AWSInternetGateway> awsInternetGateways = listAwsInternetGateways(client);
+        return getTFImport(awsInternetGateways);
     }
 
-    protected List<InternetGateway> listInternetGateways(Ec2Client client) {
+    protected List<AWSInternetGateway> listAwsInternetGateways(Ec2Client client) {
         DescribeInternetGatewaysResponse describeInternetGatewaysResponse = client.describeInternetGateways();
-        return describeInternetGatewaysResponse.internetGateways();
+        return describeInternetGatewaysResponse.internetGateways().stream()
+                .map(internetGateway -> AWSInternetGateway.builder()
+                        .internetGateway(internetGateway)
+                        .build())
+                .collect(Collectors.toList());
     }
 
-    protected Maps<Resource> getResourceMaps(List<InternetGateway> internetGateways) {
+    protected Maps<Resource> getResourceMaps(List<AWSInternetGateway> awsInternetGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (InternetGateway internetGateway : internetGateways) {
+        for (AWSInternetGateway awsInternetGateway : awsInternetGateways) {
 
+            InternetGateway internetGateway = awsInternetGateway.getInternetGateway();
             List<InternetGatewayAttachment> internetGatewayAttachments = internetGateway.attachments();
 
             for (InternetGatewayAttachment internetGatewayAttachment : internetGatewayAttachments) {
                 resourceMapsBuilder.map(
                         Resource.builder()
-                                .api("aws_internet_gateway")
-                                .name(internetGateway.internetGatewayId())
+                                .api(awsInternetGateway.getTerraformResourceName())
+                                .name(awsInternetGateway.getResourceName())
                                 .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
                                 .argument("tags", TFMap.build(
                                         internetGateway.tags().stream()
@@ -65,14 +70,12 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
         return resourceMapsBuilder.build();
     }
 
-    TFImport getTFImport(List<InternetGateway> internetGateways) {
+    TFImport getTFImport(List<AWSInternetGateway> awsInternetGateways) {
         return TFImport.builder()
-                .importLines(internetGateways.stream()
-                        .map(internetGateway -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_internet_gateway",
-                                        internetGateway.internetGatewayId()))
-                                .id(internetGateway.internetGatewayId())
+                .importLines(awsInternetGateways.stream()
+                        .map(awsInternetGateway -> TFImportLine.builder()
+                                .address(awsInternetGateway.getTerraformAddress())
+                                .id(awsInternetGateway.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

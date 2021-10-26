@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSInternetGateway;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -39,12 +40,14 @@ class ExportInternetGatewaysTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<InternetGateway> getInternetGateways() {
+    private List<AWSInternetGateway> getAwsInternetGateways() {
         return List.of(
-                InternetGateway.builder()
-                        .internetGatewayId("igw-c0a643a9")
-                        .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
-                        .tags(Tag.builder().key("Name").value("test").build())
+                AWSInternetGateway.builder()
+                        .internetGateway(InternetGateway.builder()
+                                .internetGatewayId("igw-c0a643a9")
+                                .attachments(InternetGatewayAttachment.builder().vpcId("vpc-0a850bac9c765bfd5").build())
+                                .tags(Tag.builder().key("Name").value("test").build())
+                                .build())
                         .build()
         );
     }
@@ -59,7 +62,7 @@ class ExportInternetGatewaysTest {
     @Test
     void getResourceMaps() {
         // given
-        List<InternetGateway> internetGateways = getInternetGateways();
+        List<AWSInternetGateway> internetGateways = getAwsInternetGateways();
 
         Maps<Resource> resourceMaps = exportInternetGateways.getResourceMaps(internetGateways);
         String actual = resourceMaps.unmarshall();
@@ -71,7 +74,7 @@ class ExportInternetGatewaysTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/InternetGateway.cmd"));
-        String actual = exportInternetGateways.getTFImport(getInternetGateways()).script();
+        String actual = exportInternetGateways.getTFImport(getAwsInternetGateways()).script();
 
         assertEquals(expected, actual);
     }

@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSSubnet;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -37,31 +38,37 @@ class ExportSubnetsTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<Subnet> getSubnets() {
+    private List<AWSSubnet> getAwsSubnets() {
         return List.of(
-                Subnet.builder()
-                        .subnetId("subnet-01020304")
-                        .availabilityZoneId("apne2-az2")
-                        .cidrBlock("172.31.16.0/20")
-                        .mapPublicIpOnLaunch(true)
-                        .assignIpv6AddressOnCreation(false)
-                        .vpcId("vpc-7931b212")
+                AWSSubnet.builder()
+                        .subnet(Subnet.builder()
+                                .subnetId("subnet-01020304")
+                                .availabilityZoneId("apne2-az2")
+                                .cidrBlock("172.31.16.0/20")
+                                .mapPublicIpOnLaunch(true)
+                                .assignIpv6AddressOnCreation(false)
+                                .vpcId("vpc-7931b212")
+                                .build())
                         .build(),
-                Subnet.builder()
-                        .subnetId("subnet-02020304")
-                        .availabilityZoneId("apne2-az1")
-                        .cidrBlock("172.31.0.0/20")
-                        .mapPublicIpOnLaunch(true)
-                        .assignIpv6AddressOnCreation(false)
-                        .vpcId("vpc-7931b212")
+                AWSSubnet.builder()
+                        .subnet(Subnet.builder()
+                                .subnetId("subnet-02020304")
+                                .availabilityZoneId("apne2-az1")
+                                .cidrBlock("172.31.0.0/20")
+                                .mapPublicIpOnLaunch(true)
+                                .assignIpv6AddressOnCreation(false)
+                                .vpcId("vpc-7931b212")
+                                .build())
                         .build(),
-                Subnet.builder()
-                        .subnetId("subnet-03020304")
-                        .availabilityZoneId("apne2-az3")
-                        .cidrBlock("172.31.32.0/20")
-                        .mapPublicIpOnLaunch(true)
-                        .assignIpv6AddressOnCreation(false)
-                        .vpcId("vpc-7931b212")
+                AWSSubnet.builder()
+                        .subnet(Subnet.builder()
+                                .subnetId("subnet-03020304")
+                                .availabilityZoneId("apne2-az3")
+                                .cidrBlock("172.31.32.0/20")
+                                .mapPublicIpOnLaunch(true)
+                                .assignIpv6AddressOnCreation(false)
+                                .vpcId("vpc-7931b212")
+                                .build())
                         .build()
         );
     }
@@ -76,9 +83,9 @@ class ExportSubnetsTest {
     @Test
     void getResourceMaps() {
         // given
-        List<Subnet> subnets = getSubnets();
+        List<AWSSubnet> awsSubnets = getAwsSubnets();
 
-        Maps<Resource> resourceMaps = exportSubnets.getResourceMaps(subnets);
+        Maps<Resource> resourceMaps = exportSubnets.getResourceMaps(awsSubnets);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Subnet.tf"));
@@ -88,7 +95,7 @@ class ExportSubnetsTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Subnet.cmd"));
-        String actual = exportSubnets.getTFImport(getSubnets()).script();
+        String actual = exportSubnets.getTFImport(getAwsSubnets()).script();
 
         assertEquals(expected, actual);
     }

@@ -10,7 +10,6 @@ import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 @ToString
 @Builder
 public class AWSVpcEndpoint implements TerraformSource {
-
     final private static String TERRAFORM_RESOURCE_NAME = "aws_vpc_endpoint";
     private VpcEndpoint vpcEndpoint;
 

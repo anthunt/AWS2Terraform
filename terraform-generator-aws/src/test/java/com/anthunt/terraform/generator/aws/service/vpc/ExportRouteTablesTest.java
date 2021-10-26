@@ -1,6 +1,9 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSRoute;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSRouteTable;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSRouteTableAssociation;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -14,7 +17,7 @@ import org.springframework.core.io.ResourceLoader;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.Route;
-import software.amazon.awssdk.services.ec2.model.RouteTable;
+import software.amazon.awssdk.services.ec2.model.RouteTableAssociation;
 
 import java.util.List;
 
@@ -38,34 +41,58 @@ class ExportRouteTablesTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<RouteTable> getRouteTables() {
+    private List<AWSRouteTable> getAwsRouteTables() {
         //noinspection unchecked
         return List.of(
-                RouteTable.builder()
+                AWSRouteTable.builder()
                         .vpcId("vpc-7931b212")
                         .routeTableId("rtb-d6b5fdbd")
-                        .routes(Route.builder()
-                                        .destinationCidrBlock("172.31.0.0/16")
-                                        .gatewayId("local")
+                        .awsRoutes(List.of(AWSRoute.builder()
+                                        .routeTableId("rtb-d6b5fdbd")
+                                        .route(Route.builder()
+                                                .destinationCidrBlock("172.31.0.0/16")
+                                                .gatewayId("local")
+                                                .build())
                                         .build(),
-                                Route.builder()
-                                        .destinationCidrBlock("0.0.0.0/0")
+                                AWSRoute.builder()
+                                        .routeTableId("rtb-d6b5fdbd")
+                                        .route(Route.builder()
+                                                .destinationCidrBlock("0.0.0.0/0")
+                                                .gatewayId("igw-8ecdbbe6")
+                                                .build())
+                                        .build()))
+                        .awsRouteTableAssociation(AWSRouteTableAssociation.builder()
+                                .routeTableAssociation(RouteTableAssociation.builder()
                                         .gatewayId("igw-8ecdbbe6")
+                                        .routeTableId("rtb-d6b5fdbd")
                                         .build())
-                        .associations(builder -> builder.gatewayId("igw-8ecdbbe6").routeTableId("rtb-d6b5fdbd"))
+                                .build())
+                        .tags(List.of())
                         .build(),
-                RouteTable.builder()
+                AWSRouteTable.builder()
                         .vpcId("vpc-8931b212")
                         .routeTableId("rtb-e6b5fdbd")
-                        .routes(Route.builder()
-                                        .destinationCidrBlock("172.31.0.0/16")
-                                        .gatewayId("local")
+                        .awsRoutes(List.of(AWSRoute.builder()
+                                        .routeTableId("rtb-e6b5fdbd")
+                                        .route(Route.builder()
+                                                .destinationCidrBlock("172.31.0.0/16")
+                                                .gatewayId("local")
+                                                .build())
                                         .build(),
-                                Route.builder()
-                                        .destinationCidrBlock("0.0.0.0/0")
-                                        .gatewayId("igw-8ecdbbe6")
+                                AWSRoute.builder()
+                                        .routeTableId("rtb-e6b5fdbd")
+                                        .route(Route.builder()
+                                                .destinationCidrBlock("0.0.0.0/0")
+                                                .gatewayId("igw-8ecdbbe6")
+                                                .build())
+                                        .build()))
+                        .awsRouteTableAssociation(AWSRouteTableAssociation.builder()
+                                .routeTableAssociation(RouteTableAssociation.builder()
+                                        .subnetId("subnet-02c7511faa4344f83")
+                                        .routeTableId("rtb-e6b5fdbd")
                                         .build())
-                        .associations(builder -> builder.subnetId("subnet-02c7511faa4344f83").routeTableId("rtb-e6b5fdbd"))
+                                .build())
+                        .tags(List.of())
                         .build()
         );
     }
@@ -80,7 +107,7 @@ class ExportRouteTablesTest {
     @Test
     void getResourceMaps() {
         // given
-        List<RouteTable> routeTables = getRouteTables();
+        List<AWSRouteTable> routeTables = getAwsRouteTables();
 
         Maps<Resource> resourceMaps = exportRouteTables.getResourceMaps(routeTables);
         String actual = resourceMaps.unmarshall();
@@ -92,7 +119,7 @@ class ExportRouteTablesTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/RouteTable.cmd"));
-        String actual = exportRouteTables.getTFImport(getRouteTables()).script();
+        String actual = exportRouteTables.getTFImport(getAwsRouteTables()).script();
 
         assertEquals(expected, actual);
     }

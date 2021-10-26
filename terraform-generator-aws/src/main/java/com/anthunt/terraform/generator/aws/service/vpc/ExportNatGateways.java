@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSNatGateway;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -17,7 +18,6 @@ import software.amazon.awssdk.services.ec2.model.NatGateway;
 import software.amazon.awssdk.services.ec2.model.NatGatewayAddress;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,30 +26,35 @@ import java.util.stream.Collectors;
 public class ExportNatGateways extends AbstractExport<Ec2Client> {
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<NatGateway> natGateways = listNatGateways(client);
-        return getResourceMaps(natGateways);
+        List<AWSNatGateway> awsNatGateways = listAwsNatGateways(client);
+        return getResourceMaps(awsNatGateways);
     }
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<NatGateway> natGateways = listNatGateways(client);
-        return getTFImport(natGateways);
+        List<AWSNatGateway> awsNatGateways = listAwsNatGateways(client);
+        return getTFImport(awsNatGateways);
     }
 
-    protected List<NatGateway> listNatGateways(Ec2Client client) {
+    protected List<AWSNatGateway> listAwsNatGateways(Ec2Client client) {
         DescribeNatGatewaysResponse describeNatGatewaysResponse = client.describeNatGateways();
-        return describeNatGatewaysResponse.natGateways();
+        return describeNatGatewaysResponse.natGateways().stream()
+                .map(natGateway -> AWSNatGateway.builder()
+                        .natGateway(natGateway)
+                        .build())
+                .collect(Collectors.toList());
     }
 
-    protected Maps<Resource> getResourceMaps(List<NatGateway> natGateways) {
+    protected Maps<Resource> getResourceMaps(List<AWSNatGateway> awsNatGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (NatGateway natGateway : natGateways) {
+        for (AWSNatGateway awsNatGateway : awsNatGateways) {
+            NatGateway natGateway = awsNatGateway.getNatGateway();
             List<NatGatewayAddress> natGatewayAddresses = natGateway.natGatewayAddresses();
             for (NatGatewayAddress natGatewayAddress : natGatewayAddresses) {
                 resourceMapsBuilder.map(
                         Resource.builder()
-                                .api("aws_nat_gateway")
-                                .name(natGateway.natGatewayId())
+                                .api(awsNatGateway.getTerraformResourceName())
+                                .name(awsNatGateway.getResourceName())
                                 .argument("allocation_id", TFString.build(natGatewayAddress.allocationId()))
                                 .argument("subnet_id", TFString.build(natGateway.subnetId()))
                                 .argument("tags", TFMap.build(
@@ -63,14 +68,12 @@ public class ExportNatGateways extends AbstractExport<Ec2Client> {
         return resourceMapsBuilder.build();
     }
 
-    TFImport getTFImport(List<NatGateway> natGateways) {
+    TFImport getTFImport(List<AWSNatGateway> awsNatGateways) {
         return TFImport.builder()
-                .importLines(natGateways.stream()
-                        .map(natGateway -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_nat_gateway",
-                                        natGateway.natGatewayId()))
-                                .id(natGateway.natGatewayId())
+                .importLines(awsNatGateways.stream()
+                        .map(awsNatGateway -> TFImportLine.builder()
+                                .address(awsNatGateway.getTerraformAddress())
+                                .id(awsNatGateway.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();

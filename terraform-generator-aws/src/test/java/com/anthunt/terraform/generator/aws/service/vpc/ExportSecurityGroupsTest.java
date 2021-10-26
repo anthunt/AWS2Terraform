@@ -1,6 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.vpc;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSSecurityGroup;
 import com.anthunt.terraform.generator.aws.support.DisabledOnNoAwsCredentials;
 import com.anthunt.terraform.generator.aws.support.TestDataFileUtils;
 import com.anthunt.terraform.generator.core.model.terraform.nodes.Maps;
@@ -37,49 +38,52 @@ class ExportSecurityGroupsTest {
         client = amazonClients.getEc2Client();
     }
 
-    private List<SecurityGroup> getSecurityGroups() {
+    private List<AWSSecurityGroup> getAwsSecurityGroups() {
         return List.of(
-                SecurityGroup.builder()
-                        .description("test description")
-                        .groupName("sg_test")
-                        .groupId("sg-002efaf20710623d5")
-                        .ipPermissions(
-                                IpPermission.builder()
-                                        .fromPort(3306)
-                                        .ipProtocol("tcp")
-                                        .toPort(3306)
-                                        .userIdGroupPairs(
-                                                UserIdGroupPair.builder()
-                                                        .groupId("sg-002efaf20710623d5")
-                                                        .userId("400661667959")
-                                                        .build(),
-                                                UserIdGroupPair.builder()
-                                                        .groupId("sg-05465424de0e9d80b")
-                                                        .userId("400661667959")
-                                                        .build(),
-                                                UserIdGroupPair.builder()
-                                                        .description("ssh hub to aurora service")
-                                                        .groupId("sg-0575ae95fd6c58c75")
-                                                        .userId("400661667959")
-                                                        .build()
-                                        ).build()
-                        ).ipPermissionsEgress(
-                                IpPermission.builder()
-                                        .ipProtocol("-1")
-                                        .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
-                                        .ipv6Ranges(Ipv6Range.builder().cidrIpv6("::/0").build())
-                                        .build(),
-                                IpPermission.builder()
-                                        .fromPort(3306)
-                                        .ipProtocol("tcp")
-                                        .toPort(3306)
-                                        .userIdGroupPairs(
-                                                UserIdGroupPair.builder()
-                                                        .groupId("sg-002efaf20710623d5")
-                                                        .userId("400661667959")
-                                                        .build()
-                                        ).build()
-                        ).build());
+                AWSSecurityGroup.builder()
+                        .securityGroup(SecurityGroup.builder()
+                                .description("test description")
+                                .groupName("sg_test")
+                                .groupId("sg-002efaf20710623d5")
+                                .ipPermissions(
+                                        IpPermission.builder()
+                                                .fromPort(3306)
+                                                .ipProtocol("tcp")
+                                                .toPort(3306)
+                                                .userIdGroupPairs(
+                                                        UserIdGroupPair.builder()
+                                                                .groupId("sg-002efaf20710623d5")
+                                                                .userId("400661667959")
+                                                                .build(),
+                                                        UserIdGroupPair.builder()
+                                                                .groupId("sg-05465424de0e9d80b")
+                                                                .userId("400661667959")
+                                                                .build(),
+                                                        UserIdGroupPair.builder()
+                                                                .description("ssh hub to aurora service")
+                                                                .groupId("sg-0575ae95fd6c58c75")
+                                                                .userId("400661667959")
+                                                                .build()
+                                                ).build()
+                                ).ipPermissionsEgress(
+                                        IpPermission.builder()
+                                                .ipProtocol("-1")
+                                                .ipRanges(IpRange.builder().cidrIp("0.0.0.0/0").build())
+                                                .ipv6Ranges(Ipv6Range.builder().cidrIpv6("::/0").build())
+                                                .build(),
+                                        IpPermission.builder()
+                                                .fromPort(3306)
+                                                .ipProtocol("tcp")
+                                                .toPort(3306)
+                                                .userIdGroupPairs(
+                                                        UserIdGroupPair.builder()
+                                                                .groupId("sg-002efaf20710623d5")
+                                                                .userId("400661667959")
+                                                                .build()
+                                                ).build()
+                                ).build())
+                        .build()
+        );
     }
 
     @Test
@@ -97,16 +101,16 @@ class ExportSecurityGroupsTest {
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         Ec2Client ec2Client = amazonClients.getEc2Client();
 
-        List<SecurityGroup> securityGroups = exportSecurityGroups.listSecurityGroups(ec2Client);
+        List<AWSSecurityGroup> securityGroups = exportSecurityGroups.listAwsSecurityGroups(ec2Client);
         log.debug("securityGroups => {}", securityGroups);
     }
 
     @Test
     void getResourceMaps() {
         // given
-        List<SecurityGroup> securityGroups = getSecurityGroups();
+        List<AWSSecurityGroup> awsSecurityGroups = getAwsSecurityGroups();
 
-        Maps<Resource> resourceMaps = exportSecurityGroups.getResourceMaps(securityGroups);
+        Maps<Resource> resourceMaps = exportSecurityGroups.getResourceMaps(awsSecurityGroups);
         String actual = resourceMaps.unmarshall();
         log.debug("resourceMaps => \n{}", actual);
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/SecurityGroup.tf"));
@@ -116,7 +120,7 @@ class ExportSecurityGroupsTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/SecurityGroup.cmd"));
-        String actual = exportSecurityGroups.getTFImport(getSecurityGroups()).script();
+        String actual = exportSecurityGroups.getTFImport(getAwsSecurityGroups()).script();
 
         assertEquals(expected, actual);
     }

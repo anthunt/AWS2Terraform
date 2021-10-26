@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service.vpc;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
+import com.anthunt.terraform.generator.aws.service.vpc.model.AWSEgressOnlyInternetGateway;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -17,7 +18,6 @@ import software.amazon.awssdk.services.ec2.model.EgressOnlyInternetGateway;
 import software.amazon.awssdk.services.ec2.model.InternetGatewayAttachment;
 import software.amazon.awssdk.services.ec2.model.Tag;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,31 +27,35 @@ public class ExportEgressOnlyInternetGateways extends AbstractExport<Ec2Client> 
 
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<EgressOnlyInternetGateway> egressOnlyInternetGateways = listEgressOnlyInternetGateways(client);
-        return getResourceMaps(egressOnlyInternetGateways);
+        List<AWSEgressOnlyInternetGateway> awsEgressOnlyInternetGateways = listAwsEgressOnlyInternetGateways(client);
+        return getResourceMaps(awsEgressOnlyInternetGateways);
     }
 
     @Override
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
-        List<EgressOnlyInternetGateway> egressOnlyInternetGateways = listEgressOnlyInternetGateways(client);
-        return getTFImport(egressOnlyInternetGateways);
+        List<AWSEgressOnlyInternetGateway> awsEgressOnlyInternetGateways = listAwsEgressOnlyInternetGateways(client);
+        return getTFImport(awsEgressOnlyInternetGateways);
     }
 
-    protected List<EgressOnlyInternetGateway> listEgressOnlyInternetGateways(Ec2Client client) {
+    protected List<AWSEgressOnlyInternetGateway> listAwsEgressOnlyInternetGateways(Ec2Client client) {
         DescribeEgressOnlyInternetGatewaysResponse describeEgressOnlyInternetGatewaysResponse = client.describeEgressOnlyInternetGateways();
-        return describeEgressOnlyInternetGatewaysResponse.egressOnlyInternetGateways();
+        return describeEgressOnlyInternetGatewaysResponse.egressOnlyInternetGateways().stream()
+                .map(egressOnlyInternetGateway -> AWSEgressOnlyInternetGateway.builder()
+                        .egressOnlyInternetGateway(egressOnlyInternetGateway)
+                        .build())
+                .collect(Collectors.toList());
     }
 
-    protected Maps<Resource> getResourceMaps(List<EgressOnlyInternetGateway> egressOnlyInternetGateways) {
+    protected Maps<Resource> getResourceMaps(List<AWSEgressOnlyInternetGateway> awsEgressOnlyInternetGateways) {
         Maps.MapsBuilder<Resource> resourceMapsBuilder = Maps.builder();
-        for (EgressOnlyInternetGateway egressOnlyInternetGateway : egressOnlyInternetGateways) {
-
+        for (AWSEgressOnlyInternetGateway awsEgressOnlyInternetGateway : awsEgressOnlyInternetGateways) {
+            EgressOnlyInternetGateway egressOnlyInternetGateway = awsEgressOnlyInternetGateway.getEgressOnlyInternetGateway();
             List<InternetGatewayAttachment> internetGatewayAttachments = egressOnlyInternetGateway.attachments();
 
             for (InternetGatewayAttachment internetGatewayAttachment : internetGatewayAttachments) {
                 resourceMapsBuilder.map(
                         Resource.builder()
-                                .api("aws_egress_only_internet_gateway")
+                                .api(awsEgressOnlyInternetGateway.getTerraformResourceName())
                                 .name(egressOnlyInternetGateway.egressOnlyInternetGatewayId())
                                 .argument("vpc_id", TFString.build(internetGatewayAttachment.vpcId()))
                                 .argument("tags", TFMap.build(
@@ -65,14 +69,13 @@ public class ExportEgressOnlyInternetGateways extends AbstractExport<Ec2Client> 
         return resourceMapsBuilder.build();
     }
 
-    TFImport getTFImport(List<EgressOnlyInternetGateway> egressOnlyInternetGateways) {
+    TFImport getTFImport(List<AWSEgressOnlyInternetGateway> awsEgressOnlyInternetGateways) {
+
         return TFImport.builder()
-                .importLines(egressOnlyInternetGateways.stream()
-                        .map(egressOnlyInternetGateway -> TFImportLine.builder()
-                                .address(MessageFormat.format("{0}.{1}",
-                                        "aws_egress_only_internet_gateway",
-                                        egressOnlyInternetGateway.egressOnlyInternetGatewayId()))
-                                .id(egressOnlyInternetGateway.egressOnlyInternetGatewayId())
+                .importLines(awsEgressOnlyInternetGateways.stream()
+                        .map(awsEgressOnlyInternetGateway -> TFImportLine.builder()
+                                .address(awsEgressOnlyInternetGateway.getTerraformAddress())
+                                .id(awsEgressOnlyInternetGateway.getResourceId())
                                 .build()
                         ).collect(Collectors.toList()))
                 .build();
