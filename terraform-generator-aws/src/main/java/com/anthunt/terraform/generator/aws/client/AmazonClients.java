@@ -144,7 +144,7 @@ public class AmazonClients {
 
     public IamClient getIamClient() {
         return IamClient.builder()
-                .region(region)
+                .region(Region.AWS_GLOBAL)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }

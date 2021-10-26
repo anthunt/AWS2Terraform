@@ -3,6 +3,7 @@ package com.anthunt.terraform.generator.aws.service;
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
 import com.anthunt.terraform.generator.aws.command.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.ExtraArgs;
+import com.anthunt.terraform.generator.aws.config.ConfigRegistry;
 import com.anthunt.terraform.generator.aws.utils.IOUtils;
 import com.anthunt.terraform.generator.core.model.terraform.Terraform;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFArguments;
@@ -16,6 +17,8 @@ import com.beust.jcommander.JCommander;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
+
+import java.util.Optional;
 
 @Slf4j
 public abstract class AbstractExport<T extends SdkClient> {
@@ -35,8 +38,17 @@ public abstract class AbstractExport<T extends SdkClient> {
 
         this.printProgressBar(commonArgs.isSilence(), 1);
 
-        this.profileName = commonArgs.getProfile();
-        this.region = Region.of(commonArgs.getRegion());
+        if (Optional.ofNullable(commonArgs.getProfile()).isPresent()) {
+            this.profileName = commonArgs.getProfile();
+        } else {
+            this.profileName = ConfigRegistry.getInstance().getProfile();
+        }
+
+        if (Optional.ofNullable(commonArgs.getRegion()).isPresent()) {
+            this.region = Region.of(commonArgs.getRegion());
+        } else {
+            this.region = Region.of(ConfigRegistry.getInstance().getRegion());
+        }
 
         this.printProgressBar(commonArgs.isSilence(), 10);
 
