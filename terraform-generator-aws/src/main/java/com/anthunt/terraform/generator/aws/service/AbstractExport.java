@@ -32,8 +32,14 @@ public abstract class AbstractExport<T extends SdkClient> {
             new JCommander(new CommonArgs()).usage();
             return;
         }
+
+        this.printProgressBar(commonArgs.isSilence(), 1);
+
         this.profileName = commonArgs.getProfile();
         this.region = Region.of(commonArgs.getRegion());
+
+        this.printProgressBar(commonArgs.isSilence(), 10);
+
         Maps<Provider> providers = this.exportProvider();
         Maps<Resource> resources = this.export(
                 AmazonClients.builder()
@@ -41,14 +47,20 @@ public abstract class AbstractExport<T extends SdkClient> {
                         .region(this.region)
                         .build().getClient(t), commonArgs, extraArgs);
 
+        this.printProgressBar(commonArgs.isSilence(), 50);
+
         TFImport tfImport = this.scriptImport(AmazonClients.builder()
                 .profileName(profileName)
                 .region(this.region)
                 .build().getClient(t), commonArgs, extraArgs);
 
+        this.printProgressBar(commonArgs.isSilence(), 80);
+
         if (commonArgs.isDeleteOutputDirectory()) {
             IOUtils.emptyDir(commonArgs.getOutputDirPath());
         }
+
+        this.printProgressBar(commonArgs.isSilence(), 81);
 
         if (commonArgs.isExplicit()) {
             Terraform provider = Terraform.builder()
@@ -60,6 +72,8 @@ public abstract class AbstractExport<T extends SdkClient> {
                 log.info("result=>'{}'", providerString);
             }
 
+            this.printProgressBar(commonArgs.isSilence(), 85);
+
             if (!resources.isEmpty()) {
                 Terraform resource = Terraform.builder()
                         .resources(resources)
@@ -70,6 +84,8 @@ public abstract class AbstractExport<T extends SdkClient> {
                     log.info("result=>'{}'", resourceString);
                 }
             }
+
+            this.printProgressBar(commonArgs.isSilence(), 90);
 
             if (!tfImport.isEmpty()) {
                 String scriptString = tfImport.script();
@@ -92,6 +108,9 @@ public abstract class AbstractExport<T extends SdkClient> {
             }
         }
 
+        this.printProgressBar(commonArgs.isSilence(), 100);
+
+
     }
 
     protected abstract Maps<Resource> export(T client, CommonArgs commonArgs, ExtraArgs extraArgs);
@@ -113,4 +132,31 @@ public abstract class AbstractExport<T extends SdkClient> {
                 )
                 .build();
     }
+
+    private void printProgressBar(boolean isUse, long currentPosition) {
+        if(isUse) {
+            System.out.print(this.progressBar(100, currentPosition, 0, 100));
+            System.out.print("\r");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException skip) {}
+            if(currentPosition == 100) {
+                System.out.println("\n");
+            }
+        }
+    }
+
+    private String progressBar(int progressBarSize, long currentPosition, long startPositoin, long finishPosition) {
+        String bar = "";
+        int nPositions = progressBarSize;
+        char pb = '-'; //'░';
+        char stat = '#'; //'█';
+        for (int p = 0; p < nPositions; p++) {
+            bar += pb;
+        }
+        int ststus = (int) (100 * (currentPosition - startPositoin) / (finishPosition - startPositoin));
+        int move = (nPositions * ststus) / 100;
+        return "|" + bar.substring(0, move).replace(pb, stat) + bar.substring(move, bar.length()) + "|" + ststus + "%|";
+    }
+
 }
