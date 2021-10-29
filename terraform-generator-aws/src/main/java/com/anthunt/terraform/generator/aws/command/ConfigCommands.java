@@ -1,5 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
+import com.anthunt.terraform.generator.aws.command.args.ConfigArgs;
 import com.anthunt.terraform.generator.aws.config.ConfigRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;

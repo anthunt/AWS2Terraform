@@ -1,4 +1,4 @@
-package com.anthunt.terraform.generator.aws.command;
+package com.anthunt.terraform.generator.aws.command.args;
 
 import com.beust.jcommander.Parameter;
 import lombok.*;

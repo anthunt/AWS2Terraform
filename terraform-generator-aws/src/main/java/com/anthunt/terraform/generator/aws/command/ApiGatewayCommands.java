@@ -1,5 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
+import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.service.apigateway.ExportApiGatewayResources;
 import com.anthunt.terraform.generator.aws.service.apigateway.ExportApiGatewayRestApis;
 import lombok.extern.slf4j.Slf4j;
