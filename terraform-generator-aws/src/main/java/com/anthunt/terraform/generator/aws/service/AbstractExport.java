@@ -1,8 +1,8 @@
 package com.anthunt.terraform.generator.aws.service;
 
 import com.anthunt.terraform.generator.aws.client.AmazonClients;
-import com.anthunt.terraform.generator.aws.command.CommonArgs;
-import com.anthunt.terraform.generator.aws.command.ExtraArgs;
+import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
+import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.config.ConfigRegistry;
 import com.anthunt.terraform.generator.aws.utils.IOUtils;
 import com.anthunt.terraform.generator.core.model.terraform.Terraform;
@@ -101,28 +101,40 @@ public abstract class AbstractExport<T extends SdkClient> {
                 if (!commonArgs.isSilence()) {
                     log.info("result=>'{}'", resourceString);
                 }
-            }
 
-            this.printProgressBar(commonArgs.isSilence(), 90);
+                this.printProgressBar(commonArgs.isSilence(), 90);
 
-            if (!tfImport.isEmpty()) {
-                String scriptString = tfImport.script();
-                IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getImportFileName(), scriptString, commonArgs.isSilence());
-                if (!commonArgs.isSilence()) {
-                    log.info("result=>'{}'", scriptString);
+                if (!tfImport.isEmpty()) {
+                    String scriptString = tfImport.script();
+                    IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getImportFileName(), scriptString, commonArgs.isSilence());
+                    if (!commonArgs.isSilence()) {
+                        log.info("result=>'{}'", scriptString);
+                    }
                 }
+            } else {
+                System.out.println("No resource found!");
             }
-
-
         } else {
-            Terraform terraform = Terraform.builder()
-                    .providers(providers)
-                    .resources(resources)
-                    .build();
-            String terraformString = terraform.unmarshall();
-            IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getResourceFileName(), terraformString, commonArgs.isSilence());
-            if (!commonArgs.isSilence()) {
-                log.info("result=>'{}'", terraformString);
+            if (!resources.isEmpty()) {
+                Terraform terraform = Terraform.builder()
+                        .providers(providers)
+                        .resources(resources)
+                        .build();
+                String terraformString = terraform.unmarshall();
+                IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getResourceFileName(), terraformString, commonArgs.isSilence());
+                if (!commonArgs.isSilence()) {
+                    log.info("result=>'{}'", terraformString);
+                }
+
+                if (!tfImport.isEmpty()) {
+                    String scriptString = tfImport.script();
+                    IOUtils.writeFile(commonArgs.getOutputDirPath(), commonArgs.getImportFileName(), scriptString, commonArgs.isSilence());
+                    if (!commonArgs.isSilence()) {
+                        log.info("result=>'{}'", scriptString);
+                    }
+                }
+            } else {
+                System.out.println("No resource found!");
             }
         }
 

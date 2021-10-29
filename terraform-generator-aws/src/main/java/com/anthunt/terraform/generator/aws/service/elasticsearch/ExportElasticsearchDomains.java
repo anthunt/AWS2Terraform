@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.elasticsearch;
 
-import com.anthunt.terraform.generator.aws.command.CommonArgs;
-import com.anthunt.terraform.generator.aws.command.ExtraArgs;
+import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
+import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticsearch.model.AWSElasticsearchDomain;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.elasticsearch.ElasticsearchClient;
 import software.amazon.awssdk.services.elasticsearch.model.*;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

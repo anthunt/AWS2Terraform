@@ -1,7 +1,7 @@
 package com.anthunt.terraform.generator.aws.service.s3;
 
-import com.anthunt.terraform.generator.aws.command.CommonArgs;
-import com.anthunt.terraform.generator.aws.command.ExtraArgs;
+import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
+import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.s3.model.AWSBucket;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
