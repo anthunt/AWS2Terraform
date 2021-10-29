@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportSubnets extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "Subnets";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSSubnet> awsSubnets = listAwsSubnets(client);
@@ -35,6 +37,10 @@ public class ExportSubnets extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSSubnet> awsSubnets = listAwsSubnets(client);
         return getTFImport(awsSubnets);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSSubnet> listAwsSubnets(Ec2Client client) {

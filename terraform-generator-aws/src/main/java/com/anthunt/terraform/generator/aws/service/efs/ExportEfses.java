@@ -28,7 +28,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ExportEfs extends AbstractExport<EfsClient> {
+public class ExportEfses extends AbstractExport<EfsClient> {
+
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "Efses";
 
     @Override
     protected Maps<Resource> export(EfsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
@@ -40,6 +42,10 @@ public class ExportEfs extends AbstractExport<EfsClient> {
     protected TFImport scriptImport(EfsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSEfs> awsEfs = listAwsEfs(client);
         return getTFImport(awsEfs);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSEfs> listAwsEfs(EfsClient client) {

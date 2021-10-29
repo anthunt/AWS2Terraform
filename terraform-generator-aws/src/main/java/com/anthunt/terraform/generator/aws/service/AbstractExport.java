@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.SdkClient;
 import software.amazon.awssdk.regions.Region;
 
+import java.text.MessageFormat;
 import java.util.Optional;
 
 @Slf4j
@@ -48,6 +49,11 @@ public abstract class AbstractExport<T extends SdkClient> {
             this.region = Region.of(commonArgs.getRegion());
         } else {
             this.region = Region.of(ConfigRegistry.getInstance().getRegion());
+        }
+        String defaultOutputFileName = getDefaultOutputFileName();
+        if (Optional.ofNullable(getDefaultOutputFileName()).isPresent()) {
+            commonArgs.setResourceFileName(MessageFormat.format("{0}.tf", defaultOutputFileName));
+            commonArgs.setImportFileName(MessageFormat.format("{0}.cmd", defaultOutputFileName));
         }
 
         this.printProgressBar(commonArgs.isSilence(), 10);
@@ -145,13 +151,17 @@ public abstract class AbstractExport<T extends SdkClient> {
                 .build();
     }
 
+    protected abstract String getDefaultOutputFileName();
+
     private void printProgressBar(boolean isUse, long currentPosition) {
         if(isUse) {
             System.out.print(this.progressBar(100, currentPosition, 0, 100));
             System.out.print("\r");
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException skip) {}
+            } catch (InterruptedException skip) {
+                skip.printStackTrace();
+            }
             if(currentPosition == 100) {
                 System.out.println("\n");
             }
@@ -159,16 +169,14 @@ public abstract class AbstractExport<T extends SdkClient> {
     }
 
     private String progressBar(int progressBarSize, long currentPosition, long startPositoin, long finishPosition) {
-        String bar = "";
+        StringBuilder bar = new StringBuilder();
         int nPositions = progressBarSize;
         char pb = '-'; //'░';
         char stat = '#'; //'█';
-        for (int p = 0; p < nPositions; p++) {
-            bar += pb;
-        }
-        int ststus = (int) (100 * (currentPosition - startPositoin) / (finishPosition - startPositoin));
-        int move = (nPositions * ststus) / 100;
-        return "|" + bar.substring(0, move).replace(pb, stat) + bar.substring(move, bar.length()) + "|" + ststus + "%|";
+        bar.append(String.valueOf(pb).repeat(Math.max(0, nPositions)));
+        int status = (int) (100 * (currentPosition - startPositoin) / (finishPosition - startPositoin));
+        int move = (nPositions * status) / 100;
+        return "|" + bar.substring(0, move).replace(pb, stat) + bar.substring(move, bar.length()) + "|" + status + "%|";
     }
 
 }

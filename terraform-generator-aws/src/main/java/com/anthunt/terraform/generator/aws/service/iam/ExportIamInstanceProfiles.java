@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "IamInstanceProfiles";
+
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSInstanceProfile> awsInstanceProfiles = listInstanceProfiles(client);
@@ -35,6 +37,10 @@ public class ExportIamInstanceProfiles extends AbstractExport<IamClient> {
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSInstanceProfile> awsInstanceProfiles = listInstanceProfiles(client);
         return getTFImport(awsInstanceProfiles);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSInstanceProfile> listInstanceProfiles(IamClient client) {

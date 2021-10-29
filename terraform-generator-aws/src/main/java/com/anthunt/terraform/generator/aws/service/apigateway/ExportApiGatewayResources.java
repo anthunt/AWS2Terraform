@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "ApiGatewayResources";
+
     @Override
     protected Maps<Resource> export(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRestApiResource> awsRestApiResources = listAWSRestApiResources(client);
@@ -39,6 +41,11 @@ public class ExportApiGatewayResources extends AbstractExport<ApiGatewayClient> 
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRestApiResource> awsRestApiResources = listAWSRestApiResources(client);
         return getTFImport(awsRestApiResources);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRestApiResource> listAWSRestApiResources(ApiGatewayClient client) {

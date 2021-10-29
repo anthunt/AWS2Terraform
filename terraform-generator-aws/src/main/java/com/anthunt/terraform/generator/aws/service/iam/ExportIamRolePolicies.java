@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportIamRolePolicies extends AbstractExport<IamClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "IamRolePolicies";
+
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRolePolicy> rolePolicies = listRolePolices(client);
@@ -39,6 +41,10 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRolePolicy> awsRolePolicies = listRolePolices(client);
         return getTFImport(awsRolePolicies);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRolePolicy> listRolePolices(IamClient client) {

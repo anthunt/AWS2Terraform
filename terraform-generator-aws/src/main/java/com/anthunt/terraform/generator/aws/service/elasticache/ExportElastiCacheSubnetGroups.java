@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "ElastiCacheSubnetGroups";
+
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSCacheSubnetGroup> cacheSubnetGroups = listAwsCacheSubnetGroups(client);
@@ -38,6 +40,10 @@ public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheCli
     protected TFImport scriptImport(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSCacheSubnetGroup> cacheSubnetGroups = listAwsCacheSubnetGroups(client);
         return getTFImport(cacheSubnetGroups);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSCacheSubnetGroup> listAwsCacheSubnetGroups(ElastiCacheClient client) {

@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportInstances extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "Instances";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSReservation> awsReservations = listAwsReservations(client);
@@ -33,6 +35,11 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSReservation> awsReservations = listAwsReservations(client);
         return getTFImport(awsReservations);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSReservation> listAwsReservations(Ec2Client client) {

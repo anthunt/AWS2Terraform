@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "SecurityGroups";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSSecurityGroup> awsSecurityGroups = listAwsSecurityGroups(client);
@@ -36,6 +38,9 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
         return getTFImport(awsSecurityGroups);
     }
 
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
+    }
 
     List<AWSSecurityGroup> listAwsSecurityGroups(Ec2Client client) {
         DescribeVpcsResponse describeVpcsResponse = client.describeVpcs();

@@ -20,6 +20,8 @@ import java.util.Optional;
 @Service
 public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "ApiGatewayAccount";
+
     @Override
     protected Maps<Resource> export(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         AWSAccount awsAccount = getAccount(client);
@@ -30,6 +32,11 @@ public class ExportApiGatewayAccount extends AbstractExport<ApiGatewayClient> {
     protected TFImport scriptImport(ApiGatewayClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         AWSAccount awsAccount = getAccount(client);
         return getTFImport(awsAccount);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     AWSAccount getAccount(ApiGatewayClient client) {

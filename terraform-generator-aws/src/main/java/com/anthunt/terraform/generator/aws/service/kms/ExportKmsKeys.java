@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportKmsKeys extends AbstractExport<KmsClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "KmsKeys";
+
     @Override
     protected Maps<Resource> export(KmsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSKmsKey> awsKmsKeys = listKeys(client);
@@ -38,6 +40,10 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
     protected TFImport scriptImport(KmsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSKmsKey> awsKmsKeys = listKeys(client);
         return getTFImport(awsKmsKeys);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSKmsKey> listKeys(KmsClient client) {

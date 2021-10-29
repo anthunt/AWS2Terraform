@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportInternetGateways extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "InternetGateways";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSInternetGateway> internetGateways = listAwsInternetGateways(client);
@@ -35,6 +37,10 @@ public class ExportInternetGateways extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSInternetGateway> awsInternetGateways = listAwsInternetGateways(client);
         return getTFImport(awsInternetGateways);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     protected List<AWSInternetGateway> listAwsInternetGateways(Ec2Client client) {

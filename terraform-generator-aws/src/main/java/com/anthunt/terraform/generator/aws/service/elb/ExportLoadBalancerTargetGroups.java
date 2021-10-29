@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBalancingV2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "LoadBalancerTargetGroups";
+
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSTargetGroup> awsTargetGroups = listAwsTagetGroups(client);
@@ -33,6 +35,10 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
     protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSTargetGroup> awsTargetGroups = listAwsTagetGroups(client);
         return getTFImport(awsTargetGroups);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSTargetGroup> listAwsTagetGroups(ElasticLoadBalancingV2Client client) {

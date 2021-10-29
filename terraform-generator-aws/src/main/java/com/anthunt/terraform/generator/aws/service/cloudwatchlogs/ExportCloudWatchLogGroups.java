@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "CloudWatchLogGroups";
+
     @Override
     protected Maps<Resource> export(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSLogGroup> awsLogGroups = listAwsLogGroups(client);
@@ -37,6 +39,11 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
     protected TFImport scriptImport(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSLogGroup> awsLogGroups = listAwsLogGroups(client);
         return getTFImport(awsLogGroups);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSLogGroup> listAwsLogGroups(CloudWatchLogsClient client) {

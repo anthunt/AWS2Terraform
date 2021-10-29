@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportRouteTables extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "RouteTables";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRouteTable> awsRouteTables = listAwsRouteTables(client);
@@ -40,6 +42,10 @@ public class ExportRouteTables extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRouteTable> awsRouteTables = listAwsRouteTables(client);
         return getTFImport(awsRouteTables);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     protected List<AWSRouteTable> listAwsRouteTables(Ec2Client client) {
