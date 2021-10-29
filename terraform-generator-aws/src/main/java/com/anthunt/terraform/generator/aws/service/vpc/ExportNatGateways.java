@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ExportNatGateways extends AbstractExport<Ec2Client> {
+
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "NatGateways";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSNatGateway> awsNatGateways = listAwsNatGateways(client);
@@ -34,6 +37,10 @@ public class ExportNatGateways extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSNatGateway> awsNatGateways = listAwsNatGateways(client);
         return getTFImport(awsNatGateways);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     protected List<AWSNatGateway> listAwsNatGateways(Ec2Client client) {

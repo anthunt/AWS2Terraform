@@ -28,18 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportEfsTest {
+class ExportEfsesTest {
 
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private static ExportEfs exportEfs;
+    private static ExportEfses exportEfses;
 
     private static EfsClient client;
 
     @BeforeAll
     public static void beforeAll() {
-        exportEfs = new ExportEfs();
+        exportEfses = new ExportEfses();
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEfsClient();
     }
@@ -98,13 +98,13 @@ class ExportEfsTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        Maps<Resource> export = exportEfs.export(client, null, null);
+        Maps<Resource> export = exportEfses.export(client, null, null);
         log.debug("export => \n{}", export.unmarshall());
     }
 
     @Test
     public void getResourceMaps() {
-        Maps<Resource> resourceMaps = exportEfs.getResourceMaps(getAwsEfs());
+        Maps<Resource> resourceMaps = exportEfses.getResourceMaps(getAwsEfs());
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -117,7 +117,7 @@ class ExportEfsTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/Efs.cmd"));
-        String actual = exportEfs.getTFImport(getAwsEfs()).script();
+        String actual = exportEfses.getTFImport(getAwsEfs()).script();
 
         assertEquals(expected, actual);
     }

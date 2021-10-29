@@ -19,15 +19,15 @@ public class IamCommands {
 
     private ExportIamPolicies exportIamPolicies;
 
-    private ExportIamRolePolicyAttachment exportIamRolePolicyAttachment;
+    private ExportIamRolePolicyAttachments exportIamRolePolicyAttachments;
 
     private ExportIamInstanceProfiles exportIamInstanceProfiles;
 
-    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamRolePolicyAttachment exportIamRolePolicyAttachment, ExportIamInstanceProfiles exportIamInstanceProfiles) {
+    public IamCommands(ExportIamRoles exportIamRoles, ExportIamRolePolicies exportIamRolePolicies, ExportIamPolicies exportIamPolicies, ExportIamRolePolicyAttachments exportIamRolePolicyAttachments, ExportIamInstanceProfiles exportIamInstanceProfiles) {
         this.exportIamRoles = exportIamRoles;
         this.exportIamRolePolicies = exportIamRolePolicies;
         this.exportIamPolicies = exportIamPolicies;
-        this.exportIamRolePolicyAttachment = exportIamRolePolicyAttachment;
+        this.exportIamRolePolicyAttachments = exportIamRolePolicyAttachments;
         this.exportIamInstanceProfiles = exportIamInstanceProfiles;
     }
 
@@ -48,7 +48,7 @@ public class IamCommands {
 
     @ShellMethod("Export terraform resources of iamRolePolicyAttachment.")
     public void iamRolePolicyAttachment(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
-        exportIamRolePolicyAttachment.exportTerraform(IamClient.class, commonArgs);
+        exportIamRolePolicyAttachments.exportTerraform(IamClient.class, commonArgs);
     }
 
     @ShellMethod("Export terraform resources of iamInstanceProfiles.")

@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalancingV2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "LoadBalancerListeners";
+
     @Override
     protected Maps<Resource> export(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSListener> awsListeners = listAwsListeners(client);
@@ -36,6 +38,10 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
     protected TFImport scriptImport(ElasticLoadBalancingV2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSListener> awsListeners = listAwsListeners(client);
         return getTFImport(awsListeners);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSListener> listAwsListeners(ElasticLoadBalancingV2Client client) {

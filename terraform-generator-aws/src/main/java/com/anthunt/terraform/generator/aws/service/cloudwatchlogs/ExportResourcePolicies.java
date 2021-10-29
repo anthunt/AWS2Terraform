@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportResourcePolicies extends AbstractExport<CloudWatchLogsClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "CloudWatchResourcePolicies";
+
     @Override
     protected Maps<Resource> export(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSResourcePolicy> awsResourcePolicies = listResourcePolicies(client);
@@ -32,6 +34,11 @@ public class ExportResourcePolicies extends AbstractExport<CloudWatchLogsClient>
     protected TFImport scriptImport(CloudWatchLogsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSResourcePolicy> awsResourcePolicies = listResourcePolicies(client);
         return getTFImport(awsResourcePolicies);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSResourcePolicy> listResourcePolicies(CloudWatchLogsClient client) {

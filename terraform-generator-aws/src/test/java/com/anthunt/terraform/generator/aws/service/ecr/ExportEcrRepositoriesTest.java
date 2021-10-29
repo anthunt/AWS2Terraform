@@ -24,18 +24,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportEcrRepositoryTest {
+class ExportEcrRepositoriesTest {
 
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private static ExportEcrRepository exportEcrRepository;
+    private static ExportEcrRepositories exportEcrRepositories;
 
     private static EcrClient client;
 
     @BeforeAll
     public static void beforeAll() {
-        exportEcrRepository = new ExportEcrRepository();
+        exportEcrRepositories = new ExportEcrRepositories();
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEcrClient();
     }
@@ -74,7 +74,7 @@ class ExportEcrRepositoryTest {
     @Test
     @DisabledOnNoAwsCredentials
     public void export() {
-        Maps<Resource> export = exportEcrRepository.export(client, null, null);
+        Maps<Resource> export = exportEcrRepositories.export(client, null, null);
         log.debug("export => \n{}", export.unmarshall());
     }
 
@@ -82,7 +82,7 @@ class ExportEcrRepositoryTest {
     public void getResourceMaps() {
         List<AWSRepository> awsRepositories = getRepositories();
 
-        Maps<Resource> resourceMaps = exportEcrRepository.getResourceMaps(awsRepositories);
+        Maps<Resource> resourceMaps = exportEcrRepositories.getResourceMaps(awsRepositories);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -95,7 +95,7 @@ class ExportEcrRepositoryTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/EcrRepository.cmd"));
-        String actual = exportEcrRepository.getTFImport(getRepositories()).script();
+        String actual = exportEcrRepositories.getTFImport(getRepositories()).script();
 
         assertEquals(expected, actual);
     }

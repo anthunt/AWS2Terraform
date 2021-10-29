@@ -22,7 +22,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ExportEcrRepository extends AbstractExport<EcrClient> {
+public class ExportEcrRepositories extends AbstractExport<EcrClient> {
+
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "EcrRepository";
 
     @Override
     protected Maps<Resource> export(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
@@ -34,6 +36,10 @@ public class ExportEcrRepository extends AbstractExport<EcrClient> {
     protected TFImport scriptImport(EcrClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRepository> awsRepositories = listAwsRepositories(client);
         return getTFImport(awsRepositories);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRepository> listAwsRepositories(EcrClient client) {

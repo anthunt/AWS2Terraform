@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "RdsSubnetGroups";
+
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRdsSubnetGroup> awsRdsSubnetGroups = listAwsRdsSubnetGroups(client);
@@ -38,6 +40,10 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRdsSubnetGroup> awsRdsSubnetGroups = listAwsRdsSubnetGroups(client);
         return getTFImport(awsRdsSubnetGroups);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRdsSubnetGroup> listAwsRdsSubnetGroups(RdsClient client) {

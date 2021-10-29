@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportS3Buckets extends AbstractExport<S3Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "S3Buckets";
+
     @Override
     protected Maps<Resource> export(S3Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSBucket> repositories = listAwsBuckets(client);
@@ -34,6 +36,10 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
     protected TFImport scriptImport(S3Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSBucket> repositories = listAwsBuckets(client);
         return getTFImport(repositories);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSBucket> listAwsBuckets(S3Client client) {

@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportMskClusters extends AbstractExport<KafkaClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "MskClusters";
+
     @Override
     protected Maps<Resource> export(KafkaClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSMskCluster> awsMskClusters = listAwsMskClusters(client);
@@ -34,6 +36,10 @@ public class ExportMskClusters extends AbstractExport<KafkaClient> {
     protected TFImport scriptImport(KafkaClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSMskCluster> awsMskClusters = listAwsMskClusters(client);
         return getTFImport(awsMskClusters);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSMskCluster> listAwsMskClusters(KafkaClient client) {

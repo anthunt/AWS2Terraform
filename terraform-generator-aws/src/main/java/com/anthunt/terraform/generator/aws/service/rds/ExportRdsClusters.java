@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportRdsClusters extends AbstractExport<RdsClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "RdsClusters";
+
     @Override
     protected Maps<Resource> export(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRdsCluster> awsRdsClusters = listAwsRdsClusters(client);
@@ -35,6 +37,10 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
     protected TFImport scriptImport(RdsClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRdsCluster> awsRdsClusters = listAwsRdsClusters(client);
         return getTFImport(awsRdsClusters);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRdsCluster> listAwsRdsClusters(RdsClient client) {

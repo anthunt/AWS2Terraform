@@ -21,7 +21,9 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
+public class ExportIamRolePolicyAttachments extends AbstractExport<IamClient> {
+
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "IamRolePolicyAttachments";
 
     @Override
     protected Maps<Resource> export(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
@@ -33,6 +35,10 @@ public class ExportIamRolePolicyAttachment extends AbstractExport<IamClient> {
     protected TFImport scriptImport(IamClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSRolePolicyAttachment> awsRolePolicyAttachments = listAwsRolePolicyAttachments(client);
         return getTFImport(awsRolePolicyAttachments);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSRolePolicyAttachment> listAwsRolePolicyAttachments(IamClient client) {

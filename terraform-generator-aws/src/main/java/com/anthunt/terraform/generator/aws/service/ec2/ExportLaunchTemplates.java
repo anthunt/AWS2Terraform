@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "LaunchTemplates";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = listAwsLaunchTemplateVersion(client);
@@ -34,6 +36,11 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSLaunchTemplateVersion> awsLaunchTemplateVersions = listAwsLaunchTemplateVersion(client);
         return getTFImport(awsLaunchTemplateVersions);
+    }
+
+    @Override
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSLaunchTemplateVersion> listAwsLaunchTemplateVersion(Ec2Client client) {

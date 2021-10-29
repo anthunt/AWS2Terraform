@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportVpcEndpoints extends AbstractExport<Ec2Client> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "VpcEndpoints";
+
     @Override
     protected Maps<Resource> export(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSVpcEndpoint> awsVpcEndpoints = listVpcEndpoints(client);
@@ -36,6 +38,10 @@ public class ExportVpcEndpoints extends AbstractExport<Ec2Client> {
     protected TFImport scriptImport(Ec2Client client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSVpcEndpoint> awsVpcEndpoints = listVpcEndpoints(client);
         return getTFImport(awsVpcEndpoints);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     protected List<AWSVpcEndpoint> listVpcEndpoints(Ec2Client client) {

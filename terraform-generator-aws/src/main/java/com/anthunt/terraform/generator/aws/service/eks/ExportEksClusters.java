@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportEksClusters extends AbstractExport<EksClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "EksClusters";
+
     @Override
     protected Maps<Resource> export(EksClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSEksCluster> awsEksClusters = listAWSEksClusters(client);
@@ -35,6 +37,10 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
     protected TFImport scriptImport(EksClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSEksCluster> awsEksClusters = listAWSEksClusters(client);
         return getTFImport(awsEksClusters);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSEksCluster> listAWSEksClusters(EksClient client) {

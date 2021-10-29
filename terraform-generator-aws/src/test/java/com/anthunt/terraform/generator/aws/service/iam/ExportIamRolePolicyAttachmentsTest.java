@@ -18,16 +18,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @SpringBootTest(classes = {AmazonClients.class})
-class ExportIamRolePolicyAttachmentTest {
+class ExportIamRolePolicyAttachmentsTest {
 
-    private static ExportIamRolePolicyAttachment exportIamRolePolicyAttachment;
+    private static ExportIamRolePolicyAttachments exportIamRolePolicyAttachments;
 
     @Autowired
     private ResourceLoader resourceLoader;
 
     @BeforeAll
     public static void beforeAll() {
-        exportIamRolePolicyAttachment = new ExportIamRolePolicyAttachment();
+        exportIamRolePolicyAttachments = new ExportIamRolePolicyAttachments();
     }
 
     private List<AWSRolePolicyAttachment> getAwsRolePolicyAttachments() {
@@ -46,7 +46,7 @@ class ExportIamRolePolicyAttachmentTest {
     @Test
     public void getResourceMaps() {
         List<AWSRolePolicyAttachment> awsRolePolicyAttachments = getAwsRolePolicyAttachments();
-        Maps<Resource> resourceMaps = exportIamRolePolicyAttachment.getResourceMaps(awsRolePolicyAttachments);
+        Maps<Resource> resourceMaps = exportIamRolePolicyAttachments.getResourceMaps(awsRolePolicyAttachments);
         String actual = resourceMaps.unmarshall();
 
         log.debug("actual => \n{}", actual);
@@ -59,7 +59,7 @@ class ExportIamRolePolicyAttachmentTest {
     @Test
     public void getTFImport() {
         String expected = TestDataFileUtils.asString(resourceLoader.getResource("testData/aws/expected/IamRolePolicyAttachment.cmd"));
-        String actual = exportIamRolePolicyAttachment.getTFImport(getAwsRolePolicyAttachments()).script();
+        String actual = exportIamRolePolicyAttachments.getTFImport(getAwsRolePolicyAttachments()).script();
 
         assertEquals(expected, actual);
     }

@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "ElasticsearchDomains";
+
     @Override
     protected Maps<Resource> export(ElasticsearchClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSElasticsearchDomain> awsElasticsearchDomains = listAwsElasticsearchDomains(client);
@@ -35,6 +37,10 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
     protected TFImport scriptImport(ElasticsearchClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSElasticsearchDomain> awsElasticsearchDomains = listAwsElasticsearchDomains(client);
         return getTFImport(awsElasticsearchDomains);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSElasticsearchDomain> listAwsElasticsearchDomains(ElasticsearchClient client) {

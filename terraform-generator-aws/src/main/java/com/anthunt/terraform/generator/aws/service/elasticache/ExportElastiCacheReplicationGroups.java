@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCacheClient> {
 
+    private static final String DEFAULT_OUTPUT_FILE_NAME = "ElastiCacheReplicationGroups";
+
     @Override
     protected Maps<Resource> export(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSCacheReplicationGroup> awsCacheReplicationGroups = listAwsCacheReplicationGroups(client);
@@ -32,6 +34,10 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
     protected TFImport scriptImport(ElastiCacheClient client, CommonArgs commonArgs, ExtraArgs extraArgs) {
         List<AWSCacheReplicationGroup> awsCacheReplicationGroups = listAwsCacheReplicationGroups(client);
         return getTFImport(awsCacheReplicationGroups);
+    }
+
+    protected String getDefaultOutputFileName() {
+        return DEFAULT_OUTPUT_FILE_NAME;
     }
 
     List<AWSCacheReplicationGroup> listAwsCacheReplicationGroups(ElastiCacheClient client) {

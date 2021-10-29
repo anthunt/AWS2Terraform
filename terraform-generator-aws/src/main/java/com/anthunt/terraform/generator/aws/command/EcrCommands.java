@@ -1,6 +1,6 @@
 package com.anthunt.terraform.generator.aws.command;
 
-import com.anthunt.terraform.generator.aws.service.ecr.ExportEcrRepository;
+import com.anthunt.terraform.generator.aws.service.ecr.ExportEcrRepositories;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -13,15 +13,15 @@ import javax.validation.Valid;
 @ShellComponent
 public class EcrCommands extends AbstractCommands {
 
-    private ExportEcrRepository exportEcrRepository;
+    private ExportEcrRepositories exportEcrRepositories;
 
-    public EcrCommands(ExportEcrRepository exportEcrRepository) {
-        this.exportEcrRepository = exportEcrRepository;
+    public EcrCommands(ExportEcrRepositories exportEcrRepositories) {
+        this.exportEcrRepositories = exportEcrRepositories;
     }
 
     @ShellMethod("Export terraform resources of ECR Repository.")
     public void ecrRepository(@ShellOption(optOut = true) @Valid CommonArgs commonArgs) {
-        exportEcrRepository.exportTerraform(EcrClient.class, commonArgs);
+        exportEcrRepositories.exportTerraform(EcrClient.class, commonArgs);
     }
 
 }
