@@ -8,8 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Aws2TerraformApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Aws2TerraformApplication.class, args);
-
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Aws2TerraformApplication.class, args);
+    }
 }
