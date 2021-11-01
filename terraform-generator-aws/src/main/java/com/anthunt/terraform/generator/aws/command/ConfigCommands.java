@@ -16,7 +16,11 @@ import java.util.Optional;
 public class ConfigCommands extends AbstractCommands {
 
     @ShellMethod("Configure AWS2Terraform profile and region")
-    public void config(@ShellOption(optOut = true, valueProvider = AwsRegionValueProvider.class) ConfigArgs configArgs) {
+    //
+    public void config(@ShellOption(valueProvider = AwsRegionValueProvider.class,
+            help = ConfigArgs.REGION_HELP) String region,
+                       @ShellOption(help = ConfigArgs.PROFILE_HELP) String profile) {
+        ConfigArgs configArgs = ConfigArgs.builder().region(region).profile(profile).build();
         if (configArgs.isNoArgs()) {
             ConfigRegistry configRegistry = ConfigRegistry.getInstance();
             System.out.println(MessageFormat.format("Region={0}, Profile={1}", configRegistry.getRegion(), configRegistry.getProfile()));
