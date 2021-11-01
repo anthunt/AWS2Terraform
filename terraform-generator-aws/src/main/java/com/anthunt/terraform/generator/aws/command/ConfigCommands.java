@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.command;
 
 import com.anthunt.terraform.generator.aws.command.args.ConfigArgs;
 import com.anthunt.terraform.generator.aws.config.ConfigRegistry;
+import com.anthunt.terraform.generator.aws.shell.AwsRegionValueProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -15,7 +16,11 @@ import java.util.Optional;
 public class ConfigCommands extends AbstractCommands {
 
     @ShellMethod("Configure AWS2Terraform profile and region")
-    public void config(@ShellOption(optOut = true) ConfigArgs configArgs) {
+    //
+    public void config(@ShellOption(valueProvider = AwsRegionValueProvider.class,
+            help = ConfigArgs.REGION_HELP) String region,
+                       @ShellOption(help = ConfigArgs.PROFILE_HELP) String profile) {
+        ConfigArgs configArgs = ConfigArgs.builder().region(region).profile(profile).build();
         if (configArgs.isNoArgs()) {
             ConfigRegistry configRegistry = ConfigRegistry.getInstance();
             System.out.println(MessageFormat.format("Region={0}, Profile={1}", configRegistry.getRegion(), configRegistry.getProfile()));
