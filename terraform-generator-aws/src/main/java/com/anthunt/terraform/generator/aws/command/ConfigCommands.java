@@ -18,8 +18,8 @@ public class ConfigCommands extends AbstractCommands {
     @ShellMethod("Configure AWS2Terraform profile and region")
     //
     public void config(@ShellOption(valueProvider = AwsRegionValueProvider.class,
-            help = ConfigArgs.REGION_HELP) String region,
-                       @ShellOption(help = ConfigArgs.PROFILE_HELP) String profile) {
+            help = ConfigArgs.REGION_HELP, defaultValue = ShellOption.NULL) String region,
+                       @ShellOption(help = ConfigArgs.PROFILE_HELP, defaultValue = ShellOption.NULL) String profile) {
         ConfigArgs configArgs = ConfigArgs.builder().region(region).profile(profile).build();
         if (configArgs.isNoArgs()) {
             ConfigRegistry configRegistry = ConfigRegistry.getInstance();
