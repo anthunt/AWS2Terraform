@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSLoadBalancer;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -44,21 +45,24 @@ public class ExportLoadBalancers extends AbstractExport<ElasticLoadBalancingV2Cl
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         List<AWSLoadBalancer> awsLoadBalancers = describeLoadBalancersResponse.loadBalancers().stream()
-                .map(loadBalancer -> AWSLoadBalancer.builder()
-                        .loadBalancer(loadBalancer)
-                        .loadBalancerAttributes(
-                                client.describeLoadBalancerAttributes(DescribeLoadBalancerAttributesRequest.builder()
-                                                .loadBalancerArn(loadBalancer.loadBalancerArn())
-                                                .build())
-                                        .attributes())
-                        .tags(
-                                client.describeTags(DescribeTagsRequest.builder()
-                                                .resourceArns(loadBalancer.loadBalancerArn())
-                                                .build())
-                                        .tagDescriptions().stream()
-                                        .flatMap(o -> o.tags().stream())
-                                        .collect(Collectors.toList()))
-                        .build())
+                .map(loadBalancer -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSLoadBalancer.builder()
+                            .loadBalancer(loadBalancer)
+                            .loadBalancerAttributes(
+                                    client.describeLoadBalancerAttributes(DescribeLoadBalancerAttributesRequest.builder()
+                                                    .loadBalancerArn(loadBalancer.loadBalancerArn())
+                                                    .build())
+                                            .attributes())
+                            .tags(
+                                    client.describeTags(DescribeTagsRequest.builder()
+                                                    .resourceArns(loadBalancer.loadBalancerArn())
+                                                    .build())
+                                            .tagDescriptions().stream()
+                                            .flatMap(o -> o.tags().stream())
+                                            .collect(Collectors.toList()))
+                            .build();
+                })
                 .peek(o -> log.debug("LoadBalancerAttributes => {}", o.getLoadBalancerAttributes()))
                 .peek(o -> log.debug("TagDescriptions => {}", o.getTags()))
                 .collect(Collectors.toList());

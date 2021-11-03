@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheSubnetGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
@@ -51,11 +52,14 @@ public class ExportElastiCacheSubnetGroups extends AbstractExport<ElastiCacheCli
         DescribeCacheSubnetGroupsResponse describeCacheSubnetGroupsResponse = client.describeCacheSubnetGroups();
         return describeCacheSubnetGroupsResponse.cacheSubnetGroups().stream()
                 .peek(cacheSubnetGroup -> log.debug("cacheSubnetGroup => {}", cacheSubnetGroup))
-                .map(cacheSubnetGroup -> AWSCacheSubnetGroup.builder()
-                        .cacheSubnetGroup(cacheSubnetGroup)
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                .resourceName(cacheSubnetGroup.arn()).build()).tagList())
-                        .build())
+                .map(cacheSubnetGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSCacheSubnetGroup.builder()
+                            .cacheSubnetGroup(cacheSubnetGroup)
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                    .resourceName(cacheSubnetGroup.arn()).build()).tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

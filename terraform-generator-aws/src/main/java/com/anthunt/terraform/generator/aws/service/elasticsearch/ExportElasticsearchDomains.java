@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticsearch.model.AWSElasticsearchDomain;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -47,6 +48,7 @@ public class ExportElasticsearchDomains extends AbstractExport<ElasticsearchClie
         ListDomainNamesResponse domainNamesResponse = client.listDomainNames();
         return domainNamesResponse.domainNames().stream()
                 .map(domainInfo -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
                     ElasticsearchDomainStatus elasticsearchDomainStatus = client.describeElasticsearchDomain(DescribeElasticsearchDomainRequest.builder()
                                     .domainName(domainInfo.domainName()).build())
                             .domainStatus();

@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.ec2.model.AWSLaunchTemplateVersion;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -48,13 +49,15 @@ public class ExportLaunchTemplates extends AbstractExport<Ec2Client> {
         DescribeLaunchTemplatesResponse describeLaunchTemplatesResponse = client.describeLaunchTemplates();
 
         return describeLaunchTemplatesResponse.launchTemplates().stream()
-                .map(launchTemplate ->
-                        AWSLaunchTemplateVersion.builder()
-                                .launchTemplateVersion(client.describeLaunchTemplateVersions(builder -> builder
-                                                .launchTemplateId(launchTemplate.launchTemplateId())
-                                                .versions(launchTemplate.latestVersionNumber().toString()).build())
-                                        .launchTemplateVersions().stream().findFirst().get())
-                                .build()
+                .map(launchTemplate -> {
+                            ThreadUtils.sleep(super.getDelayBetweenApis());
+                            return AWSLaunchTemplateVersion.builder()
+                                    .launchTemplateVersion(client.describeLaunchTemplateVersions(builder -> builder
+                                                    .launchTemplateId(launchTemplate.launchTemplateId())
+                                                    .versions(launchTemplate.latestVersionNumber().toString()).build())
+                                            .launchTemplateVersions().stream().findFirst().get())
+                                    .build();
+                        }
                 )
                 .peek(launchTemplateVersion -> log.debug("launchTemplateVersion=>{}", launchTemplateVersion))
                 .collect(Collectors.toList());

@@ -28,6 +28,7 @@ class ExportIamRolePolicyAttachmentsTest {
     @BeforeAll
     public static void beforeAll() {
         exportIamRolePolicyAttachments = new ExportIamRolePolicyAttachments();
+        exportIamRolePolicyAttachments.setDelayBetweenApis(0);
     }
 
     private List<AWSRolePolicyAttachment> getAwsRolePolicyAttachments() {

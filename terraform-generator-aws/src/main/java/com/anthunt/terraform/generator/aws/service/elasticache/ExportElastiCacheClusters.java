@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheCluster;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -48,13 +49,16 @@ public class ExportElastiCacheClusters extends AbstractExport<ElastiCacheClient>
                 .build());
         return describeCacheClustersResponse.cacheClusters().stream()
                 .peek(cacheCluster -> log.debug("cacheCluster => {}", cacheCluster))
-                .map(cacheCluster -> AWSCacheCluster.builder()
-                        .cacheCluster(cacheCluster)
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                        .resourceName(cacheCluster.arn())
-                                        .build())
-                                .tagList())
-                        .build())
+                .map(cacheCluster -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSCacheCluster.builder()
+                            .cacheCluster(cacheCluster)
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                            .resourceName(cacheCluster.arn())
+                                            .build())
+                                    .tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

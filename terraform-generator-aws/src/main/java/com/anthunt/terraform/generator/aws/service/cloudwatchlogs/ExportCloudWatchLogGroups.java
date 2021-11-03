@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.cloudwatchlogs.model.AWSLogGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -49,12 +50,15 @@ public class ExportCloudWatchLogGroups extends AbstractExport<CloudWatchLogsClie
     List<AWSLogGroup> listAwsLogGroups(CloudWatchLogsClient client) {
         DescribeLogGroupsResponse describeLogGroupsResponse = client.describeLogGroups();
         return describeLogGroupsResponse.logGroups().stream()
-                .map(logGroup -> AWSLogGroup.builder()
-                        .logGroup(logGroup)
-                        .tags(client.listTagsLogGroup(ListTagsLogGroupRequest.builder()
-                                .logGroupName(logGroup.logGroupName())
-                                .build()).tags())
-                        .build())
+                .map(logGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSLogGroup.builder()
+                            .logGroup(logGroup)
+                            .tags(client.listTagsLogGroup(ListTagsLogGroupRequest.builder()
+                                    .logGroupName(logGroup.logGroupName())
+                                    .build()).tags())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

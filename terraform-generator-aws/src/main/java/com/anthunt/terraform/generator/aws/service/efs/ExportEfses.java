@@ -9,6 +9,7 @@ import com.anthunt.terraform.generator.aws.service.efs.model.AWSFileSystemPolicy
 import com.anthunt.terraform.generator.aws.service.efs.model.AWSMountTarget;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -52,37 +53,40 @@ public class ExportEfses extends AbstractExport<EfsClient> {
         DescribeFileSystemsResponse describeFileSystems = client.describeFileSystems();
         return describeFileSystems.fileSystems().stream()
 //                .peek(fileSystem -> log.debug("fileSystem => {}", fileSystem))
-                .map(fileSystem -> AWSEfs.builder()
-                        .fileSystemDescription(fileSystem)
-                        .awsBackupPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSBackupPolicy.builder()
-                                        .backupPolicy(client.describeBackupPolicy(DescribeBackupPolicyRequest.builder()
-                                                        .fileSystemId(fileSystem.fileSystemId())
-                                                        .build())
-                                                .backupPolicy()
-                                        )
-                                        .build())
-                                .orElse(null))
-                        .awsFileSystemPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSFileSystemPolicy.builder()
-                                .fileSystemDescription(fileSystem)
-                                .fileSystemPolicy(
-                                        URLDecoder.decode(
-                                                client.describeFileSystemPolicy(DescribeFileSystemPolicyRequest.builder()
-                                                                .fileSystemId(fileSystem.fileSystemId())
-                                                                .build())
-                                                        .policy()
-                                                , StandardCharsets.UTF_8))
-                                .build()).orElse(null))
-                        .awsMountTargets(OptionalUtils.getExceptionAsOptional(() ->
-                                        client.describeMountTargets(DescribeMountTargetsRequest.builder()
-                                                        .fileSystemId(fileSystem.fileSystemId())
-                                                        .build())
-                                                .mountTargets().stream()
-                                                .map(mountTarget -> AWSMountTarget.builder()
-                                                        .mountTarget(mountTarget)
-                                                        .build())
-                                                .collect(Collectors.toList()))
-                                .orElse(null))
-                        .build())
+                .map(fileSystem -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSEfs.builder()
+                            .fileSystemDescription(fileSystem)
+                            .awsBackupPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSBackupPolicy.builder()
+                                            .backupPolicy(client.describeBackupPolicy(DescribeBackupPolicyRequest.builder()
+                                                            .fileSystemId(fileSystem.fileSystemId())
+                                                            .build())
+                                                    .backupPolicy()
+                                            )
+                                            .build())
+                                    .orElse(null))
+                            .awsFileSystemPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSFileSystemPolicy.builder()
+                                    .fileSystemDescription(fileSystem)
+                                    .fileSystemPolicy(
+                                            URLDecoder.decode(
+                                                    client.describeFileSystemPolicy(DescribeFileSystemPolicyRequest.builder()
+                                                                    .fileSystemId(fileSystem.fileSystemId())
+                                                                    .build())
+                                                            .policy()
+                                                    , StandardCharsets.UTF_8))
+                                    .build()).orElse(null))
+                            .awsMountTargets(OptionalUtils.getExceptionAsOptional(() ->
+                                            client.describeMountTargets(DescribeMountTargetsRequest.builder()
+                                                            .fileSystemId(fileSystem.fileSystemId())
+                                                            .build())
+                                                    .mountTargets().stream()
+                                                    .map(mountTarget -> AWSMountTarget.builder()
+                                                            .mountTarget(mountTarget)
+                                                            .build())
+                                                    .collect(Collectors.toList()))
+                                    .orElse(null))
+                            .build();
+                })
                 .peek(AWSEfs -> log.debug("fileSystemPolicy => {}", AWSEfs.getAwsFileSystemPolicy()))
                 .collect(Collectors.toList());
 

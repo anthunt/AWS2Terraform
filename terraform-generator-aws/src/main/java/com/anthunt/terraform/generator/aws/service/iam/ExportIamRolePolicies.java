@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicy;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -53,20 +54,23 @@ public class ExportIamRolePolicies extends AbstractExport<IamClient> {
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))
                 .peek(role -> log.debug("roleName => {}", role.roleName()))
                 .flatMap(
-                        role -> client.listRolePolicies(ListRolePoliciesRequest.builder()
-                                        .roleName(role.roleName())
-                                        .build())
-                                .policyNames()
-                                .stream()
-                                .map(policyName -> AWSRolePolicy.builder()
-                                                .rolePolicy(client.getRolePolicy(
-                                                        GetRolePolicyRequest.builder()
-                                                                .roleName(role.roleName())
-                                                                .policyName(policyName)
-                                                                .build()))
-                                                        .build()
-                                )
-                                .peek(rolePolicy -> log.debug("rolePolicy => {}", rolePolicy))
+                        role -> {
+                            ThreadUtils.sleep(super.getDelayBetweenApis());
+                            return client.listRolePolicies(ListRolePoliciesRequest.builder()
+                                            .roleName(role.roleName())
+                                            .build())
+                                    .policyNames()
+                                    .stream()
+                                    .map(policyName -> AWSRolePolicy.builder()
+                                            .rolePolicy(client.getRolePolicy(
+                                                    GetRolePolicyRequest.builder()
+                                                            .roleName(role.roleName())
+                                                            .policyName(policyName)
+                                                            .build()))
+                                            .build()
+                                    )
+                                    .peek(rolePolicy -> log.debug("rolePolicy => {}", rolePolicy));
+                        }
                 )
                 .collect(Collectors.toList());
     }

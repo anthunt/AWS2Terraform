@@ -34,6 +34,7 @@ class ExportVpcEndpointsTest {
     @BeforeAll
     public static void beforeAll() {
         exportVpcEndpoints = new ExportVpcEndpoints();
+        exportVpcEndpoints.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEc2Client();
     }

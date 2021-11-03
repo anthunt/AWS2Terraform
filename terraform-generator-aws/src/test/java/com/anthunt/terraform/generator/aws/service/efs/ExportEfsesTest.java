@@ -40,6 +40,7 @@ class ExportEfsesTest {
     @BeforeAll
     public static void beforeAll() {
         exportEfses = new ExportEfses();
+        exportEfses.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEfsClient();
     }

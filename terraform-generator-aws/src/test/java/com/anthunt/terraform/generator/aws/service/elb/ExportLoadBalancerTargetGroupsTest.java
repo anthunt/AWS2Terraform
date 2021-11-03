@@ -34,6 +34,7 @@ class ExportLoadBalancerTargetGroupsTest {
     @BeforeAll
     public static void beforeAll() {
         exportLoadBalancerTargetGroups = new ExportLoadBalancerTargetGroups();
+        exportLoadBalancerTargetGroups.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getElasticLoadBalancingV2Client();
     }

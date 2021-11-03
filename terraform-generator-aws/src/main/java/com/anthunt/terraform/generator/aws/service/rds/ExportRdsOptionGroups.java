@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsOptionGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -51,13 +52,16 @@ public class ExportRdsOptionGroups extends AbstractExport<RdsClient> {
         return describeOptionGroupsResponse.optionGroupsList().stream()
                 .filter(optionGroup -> !optionGroup.optionGroupName().startsWith("default:"))
                 .peek(optionGroup -> log.debug("optionGroup => {}", optionGroup))
-                .map(optionGroup -> AWSRdsOptionGroup.builder()
-                        .optionGroup(optionGroup)
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                        .resourceName(optionGroup.optionGroupArn())
-                                        .build())
-                                .tagList())
-                        .build())
+                .map(optionGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSRdsOptionGroup.builder()
+                            .optionGroup(optionGroup)
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                            .resourceName(optionGroup.optionGroupArn())
+                                            .build())
+                                    .tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

@@ -34,6 +34,7 @@ class ExportRdsClustersTest {
     @BeforeAll
     public static void beforeAll() {
         exportRdsClusters = new ExportRdsClusters();
+        exportRdsClusters.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getRdsClient();
     }

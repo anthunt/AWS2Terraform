@@ -34,6 +34,7 @@ class ExportCloudwatchLogGroupsTest {
     @BeforeAll
     public static void beforeAll() {
         exportCloudwatchLogGroups = new ExportCloudWatchLogGroups();
+        exportCloudwatchLogGroups.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getCloudWatchLogGroupClient();
     }

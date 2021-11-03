@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.vpc.model.AWSVpc;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBool;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -44,20 +45,22 @@ public class ExportVpcs extends AbstractExport<Ec2Client> {
 
     List<AWSVpc> listVpcs(Ec2Client client) {
         DescribeVpcsResponse response = client.describeVpcs();
-        return response.vpcs().stream().map(vpc ->
-                AWSVpc.builder()
-                        .vpc(vpc)
-                        .enableDnsSupport(client.describeVpcAttribute(
-                                DescribeVpcAttributeRequest.builder()
-                                        .vpcId(vpc.vpcId())
-                                        .attribute(VpcAttributeName.ENABLE_DNS_SUPPORT)
-                                        .build()).enableDnsSupport().value())
-                        .enableDnsHostnames(client.describeVpcAttribute(
-                                DescribeVpcAttributeRequest.builder()
-                                        .vpcId(vpc.vpcId())
-                                        .attribute(VpcAttributeName.ENABLE_DNS_HOSTNAMES)
-                                        .build()).enableDnsHostnames().value())
-                        .build()
+        return response.vpcs().stream().map(vpc -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSVpc.builder()
+                            .vpc(vpc)
+                            .enableDnsSupport(client.describeVpcAttribute(
+                                    DescribeVpcAttributeRequest.builder()
+                                            .vpcId(vpc.vpcId())
+                                            .attribute(VpcAttributeName.ENABLE_DNS_SUPPORT)
+                                            .build()).enableDnsSupport().value())
+                            .enableDnsHostnames(client.describeVpcAttribute(
+                                    DescribeVpcAttributeRequest.builder()
+                                            .vpcId(vpc.vpcId())
+                                            .attribute(VpcAttributeName.ENABLE_DNS_HOSTNAMES)
+                                            .build()).enableDnsHostnames().value())
+                            .build();
+                }
         ).collect(Collectors.toList());
 
     }

@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.ec2.model.AWSInstance;
 import com.anthunt.terraform.generator.aws.service.ec2.model.AWSReservation;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -50,24 +51,27 @@ public class ExportInstances extends AbstractExport<Ec2Client> {
                 .map(reservation -> AWSReservation.builder()
                         .instances(reservation.instances().stream()
                                 .filter(instance -> instance.tags().stream().noneMatch(tag -> tag.key().equals("aws:autoscaling:groupName")))
-                                .map(instance -> AWSInstance.builder()
-                                        .instance(instance)
-                                        .disableApiTermination(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                                                        .instanceId(instance.instanceId())
-                                                        .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
-                                                        .build())
-                                                .disableApiTermination().value())
-                                        .shutdownBehavior(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                                                        .instanceId(instance.instanceId())
-                                                        .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
-                                                        .build())
-                                                .instanceInitiatedShutdownBehavior().value())
-                                        .userData(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
-                                                        .instanceId(instance.instanceId())
-                                                        .attribute(InstanceAttributeName.USER_DATA)
-                                                        .build())
-                                                .userData().value())
-                                        .build())
+                                .map(instance -> {
+                                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                                    return AWSInstance.builder()
+                                            .instance(instance)
+                                            .disableApiTermination(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                            .instanceId(instance.instanceId())
+                                                            .attribute(InstanceAttributeName.DISABLE_API_TERMINATION)
+                                                            .build())
+                                                    .disableApiTermination().value())
+                                            .shutdownBehavior(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                            .instanceId(instance.instanceId())
+                                                            .attribute(InstanceAttributeName.INSTANCE_INITIATED_SHUTDOWN_BEHAVIOR)
+                                                            .build())
+                                                    .instanceInitiatedShutdownBehavior().value())
+                                            .userData(client.describeInstanceAttribute(DescribeInstanceAttributeRequest.builder()
+                                                            .instanceId(instance.instanceId())
+                                                            .attribute(InstanceAttributeName.USER_DATA)
+                                                            .build())
+                                                    .userData().value())
+                                            .build();
+                                })
                                 .collect(Collectors.toList())
                         )
                         .build())

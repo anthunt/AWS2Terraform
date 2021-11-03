@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elasticache.model.AWSCacheReplicationGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -46,19 +47,22 @@ public class ExportElastiCacheReplicationGroups extends AbstractExport<ElastiCac
                 .build());
         return describeReplicationGroups.replicationGroups().stream()
                 .peek(replicationGroup -> log.debug("replicationGroup => {}", replicationGroup))
-                .map(replicationGroup -> AWSCacheReplicationGroup.builder()
-                        .replicationGroup(replicationGroup)
-                        .cacheClusters(replicationGroup.memberClusters().stream()
-                                .flatMap(memberCluster -> client.describeCacheClusters(DescribeCacheClustersRequest.builder()
-                                        .cacheClusterId(memberCluster)
-                                        .build()).cacheClusters().stream())
-                                .collect(Collectors.toList())
-                        )
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                        .resourceName(replicationGroup.arn())
-                                        .build())
-                                .tagList())
-                        .build())
+                .map(replicationGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSCacheReplicationGroup.builder()
+                            .replicationGroup(replicationGroup)
+                            .cacheClusters(replicationGroup.memberClusters().stream()
+                                    .flatMap(memberCluster -> client.describeCacheClusters(DescribeCacheClustersRequest.builder()
+                                            .cacheClusterId(memberCluster)
+                                            .build()).cacheClusters().stream())
+                                    .collect(Collectors.toList())
+                            )
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                            .resourceName(replicationGroup.arn())
+                                            .build())
+                                    .tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

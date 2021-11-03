@@ -17,7 +17,6 @@ import java.util.Optional;
 public class ConfigCommands extends AbstractCommands {
 
     @ShellMethod("Configure AWS2Terraform profile and region")
-    //
     public void config(@ShellOption(valueProvider = AwsRegionValueProvider.class,
             help = ConfigArgs.REGION_HELP, defaultValue = ShellOption.NULL) String region,
                        @ShellOption(valueProvider = AwsProfileValueProvider.class,

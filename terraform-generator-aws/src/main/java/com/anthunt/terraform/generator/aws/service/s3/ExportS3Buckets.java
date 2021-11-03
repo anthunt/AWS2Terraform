@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.s3.model.AWSBucket;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -45,49 +46,55 @@ public class ExportS3Buckets extends AbstractExport<S3Client> {
     List<AWSBucket> listAwsBuckets(S3Client client) {
         ListBucketsResponse listBucketsResponse = client.listBuckets();
         return listBucketsResponse.buckets().stream()
-                .map(bucket -> AWSBucket.builder()
-                        .bucket(bucket)
-                        .acl(client.getBucketAcl(GetBucketAclRequest.builder()
-                                .bucket(bucket.name())
-                                .build()))
-                        .policy(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getBucketPolicy(GetBucketPolicyRequest.builder()
-                                                .bucket(bucket.name()).build())
-                                        .policy()).orElse(null))
-                        .website(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getBucketWebsite(GetBucketWebsiteRequest.builder()
-                                        .bucket(bucket.name())
-                                        .build())).orElse(null)
-                        )
-                        .versioning(client.getBucketVersioning(GetBucketVersioningRequest.builder()
-                                .bucket(bucket.name()).build()))
-                        .logging(client.getBucketLogging(GetBucketLoggingRequest.builder()
-                                .bucket(bucket.name()).build()))
-                        .lifecycleRules(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getBucketLifecycleConfiguration(GetBucketLifecycleConfigurationRequest.builder()
-                                        .bucket(bucket.name()).build())).map(GetBucketLifecycleConfigurationResponse::rules).orElse(null)
-                        )
-                        .accelerateConfiguration(client.getBucketAccelerateConfiguration(GetBucketAccelerateConfigurationRequest.builder()
-                                .bucket(bucket.name()).build()))
-                        .requestPayment(client.getBucketRequestPayment(GetBucketRequestPaymentRequest.builder()
-                                .bucket(bucket.name()).build()))
-                        .replication(OptionalUtils.getExceptionAsOptional(() ->
-                                        client.getBucketReplication(GetBucketReplicationRequest.builder()
-                                                .bucket(bucket.name()).build()))
-                                .map(GetBucketReplicationResponse::replicationConfiguration).orElse(null))
-                        .encryption(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getBucketEncryption(GetBucketEncryptionRequest.builder()
-                                        .bucket(bucket.name()).build())).orElse(null))
-                        .objectLock(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getObjectLockConfiguration(GetObjectLockConfigurationRequest.builder()
-                                        .bucket(bucket.name()).build())).orElse(null))
-                        .tags(OptionalUtils.getExceptionAsOptional(() ->
-                                client.getBucketTagging(GetBucketTaggingRequest.builder()
-                                        .bucket(bucket.name())
-                                        .build())).map(GetBucketTaggingResponse::tagSet).orElse(List.of())
-                        )
+                .map(bucket -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSBucket.builder()
+                            .bucket(bucket)
+                            .acl(client.getBucketAcl(GetBucketAclRequest.builder()
+                                    .bucket(bucket.name())
+                                    .build()))
+                            .policy(OptionalUtils.getExceptionAsOptional(() ->
+                                    client.getBucketPolicy(GetBucketPolicyRequest.builder()
+                                                    .bucket(bucket.name()).build())
+                                            .policy()).orElse(null))
+                            .website(OptionalUtils.getExceptionAsOptional(() ->
+                                    client.getBucketWebsite(GetBucketWebsiteRequest.builder()
+                                            .bucket(bucket.name())
+                                            .build())).orElse(null)
+                            )
+                            .versioning(client.getBucketVersioning(GetBucketVersioningRequest.builder()
+                                    .bucket(bucket.name()).build()))
+                            .logging(client.getBucketLogging(GetBucketLoggingRequest.builder()
+                                    .bucket(bucket.name()).build()))
+                            .lifecycleRules(OptionalUtils.getExceptionAsOptional(() ->
+                                            client.getBucketLifecycleConfiguration(GetBucketLifecycleConfigurationRequest.builder()
+                                                    .bucket(bucket.name()).build()))
+                                    .map(getBucketLifecycleConfigurationResponse -> getBucketLifecycleConfigurationResponse.rules()).orElse(null)
+                            )
+                            .accelerateConfiguration(client.getBucketAccelerateConfiguration(GetBucketAccelerateConfigurationRequest.builder()
+                                    .bucket(bucket.name()).build()))
+                            .requestPayment(client.getBucketRequestPayment(GetBucketRequestPaymentRequest.builder()
+                                    .bucket(bucket.name()).build()))
+                            .replication(OptionalUtils.getExceptionAsOptional(() ->
+                                            client.getBucketReplication(GetBucketReplicationRequest.builder()
+                                                    .bucket(bucket.name()).build()))
+                                    .map(getBucketReplicationResponse -> getBucketReplicationResponse.replicationConfiguration()).orElse(null))
+                            .encryption(OptionalUtils.getExceptionAsOptional(() ->
+                                    client.getBucketEncryption(GetBucketEncryptionRequest.builder()
+                                            .bucket(bucket.name()).build())).orElse(null))
+                            .objectLock(OptionalUtils.getExceptionAsOptional(() ->
+                                    client.getObjectLockConfiguration(GetObjectLockConfigurationRequest.builder()
+                                            .bucket(bucket.name()).build())).orElse(null))
+                            .tags(OptionalUtils.getExceptionAsOptional(() ->
+                                            client.getBucketTagging(GetBucketTaggingRequest.builder()
+                                                    .bucket(bucket.name())
+                                                    .build()))
+                                    .map(getBucketTaggingResponse -> getBucketTaggingResponse.tagSet())
+                                    .orElse(List.of())
+                            )
 
-                        .build())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

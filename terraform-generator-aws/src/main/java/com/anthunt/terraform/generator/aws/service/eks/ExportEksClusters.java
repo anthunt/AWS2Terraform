@@ -5,6 +5,7 @@ import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.eks.model.AWSEksCluster;
 import com.anthunt.terraform.generator.aws.service.eks.model.AWSEksNodeGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -47,6 +48,7 @@ public class ExportEksClusters extends AbstractExport<EksClient> {
         ListClustersResponse listClustersResponse = client.listClusters();
         return listClustersResponse.clusters().stream()
                 .map(clusterName -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
                     Cluster cluster = client.describeCluster(
                                     DescribeClusterRequest.builder()
                                             .name(clusterName)

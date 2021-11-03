@@ -34,6 +34,7 @@ class ExportSubnetsTest {
     @BeforeAll
     public static void beforeAll() {
         exportSubnets = new ExportSubnets();
+        exportSubnets.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEc2Client();
     }

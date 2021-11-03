@@ -3,8 +3,9 @@ package com.anthunt.terraform.generator.aws.service.elb;
 import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
-import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroupAttachment;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroup;
+import com.anthunt.terraform.generator.aws.service.elb.model.AWSTargetGroupAttachment;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -47,32 +48,35 @@ public class ExportLoadBalancerTargetGroups extends AbstractExport<ElasticLoadBa
         List<AWSTargetGroup> awsTargetGroups = describeTargetGroupsResponse.targetGroups()
                 .stream()
                 .peek(targetGroup -> log.debug("targetGroup => {}", targetGroup))
-                .map(targetGroup -> AWSTargetGroup.builder()
-                        .targetGroup(targetGroup)
-                        .targetGroupAttributes(
-                                client.describeTargetGroupAttributes(DescribeTargetGroupAttributesRequest.builder()
-                                                .targetGroupArn(targetGroup.targetGroupArn())
-                                                .build())
-                                        .attributes())
-                        .awsTargetGroupAttachments(
-                                client.describeTargetHealth(DescribeTargetHealthRequest.builder()
-                                                .targetGroupArn(targetGroup.targetGroupArn())
-                                                .build())
-                                        .targetHealthDescriptions().stream()
-                                        .map(targetHealthDescription -> AWSTargetGroupAttachment.builder()
-                                                .targetGroupName(targetGroup.targetGroupName())
-                                                .targetDescription(targetHealthDescription.target())
-                                                .build())
-                                        .collect(Collectors.toList())
-                        )
-                        .tags(
-                                client.describeTags(DescribeTagsRequest.builder()
-                                                .resourceArns(targetGroup.targetGroupArn())
-                                                .build())
-                                        .tagDescriptions().stream()
-                                        .flatMap(o -> o.tags().stream())
-                                        .collect(Collectors.toList()))
-                        .build())
+                .map(targetGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSTargetGroup.builder()
+                            .targetGroup(targetGroup)
+                            .targetGroupAttributes(
+                                    client.describeTargetGroupAttributes(DescribeTargetGroupAttributesRequest.builder()
+                                                    .targetGroupArn(targetGroup.targetGroupArn())
+                                                    .build())
+                                            .attributes())
+                            .awsTargetGroupAttachments(
+                                    client.describeTargetHealth(DescribeTargetHealthRequest.builder()
+                                                    .targetGroupArn(targetGroup.targetGroupArn())
+                                                    .build())
+                                            .targetHealthDescriptions().stream()
+                                            .map(targetHealthDescription -> AWSTargetGroupAttachment.builder()
+                                                    .targetGroupName(targetGroup.targetGroupName())
+                                                    .targetDescription(targetHealthDescription.target())
+                                                    .build())
+                                            .collect(Collectors.toList())
+                            )
+                            .tags(
+                                    client.describeTags(DescribeTagsRequest.builder()
+                                                    .resourceArns(targetGroup.targetGroupArn())
+                                                    .build())
+                                            .tagDescriptions().stream()
+                                            .flatMap(o -> o.tags().stream())
+                                            .collect(Collectors.toList()))
+                            .build();
+                })
                 .collect(Collectors.toList());
         return awsTargetGroups.stream()
                 .filter(awsTargetGroup -> awsTargetGroup.getTags().stream()

@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSListener;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
@@ -48,23 +49,26 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         return describeLoadBalancersResponse.loadBalancers().stream()
-                .flatMap(loadBalancer -> client.describeListeners(DescribeListenersRequest.builder()
-                                .loadBalancerArn(loadBalancer.loadBalancerArn()).build())
-                        .listeners().stream()
-                        .map(listener -> AWSListener.builder()
-                                .listener(listener)
-                                .loadBalancer(loadBalancer)
-                                .targetGroup(listener.defaultActions().stream()
-                                        .map(Action::targetGroupArn)
-                                        .findFirst()
-                                        .flatMap(targetGroupArn -> client.describeTargetGroups(
-                                                        DescribeTargetGroupsRequest.builder()
-                                                                .targetGroupArns(targetGroupArn)
-                                                                .build())
-                                                .targetGroups().stream()
-                                                .findFirst())
-                                        .orElse(null))
-                                .build()))
+                .flatMap(loadBalancer -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return client.describeListeners(DescribeListenersRequest.builder()
+                                    .loadBalancerArn(loadBalancer.loadBalancerArn()).build())
+                            .listeners().stream()
+                            .map(listener -> AWSListener.builder()
+                                    .listener(listener)
+                                    .loadBalancer(loadBalancer)
+                                    .targetGroup(listener.defaultActions().stream()
+                                            .map(Action::targetGroupArn)
+                                            .findFirst()
+                                            .flatMap(targetGroupArn -> client.describeTargetGroups(
+                                                            DescribeTargetGroupsRequest.builder()
+                                                                    .targetGroupArns(targetGroupArn)
+                                                                    .build())
+                                                    .targetGroups().stream()
+                                                    .findFirst())
+                                            .orElse(null))
+                                    .build());
+                })
                 .collect(Collectors.toList());
     }
 
