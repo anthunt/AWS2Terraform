@@ -49,6 +49,19 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
 
         DescribeLoadBalancersResponse describeLoadBalancersResponse = client.describeLoadBalancers();
         return describeLoadBalancersResponse.loadBalancers().stream()
+                .filter(loadBalancer -> {
+                            ThreadUtils.sleep(super.getDelayBetweenApis());
+                            return client.describeTags(DescribeTagsRequest.builder()
+                                            .resourceArns(loadBalancer.loadBalancerArn())
+                                            .build())
+                                    .tagDescriptions().stream()
+                                    .flatMap(o -> o.tags().stream())
+                                    .collect(Collectors.toList()).stream()
+                                    .noneMatch(tag ->
+                                            tag.key().startsWith("kubernetes.io/cluster/") &&
+                                                    tag.value().equals("owned"));
+                        }
+                )
                 .flatMap(loadBalancer -> {
                     ThreadUtils.sleep(super.getDelayBetweenApis());
                     return client.describeListeners(DescribeListenersRequest.builder()
