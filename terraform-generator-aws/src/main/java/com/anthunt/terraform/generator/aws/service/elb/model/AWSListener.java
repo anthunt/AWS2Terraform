@@ -31,6 +31,6 @@ public class AWSListener implements TerraformSource {
 
     @Override
     public String getResourceName() {
-        return MessageFormat.format("{0}-{1}-{2}", loadBalancer.loadBalancerName(), listener.port(), listener.protocolAsString());
+        return MessageFormat.format("{0}-{1}-{2}", loadBalancer.loadBalancerName(), listener.port().toString(), listener.protocolAsString());
     }
 }
