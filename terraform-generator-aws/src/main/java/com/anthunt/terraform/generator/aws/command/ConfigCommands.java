@@ -2,6 +2,7 @@ package com.anthunt.terraform.generator.aws.command;
 
 import com.anthunt.terraform.generator.aws.command.args.ConfigArgs;
 import com.anthunt.terraform.generator.aws.config.ConfigRegistry;
+import com.anthunt.terraform.generator.aws.shell.AwsProfileValueProvider;
 import com.anthunt.terraform.generator.aws.shell.AwsRegionValueProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
@@ -19,7 +20,8 @@ public class ConfigCommands extends AbstractCommands {
     //
     public void config(@ShellOption(valueProvider = AwsRegionValueProvider.class,
             help = ConfigArgs.REGION_HELP, defaultValue = ShellOption.NULL) String region,
-                       @ShellOption(help = ConfigArgs.PROFILE_HELP, defaultValue = ShellOption.NULL) String profile) {
+                       @ShellOption(valueProvider = AwsProfileValueProvider.class,
+                               help = ConfigArgs.PROFILE_HELP, defaultValue = ShellOption.NULL) String profile) {
         ConfigArgs configArgs = ConfigArgs.builder().region(region).profile(profile).build();
         if (configArgs.isNoArgs()) {
             ConfigRegistry configRegistry = ConfigRegistry.getInstance();
