@@ -7,6 +7,7 @@ import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsAlias;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKey;
 import com.anthunt.terraform.generator.aws.service.kms.model.AWSKmsKeyPolicy;
 import com.anthunt.terraform.generator.aws.utils.JsonUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFNumber;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
@@ -49,31 +50,34 @@ public class ExportKmsKeys extends AbstractExport<KmsClient> {
     List<AWSKmsKey> listKeys(KmsClient client) {
         ListKeysResponse listKeysResponse = client.listKeys();
         return listKeysResponse.keys().stream()
-                .map(key -> AWSKmsKey.builder()
-                        .keyMetadata(client.describeKey(DescribeKeyRequest.builder()
-                                        .keyId(key.keyId())
-                                        .build())
-                                .keyMetadata())
-                        .awsKeyPolicies(client.listKeyPolicies(ListKeyPoliciesRequest.builder()
-                                        .keyId(key.keyId())
-                                        .build())
-                                .policyNames().stream()
-                                .map(policyName -> AWSKmsKeyPolicy.builder()
-                                        .name(policyName)
-                                        .policy(client.getKeyPolicy(builder -> builder.keyId(key.keyId())
-                                                        .policyName(policyName))
-                                                .policy())
-                                        .build())
-                                .collect(Collectors.toList())
-                        )
-                        .awsKmsAliases(client.listAliases(ListAliasesRequest.builder()
-                                        .keyId(key.keyId())
-                                        .build()).aliases().stream()
-                                .map(entry -> AWSKmsAlias.builder()
-                                        .alias(entry)
-                                        .build())
-                                .collect(Collectors.toList()))
-                        .build())
+                .map(key -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSKmsKey.builder()
+                            .keyMetadata(client.describeKey(DescribeKeyRequest.builder()
+                                            .keyId(key.keyId())
+                                            .build())
+                                    .keyMetadata())
+                            .awsKeyPolicies(client.listKeyPolicies(ListKeyPoliciesRequest.builder()
+                                            .keyId(key.keyId())
+                                            .build())
+                                    .policyNames().stream()
+                                    .map(policyName -> AWSKmsKeyPolicy.builder()
+                                            .name(policyName)
+                                            .policy(client.getKeyPolicy(builder -> builder.keyId(key.keyId())
+                                                            .policyName(policyName))
+                                                    .policy())
+                                            .build())
+                                    .collect(Collectors.toList())
+                            )
+                            .awsKmsAliases(client.listAliases(ListAliasesRequest.builder()
+                                            .keyId(key.keyId())
+                                            .build()).aliases().stream()
+                                    .map(entry -> AWSKmsAlias.builder()
+                                            .alias(entry)
+                                            .build())
+                                    .collect(Collectors.toList()))
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

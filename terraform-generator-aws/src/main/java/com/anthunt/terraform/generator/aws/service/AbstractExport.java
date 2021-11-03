@@ -26,6 +26,15 @@ public abstract class AbstractExport<T extends SdkClient> {
 
     private String profileName;
     private Region region;
+    private long delayBetweenApis = 100;
+
+    public long getDelayBetweenApis() {
+        return delayBetweenApis;
+    }
+
+    public void setDelayBetweenApis(long delayBetweenApis) {
+        this.delayBetweenApis = delayBetweenApis;
+    }
 
     public void exportTerraform(Class<T> t, CommonArgs commonArgs) {
         this.exportTerraform(t, commonArgs, null);
@@ -111,8 +120,6 @@ public abstract class AbstractExport<T extends SdkClient> {
                         log.info("result=>'{}'", scriptString);
                     }
                 }
-            } else {
-                System.out.println("No resource found!");
             }
         } else {
             if (!resources.isEmpty()) {
@@ -133,13 +140,13 @@ public abstract class AbstractExport<T extends SdkClient> {
                         log.info("result=>'{}'", scriptString);
                     }
                 }
-            } else {
-                System.out.println("No resource found!");
             }
         }
 
         this.printProgressBar(commonArgs.isSilence(), 100);
-
+        if (resources.isEmpty()) {
+            System.out.println("No resource found!");
+        }
 
     }
 

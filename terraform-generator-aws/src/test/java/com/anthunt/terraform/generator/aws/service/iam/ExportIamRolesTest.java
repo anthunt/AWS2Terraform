@@ -36,6 +36,7 @@ class ExportIamRolesTest {
     @BeforeAll
     public static void beforeAll() {
         exportIamRoles = new ExportIamRoles();
+        exportIamRoles.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
         client = amazonClients.getIamClient();
     }

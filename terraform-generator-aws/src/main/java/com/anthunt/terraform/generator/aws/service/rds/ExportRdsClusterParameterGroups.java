@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsClusterParameterGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
@@ -49,16 +50,19 @@ public class ExportRdsClusterParameterGroups extends AbstractExport<RdsClient> {
                 .filter(parameterGroup ->
                         !parameterGroup.dbClusterParameterGroupName().startsWith("default."))
                 .peek(parameterGroup -> log.debug("parameterGroup => {}", parameterGroup))
-                .map(parameterGroup -> AWSRdsClusterParameterGroup.builder()
-                        .dbClusterParameterGroup(parameterGroup)
-                        .parameters(client.describeDBClusterParameters(DescribeDbClusterParametersRequest.builder()
-                                        .dbClusterParameterGroupName(parameterGroup.dbClusterParameterGroupName())
-                                        .build()).parameters().stream()
-                                .peek(parameter -> log.debug("parameter => {}", parameter))
-                                .collect(Collectors.toList()))
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                .resourceName(parameterGroup.dbClusterParameterGroupArn()).build()).tagList())
-                        .build())
+                .map(parameterGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSRdsClusterParameterGroup.builder()
+                            .dbClusterParameterGroup(parameterGroup)
+                            .parameters(client.describeDBClusterParameters(DescribeDbClusterParametersRequest.builder()
+                                            .dbClusterParameterGroupName(parameterGroup.dbClusterParameterGroupName())
+                                            .build()).parameters().stream()
+                                    .peek(parameter -> log.debug("parameter => {}", parameter))
+                                    .collect(Collectors.toList()))
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                    .resourceName(parameterGroup.dbClusterParameterGroupArn()).build()).tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

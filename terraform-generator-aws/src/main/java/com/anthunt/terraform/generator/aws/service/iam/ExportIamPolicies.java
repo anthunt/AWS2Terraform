@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSPolicy;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFString;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -48,17 +49,20 @@ public class ExportIamPolicies extends AbstractExport<IamClient> {
         ListPoliciesResponse listPoliciesResponse = client.listPolicies(ListPoliciesRequest.builder().build());
         return listPoliciesResponse.policies().stream()
                 .filter(policy -> !policy.arn().startsWith("arn:aws:iam::aws:policy/"))
-                .map(policy -> AWSPolicy.builder().policy(policy)
-                        .document(
-                                decodeURL(
-                                        client.getPolicyVersion(
-                                                GetPolicyVersionRequest.builder()
-                                                        .policyArn(policy.arn())
-                                                        .versionId(policy.defaultVersionId())
-                                                        .build()
-                                        ).policyVersion().document()
-                                )
-                        ).build()
+                .map(policy -> {
+                            ThreadUtils.sleep(super.getDelayBetweenApis());
+                            return AWSPolicy.builder().policy(policy)
+                                    .document(
+                                            decodeURL(
+                                                    client.getPolicyVersion(
+                                                            GetPolicyVersionRequest.builder()
+                                                                    .policyArn(policy.arn())
+                                                                    .versionId(policy.defaultVersionId())
+                                                                    .build()
+                                                    ).policyVersion().document()
+                                            )
+                                    ).build();
+                        }
                 )
                 .collect(Collectors.toList());
     }

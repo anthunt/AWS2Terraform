@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.iam.model.AWSRolePolicyAttachment;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -47,17 +48,20 @@ public class ExportIamRolePolicyAttachments extends AbstractExport<IamClient> {
                 .filter(role -> !role.arn().startsWith("arn:aws:iam::aws:role/"))
                 .peek(role -> log.debug("roleName => {}", role.roleName()))
                 .flatMap(
-                        role -> client.listAttachedRolePolicies(ListAttachedRolePoliciesRequest.builder()
-                                        .roleName(role.roleName())
-                                        .build())
-                                .attachedPolicies()
-                                .stream()
-                                .map(attachedPolicy -> AWSRolePolicyAttachment.builder()
-                                        .roleName(role.roleName())
-                                        .policyName(attachedPolicy.policyName())
-                                        .build()
-                                )
-                                .peek(rolePolicyAttachment -> log.debug("rolePolicyAttachment => {}", rolePolicyAttachment))
+                        role -> {
+                            ThreadUtils.sleep(super.getDelayBetweenApis());
+                            return client.listAttachedRolePolicies(ListAttachedRolePoliciesRequest.builder()
+                                            .roleName(role.roleName())
+                                            .build())
+                                    .attachedPolicies()
+                                    .stream()
+                                    .map(attachedPolicy -> AWSRolePolicyAttachment.builder()
+                                            .roleName(role.roleName())
+                                            .policyName(attachedPolicy.policyName())
+                                            .build()
+                                    )
+                                    .peek(rolePolicyAttachment -> log.debug("rolePolicyAttachment => {}", rolePolicyAttachment));
+                        }
                 )
                 .collect(Collectors.toList());
     }

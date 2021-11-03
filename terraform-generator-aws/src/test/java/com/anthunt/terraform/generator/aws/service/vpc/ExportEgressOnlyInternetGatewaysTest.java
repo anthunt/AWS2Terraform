@@ -36,6 +36,7 @@ class ExportEgressOnlyInternetGatewaysTest {
     @BeforeAll
     public static void beforeAll() {
         exportEgressOnlyInternetGateways = new ExportEgressOnlyInternetGateways();
+        exportEgressOnlyInternetGateways.setDelayBetweenApis(0);
         AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
         client = amazonClients.getEc2Client();
     }

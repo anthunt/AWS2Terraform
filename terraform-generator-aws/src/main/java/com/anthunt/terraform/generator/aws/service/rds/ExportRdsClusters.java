@@ -6,6 +6,7 @@ import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsCluster;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsInstance;
 import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -48,20 +49,23 @@ public class ExportRdsClusters extends AbstractExport<RdsClient> {
         DescribeDbClustersResponse describeDbClustersResponse = client.describeDBClusters();
         return describeDbClustersResponse.dbClusters().stream()
                 .peek(dbCuster -> log.debug("dbCuster => {}", dbCuster))
-                .map(dbCuster -> AWSRdsCluster.builder()
-                        .dbCluster(dbCuster)
-                        .awsRdsInstances(OptionalUtils.getExceptionAsOptional(() ->
-                                        client.describeDBInstances(DescribeDbInstancesRequest.builder()
-                                                        .filters(f -> f.name("db-cluster-id")
-                                                                .values(dbCuster.dbClusterArn()))
-                                                        .build())
-                                                .dbInstances().stream()
-                                                .map(dbInstance -> AWSRdsInstance.builder()
-                                                        .dbInstance(dbInstance)
-                                                        .build())
-                                                .collect(Collectors.toList()))
-                                .orElse(null))
-                        .build())
+                .map(dbCuster -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSRdsCluster.builder()
+                            .dbCluster(dbCuster)
+                            .awsRdsInstances(OptionalUtils.getExceptionAsOptional(() ->
+                                            client.describeDBInstances(DescribeDbInstancesRequest.builder()
+                                                            .filters(f -> f.name("db-cluster-id")
+                                                                    .values(dbCuster.dbClusterArn()))
+                                                            .build())
+                                                    .dbInstances().stream()
+                                                    .map(dbInstance -> AWSRdsInstance.builder()
+                                                            .dbInstance(dbInstance)
+                                                            .build())
+                                                    .collect(Collectors.toList()))
+                                    .orElse(null))
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

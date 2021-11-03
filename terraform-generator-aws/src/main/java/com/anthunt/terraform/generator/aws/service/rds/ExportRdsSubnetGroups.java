@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.rds.model.AWSRdsSubnetGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFList;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFMap;
@@ -51,11 +52,14 @@ public class ExportRdsSubnetGroups extends AbstractExport<RdsClient> {
         DescribeDbSubnetGroupsResponse describeDbSubnetGroupsResponse = client.describeDBSubnetGroups();
         return describeDbSubnetGroupsResponse.dbSubnetGroups().stream()
                 .peek(dbSubnetGroup -> log.debug("dbSubnetGroup => {}", dbSubnetGroup))
-                .map(dbSubnetGroup -> AWSRdsSubnetGroup.builder()
-                        .dbSubnetGroup(dbSubnetGroup)
-                        .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
-                                .resourceName(dbSubnetGroup.dbSubnetGroupArn()).build()).tagList())
-                        .build())
+                .map(dbSubnetGroup -> {
+                    ThreadUtils.sleep(super.getDelayBetweenApis());
+                    return AWSRdsSubnetGroup.builder()
+                            .dbSubnetGroup(dbSubnetGroup)
+                            .tags(client.listTagsForResource(ListTagsForResourceRequest.builder()
+                                    .resourceName(dbSubnetGroup.dbSubnetGroupArn()).build()).tagList())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

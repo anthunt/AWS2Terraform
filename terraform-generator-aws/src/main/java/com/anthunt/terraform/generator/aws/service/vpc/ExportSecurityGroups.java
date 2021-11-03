@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.vpc.model.AWSSecurityGroup;
+import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.*;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImport;
 import com.anthunt.terraform.generator.core.model.terraform.imports.TFImportLine;
@@ -55,6 +56,7 @@ public class ExportSecurityGroups extends AbstractExport<Ec2Client> {
             log.debug("vpcName : {}", vpcName);
             log.debug("===============================================================");
 
+            ThreadUtils.sleep(super.getDelayBetweenApis());
             DescribeSecurityGroupsResponse describeSecurityGroupResponse = client.describeSecurityGroups(
                     DescribeSecurityGroupsRequest.builder()
                             .filters(Filter.builder().name("vpc-id").values(vpc.vpcId()).build())
