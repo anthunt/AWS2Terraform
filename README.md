@@ -1,4 +1,4 @@
-# AWS2Terraform
+# AWS2Terraform ( AWS to Terraform )
 
 [![Gitpod](https://img.shields.io/badge/build-Gitpod-green.svg)](https://gitpod.io/#https://github.com/anthunt/AWS2Terraform)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f952e93b7a7c4be7b60c625d3ef75cda)](https://www.codacy.com/gh/anthunt/AWS2Terraform/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=anthunt/AWS2Terraform&amp;utm_campaign=Badge_Grade)
