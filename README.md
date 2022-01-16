@@ -101,6 +101,7 @@ CloudWatchLogsCommands : cloud-watch-log-groups
 
 3. Exit shell and check out result files which is created on outout folder.
 *.tf files are terraform files, and *.cmd files are terraform import files.
+
 ```shell
 export:>exit
 
@@ -132,6 +133,7 @@ How to check Spring Shell CLI Builtin option.
 ```shell
 export:>help
 ```
+
 ```shell
 AVAILABLE COMMANDS
 
