@@ -3,3 +3,4 @@ plugins:
   - jekyll-sitemap
 exclude:
   - terraform-generator-shell/jdk-11.0.9+11-jre/
+  - google2685076b82b34fc9.html
