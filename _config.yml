@@ -1,3 +1,5 @@
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-sitemap
+exclude:
+  - terraform-generator-shell/jdk-11.0.9+11-jre/
