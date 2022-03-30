@@ -1,3 +1,3 @@
 # Table of contents
 
-* [AWS2Terraform](README.md)
+* [🏳 AWS2Terraform](README.md)

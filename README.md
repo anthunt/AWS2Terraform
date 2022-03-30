@@ -1,73 +1,78 @@
-# AWS2Terraform
+# 🏳 AWS2Terraform
 
-[![Gitpod](https://img.shields.io/badge/build-Gitpod-green.svg)](https://gitpod.io/#https://github.com/anthunt/AWS2Terraform)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f952e93b7a7c4be7b60c625d3ef75cda)](https://www.codacy.com/gh/anthunt/AWS2Terraform/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=anthunt/AWS2Terraform&amp;utm_campaign=Badge_Grade)
-[![gradle build](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml)
-[![Create Release](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml)
---
-[![Status Not yet](https://img.shields.io/badge/Status-NotYet-yellow.svg)](#)
-[![Language Java](https://img.shields.io/badge/Language-Java-orange.svg)](#)
-[![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](LICENSE)
+## [![Gitpod](https://img.shields.io/badge/build-Gitpod-green.svg)](https://gitpod.io/#https://github.com/anthunt/AWS2Terraform) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f952e93b7a7c4be7b60c625d3ef75cda)](https://www.codacy.com/gh/anthunt/AWS2Terraform/dashboard) [![gradle build](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml) [![Create Release](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml)
 
+[![Status Not yet](https://img.shields.io/badge/Status-NotYet-yellow.svg)](./) [![Language Java](https://img.shields.io/badge/Language-Java-orange.svg)](./) [![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](LICENSE/)
+
+{% hint style="info" %}
 This project is intended to extract resources created in AWS as Terraform resources.
 
 I implemented the CLI using Spring Shell project and JCommander library.
 
 The goal of the current project is an extract program for Terraform resources, and will be developed in the future towards generating tfvar and tfstates according to standardized Terraform code.
+{% endhint %}
 
 ## AWS Services supported
 
-1. EC2 
-  - EC2 Instances
-  - Launch Templates
+<details>
+
+<summary>Supported AWS Services</summary>
+
+
+
+1. EC2
+   * EC2 Instances
+   * Launch Templates
 2. VPCs
-  - egress-only-internet-gateways
-  - internet-gateways
-  - nat-gateways
-  - route-tables
-  - security-groups
-  - subnets
-  - vpcs
+   * egress-only-internet-gateways
+   * internet-gateways
+   * nat-gateways
+   * route-tables
+   * security-groups
+   * subnets
+   * vpcs
 3. Api Gateway
-  - api-gateway-resources
-  - api-gateway-rest-apis
+   * api-gateway-resources
+   * api-gateway-rest-apis
 4. Cloud Watch Logs
-  - cloud-watch-log-groups
-  - resource-policies
+   * cloud-watch-log-groups
+   * resource-policies
 5. ECR
-  - ecr-repository
+   * ecr-repository
 6. EFS
-  - efs-file-systems 
+   * fs-file-systems
 7. EKS
-  - eks-clusters
+   * eks-clusters
 8. ElastiCache
-  - elasti-cache-clusters
-  - elasti-cache-replication-groups
-  - elasti-cache-subnet-groups
+   * elasti-cache-clusters
+   * elasti-cache-replication-groups
+   * elasti-cache-subnet-groups
 9. Elastic Search(OpenSearch)
-  - elastic-search-domains
+   * elastic-search-domains
 10. ELB
-  - load-balancer-listeners
-  - load-balancer-target-groups
-  - load-balancers
+    * load-balancer-listeners
+    * load-balancer-target-groups
+    * load-balancers
 11. IAM
-  - iam-instance-profiles
-  - iam-policies
-  - iam-role-policies
-  - iam-role-policy-attachment
-  - iam-roles
+    * iam-instance-profiles
+    * iam-policies
+    * iam-role-policies
+    * iam-role-policy-attachment
+    * iam-roles
 12. KMS
-  - kms-keys
+    * kms-keys
 13. MSK
-  - msk-clusters
+    * msk-clusters
 14. RDS
-  - rds-cluster-parameter-groups
-  - rds-clusters
-  - rds-option-groups
-  - rds-subnet-groups
+    * rds-cluster-parameter-groups
+    * rds-clusters
+    * rds-option-groups
+    * rds-subnet-groups
 15. S3
-  - s3buckets
+    * s3buckets
 16. It will be added gradually.
+
+</details>
 
 ## Run
 
@@ -75,8 +80,8 @@ The goal of the current project is an extract program for Terraform resources, a
 java -jar terraform-generator-shell-[version].jar
 ```
 
-
 ## Getting started
+
 1. configure region and profile.
 
 ```shell
@@ -85,7 +90,7 @@ Region is set to ap-northeast-2
 Profile is set to default
 ```
 
-2. Use `all-available-resources` command to export all available-resources from aws.
+1. Use `all-available-resources` command to export all available-resources from aws.
 
 ```shell
 export:>all-available-resources
@@ -99,8 +104,8 @@ CloudWatchLogsCommands : cloud-watch-log-groups
 |##########------------------------------------------------------------------------------------------|10%|
 ```
 
-3. Exit shell and check out result files which is created on outout folder.
-*.tf files are terraform files, and *.cmd files are terraform import files.
+1. Exit shell and check out result files which is created on outout folder. \*.tf files are terraform files, and \*.cmd files are terraform import files.
+
 ```shell
 export:>exit
 
@@ -132,6 +137,7 @@ How to check Spring Shell CLI Builtin option.
 ```shell
 export:>help
 ```
+
 ```shell
 AVAILABLE COMMANDS
 
@@ -216,9 +222,8 @@ Vpc Commands
 ```
 
 ## Config Commands
-You can configure AWS2Terraform profile and region via config commands.
-After that, you do not need to put common parameters when you run each command.
-Auto completion is available for parameter of region and profile.
+
+You can configure AWS2Terraform profile and region via config commands. After that, you do not need to put common parameters when you run each command. Auto completion is available for parameter of region and profile.
 
 ```shell
 # without paramter options, you can check current configuration.
@@ -236,7 +241,6 @@ Profile is set to default
 ```
 
 ## Common Options
-
 
 How to check command-specific options.
 
