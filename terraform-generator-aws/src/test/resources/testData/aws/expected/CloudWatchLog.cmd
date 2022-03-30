@@ -1,3 +1,0 @@
-terraform import aws_cloudwatch_log_group.aws-containerinsights-EKS-CLS-SAMPLE-application /aws/containerinsights/EKS-CLS-SAMPLE/application
-terraform import aws_cloudwatch_log_group.aws-containerinsights-EKS-CLS-SAMPLE-dataplane /aws/containerinsights/EKS-CLS-SAMPLE/dataplane
-terraform import aws_cloudwatch_log_group.aws-containerinsights-EKS-CLS-SAMPLE-host /aws/containerinsights/EKS-CLS-SAMPLE/host

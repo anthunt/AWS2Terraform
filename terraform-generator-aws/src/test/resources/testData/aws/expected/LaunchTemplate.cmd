@@ -1,1 +1,0 @@
-terraform import aws_launch_template.LT-DEV-DLS lt-0c6296fcff64943d6

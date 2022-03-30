@@ -1,1 +1,0 @@
-terraform import aws_nat_gateway.nat-05dba92075d71c408 nat-05dba92075d71c408

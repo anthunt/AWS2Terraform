@@ -1,1 +1,0 @@
-terraform import aws_elasticache_subnet_group.redis-dev-subnetgrp redis-dev-subnetgrp

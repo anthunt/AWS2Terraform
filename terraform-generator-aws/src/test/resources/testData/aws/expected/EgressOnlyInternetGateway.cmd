@@ -1,1 +1,0 @@
-terraform import aws_egress_only_internet_gateway.eigw-015e0e244e24dfe8a eigw-015e0e244e24dfe8a

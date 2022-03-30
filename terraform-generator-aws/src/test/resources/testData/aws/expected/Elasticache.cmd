@@ -1,1 +1,0 @@
-terraform import aws_elasticache_cluster.redis-dev-cluster redis-dev-cluster

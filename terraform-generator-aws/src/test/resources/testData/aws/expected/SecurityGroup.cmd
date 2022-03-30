@@ -1,1 +1,0 @@
-terraform import aws_security_group.sg_test sg-002efaf20710623d5

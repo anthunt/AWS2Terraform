@@ -1,1 +1,0 @@
-terraform import aws_iam_role.testRole testRole

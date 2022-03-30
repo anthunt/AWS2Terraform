@@ -1,1 +1,0 @@
-terraform import aws_elasticsearch_domain.test-domain test-domain

@@ -1,4 +1,0 @@
-terraform import aws_lb.a000567db2d1f4d02b7493427dc88888 arn:aws:elasticloadbalancing:us-west-2:123456789012:loadbalancer/app/my-load-balancer/50dc6c495c0c9188
-terraform import aws_lb.b000567db2d1f4d02b7493427dc88888 null
-terraform import aws_lb.c000567db2d1f4d02b7493427dc88888 null
-terraform import aws_lb.d000567db2d1f4d02b7493427dc88888 null

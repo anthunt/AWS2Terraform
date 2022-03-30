@@ -1,1 +1,0 @@
-terraform import aws_internet_gateway.igw-c0a643a9 igw-c0a643a9

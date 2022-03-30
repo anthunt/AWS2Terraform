@@ -1,1 +1,0 @@
-terraform import aws_iam_policy.AWSLoadBalancerControllerIAMPolicy arn:aws:iam::235090236746:policy/AWSLoadBalancerControllerIAMPolicy

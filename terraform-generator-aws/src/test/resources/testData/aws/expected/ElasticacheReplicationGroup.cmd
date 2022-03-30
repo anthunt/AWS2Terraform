@@ -1,1 +1,0 @@
-terraform import aws_elasticache_replication_group.redis-session redis-session

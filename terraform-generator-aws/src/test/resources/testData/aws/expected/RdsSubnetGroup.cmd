@@ -1,1 +1,0 @@
-terraform import aws_db_subnet_group.rds-dev-subnetgrp rds-dev-subnetgrp
