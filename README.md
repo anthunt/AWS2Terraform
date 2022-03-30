@@ -5,7 +5,7 @@
 [![gradle build](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/gradle-build.yml)
 [![Create Release](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml/badge.svg)](https://github.com/anthunt/AWS2Terraform/actions/workflows/create-release-with-changelog.yml)
 --
-[![Status Not yet](https://img.shields.io/badge/Status-NotYet-yellow.svg)](#)
+[![Status v0.1.0](https://img.shields.io/badge/Status-v0.1.0-green.svg)](#)
 [![Language Java](https://img.shields.io/badge/Language-Java-orange.svg)](#)
 [![License](https://img.shields.io/badge/License-Apache%202-blue.svg)](LICENSE)
 
