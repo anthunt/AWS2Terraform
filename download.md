@@ -2,9 +2,14 @@
 description: >-
   Download the cli tool that automatically converts resources created in aws
   into Terraform.
+layout: editorial
 ---
 
 # ⏬ Download
+
+Now, Version 0.1.0 is available !
+
+
 
 | Type   | File                                                                                                                                                                       | Summary                             |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
