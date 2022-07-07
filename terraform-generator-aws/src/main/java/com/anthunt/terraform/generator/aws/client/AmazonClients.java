@@ -33,15 +33,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 @Slf4j
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class AmazonClients {
 
-    private Region region;
-    private String profileName;
+    private static Region region;
+    private static String profileName;
 
-    private ProfileCredentialsProvider getCredentialsProvider() {
+    public static void setRegion(Region region) {
+        AmazonClients.region = region;
+    }
+
+    public static void setProfileName(String profileName) {
+        AmazonClients.profileName = profileName;
+    }
+
+    private static ProfileCredentialsProvider getCredentialsProvider() {
         if (profileName == null) {
             return ProfileCredentialsProvider.create();
         } else {
@@ -50,21 +55,23 @@ public class AmazonClients {
     }
 
     @PostConstruct
-    void init() {
+    static void init() {
         log.debug("region => '{}'", region );
         log.debug("profileName => '{}'", profileName );
     }
 
-    public <T extends SdkClient> T getClient(Class<T> clazz) {
-        Method[] methods = this.getClass().getDeclaredMethods();
+    public static <T extends SdkClient> T getClient(Class<T> clazz) {
+        Method[] methods = AmazonClients.class.getDeclaredMethods();
         for(Method method : methods) {
-            if(clazz.isNestmateOf(method.getReturnType())) {
+
+            if(clazz.getSimpleName().equals(method.getReturnType().getSimpleName())) {
                 try {
                     //noinspection unchecked
-                    return (T) method.invoke(this, new Object[0]);
+                    return (T) method.invoke(null, new Object[0]);
                 } catch (IllegalAccessException e) {
                     return null;
                 } catch (InvocationTargetException e) {
+                    e.printStackTrace();
                     return null;
                 }
             }
@@ -72,140 +79,140 @@ public class AmazonClients {
         return null;
     }
 
-    public Ec2Client getEc2Client() {
+    public static Ec2Client getEc2Client() {
         return Ec2Client.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public ElasticLoadBalancingClient getElasticLoadBalancingClient() {
+    public static ElasticLoadBalancingClient getElasticLoadBalancingClient() {
         return ElasticLoadBalancingClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public ElasticLoadBalancingV2Client getElasticLoadBalancingV2Client() {
+    public static ElasticLoadBalancingV2Client getElasticLoadBalancingV2Client() {
         return ElasticLoadBalancingV2Client.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public ElastiCacheClient getElastiCacheClient() {
+    public static ElastiCacheClient getElastiCacheClient() {
         return ElastiCacheClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public RdsClient getRdsClient() {
+    public static RdsClient getRdsClient() {
         return RdsClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public KmsClient getKmsClient() {
+    public static KmsClient getKmsClient() {
         return KmsClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public AcmClient getAcmClient() {
+    public static AcmClient getAcmClient() {
         return AcmClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public S3Client getS3Client() {
+    public static S3Client getS3Client() {
         return S3Client.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public LambdaClient getLambdaClient() {
+    public static LambdaClient getLambdaClient() {
         return LambdaClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public ApiGatewayClient getApiGatewayClient() {
+    public static ApiGatewayClient getApiGatewayClient() {
         return ApiGatewayClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public IamClient getIamClient() {
+    public static IamClient getIamClient() {
         return IamClient.builder()
                 .region(Region.AWS_GLOBAL)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public DirectConnectClient getDirectConnectClient() {
+    public static DirectConnectClient getDirectConnectClient() {
         return DirectConnectClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public DirectoryClient getDirectoryClient() {
+    public static DirectoryClient getDirectoryClient() {
         return DirectoryClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public Route53Client getRoute53Client() {
+    public static Route53Client getRoute53Client() {
         return Route53Client.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public EcrClient getEcrClient() {
+    public static EcrClient getEcrClient() {
         return EcrClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public EksClient getEksClient() {
+    public static EksClient getEksClient() {
         return EksClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public EfsClient getEfsClient() {
+    public static EfsClient getEfsClient() {
         return EfsClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public KafkaClient getKafkaClient() {
+    public static KafkaClient getKafkaClient() {
         return KafkaClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public ElasticsearchClient getElasticsearchClient() {
+    public static ElasticsearchClient getElasticsearchClient() {
         return ElasticsearchClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())
                 .build();
     }
 
-    public CloudWatchLogsClient getCloudWatchLogGroupClient() {
+    public static CloudWatchLogsClient getCloudWatchLogGroupClient() {
         return CloudWatchLogsClient.builder()
                 .region(region)
                 .credentialsProvider(getCredentialsProvider())

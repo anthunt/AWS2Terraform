@@ -24,7 +24,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class AbstractExport<T extends SdkClient> {
 
-    private String profileName;
+    private String profileName = "default'";
     private Region region;
     private long delayBetweenApis = 100;
 
@@ -67,19 +67,17 @@ public abstract class AbstractExport<T extends SdkClient> {
 
         this.printProgressBar(commonArgs.isSilence(), 10);
 
+        ConfigRegistry.getInstance().setProfile(this.profileName);
+        commonArgs.setProfile(this.profileName);
+        AmazonClients.setRegion(this.region);
+        AmazonClients.setProfileName(profileName);
+
         Maps<Provider> providers = this.exportProvider();
-        Maps<Resource> resources = this.export(
-                AmazonClients.builder()
-                        .profileName(profileName)
-                        .region(this.region)
-                        .build().getClient(t), commonArgs, extraArgs);
+        Maps<Resource> resources = this.export(AmazonClients.getClient(t), commonArgs, extraArgs);
 
         this.printProgressBar(commonArgs.isSilence(), 50);
 
-        TFImport tfImport = this.scriptImport(AmazonClients.builder()
-                .profileName(profileName)
-                .region(this.region)
-                .build().getClient(t), commonArgs, extraArgs);
+        TFImport tfImport = this.scriptImport(AmazonClients.getClient(t), commonArgs, extraArgs);
 
         this.printProgressBar(commonArgs.isSilence(), 80);
 
