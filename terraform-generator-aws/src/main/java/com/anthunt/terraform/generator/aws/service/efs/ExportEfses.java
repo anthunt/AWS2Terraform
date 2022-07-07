@@ -58,6 +58,7 @@ public class ExportEfses extends AbstractExport<EfsClient> {
                     return AWSEfs.builder()
                             .fileSystemDescription(fileSystem)
                             .awsBackupPolicy(OptionalUtils.getExceptionAsOptional(() -> AWSBackupPolicy.builder()
+                                            .fileSystemDescription(fileSystem)
                                             .backupPolicy(client.describeBackupPolicy(DescribeBackupPolicyRequest.builder()
                                                             .fileSystemId(fileSystem.fileSystemId())
                                                             .build())

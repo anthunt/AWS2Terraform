@@ -34,8 +34,9 @@ class ExportElastiCacheClustersTest {
     public static void beforeAll() {
         exportElastiCacheClusters = new ExportElastiCacheClusters();
         exportElastiCacheClusters.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getElastiCacheClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getElastiCacheClient();
     }
 
     private List<AWSCacheCluster> getAwsCacheClusters() {

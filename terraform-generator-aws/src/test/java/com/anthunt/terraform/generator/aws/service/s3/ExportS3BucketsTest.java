@@ -35,8 +35,9 @@ class ExportS3BucketsTest {
     public static void beforeAll() {
         exportS3Buckets = new ExportS3Buckets();
         exportS3Buckets.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getS3Client();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getS3Client();
     }
 
     private List<AWSBucket> getAwsBuckets() {

@@ -36,8 +36,9 @@ class ExportRdsSubnetGroupsTest {
     public static void beforeAll() {
         exportRdsSubnetGroups = new ExportRdsSubnetGroups();
         exportRdsSubnetGroups.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getRdsClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getRdsClient();
     }
 
     private List<AWSRdsSubnetGroup> getAwsRdsSubnetGroups() {

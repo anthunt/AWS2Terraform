@@ -35,8 +35,9 @@ class ExportElasticsearchDomainsTest {
     public static void beforeAll() {
         exportElasticsearchDomains = new ExportElasticsearchDomains();
         exportElasticsearchDomains.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getElasticsearchClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getElasticsearchClient();
     }
 
     private List<AWSElasticsearchDomain> getAwsElasticsearchDomains() {

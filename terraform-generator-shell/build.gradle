@@ -29,7 +29,8 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
+    mainClass.value("com.anthunt.terraform.generator.Aws2TerraformApplication")
+    //bootJarMainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
     enabled = true
 }
 

@@ -36,8 +36,9 @@ class ExportIamInstanceProfilesTest {
     public static void beforeAll() {
         exportIamInstanceProfiles = new ExportIamInstanceProfiles();
         exportIamInstanceProfiles.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        client = amazonClients.getIamClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AWS_GLOBAL);
+        client = AmazonClients.getIamClient();
     }
 
     private List<AWSInstanceProfile> getInstanceProfiles() {

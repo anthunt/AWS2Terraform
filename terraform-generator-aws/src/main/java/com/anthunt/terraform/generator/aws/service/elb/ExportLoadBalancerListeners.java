@@ -4,6 +4,7 @@ import com.anthunt.terraform.generator.aws.command.args.CommonArgs;
 import com.anthunt.terraform.generator.aws.command.args.ExtraArgs;
 import com.anthunt.terraform.generator.aws.service.AbstractExport;
 import com.anthunt.terraform.generator.aws.service.elb.model.AWSListener;
+import com.anthunt.terraform.generator.aws.utils.OptionalUtils;
 import com.anthunt.terraform.generator.aws.utils.ThreadUtils;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFBlock;
 import com.anthunt.terraform.generator.core.model.terraform.elements.TFExpression;
@@ -70,7 +71,7 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
                             .map(listener -> AWSListener.builder()
                                     .listener(listener)
                                     .loadBalancer(loadBalancer)
-                                    .targetGroup(listener.defaultActions().stream()
+                                    .targetGroup(OptionalUtils.getExceptionAsOptional(() -> listener.defaultActions().stream()
                                             .map(Action::targetGroupArn)
                                             .findFirst()
                                             .flatMap(targetGroupArn -> client.describeTargetGroups(
@@ -79,7 +80,7 @@ public class ExportLoadBalancerListeners extends AbstractExport<ElasticLoadBalan
                                                                     .build())
                                                     .targetGroups().stream()
                                                     .findFirst())
-                                            .orElse(null))
+                                            .orElse(null)).orElse(null))
                                     .build());
                 })
                 .collect(Collectors.toList());

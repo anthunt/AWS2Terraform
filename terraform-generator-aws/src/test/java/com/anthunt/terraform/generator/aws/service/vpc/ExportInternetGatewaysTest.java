@@ -37,8 +37,9 @@ class ExportInternetGatewaysTest {
     public static void beforeAll() {
         exportInternetGateways = new ExportInternetGateways();
         exportInternetGateways.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getEc2Client();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getEc2Client();
     }
 
     private List<AWSInternetGateway> getAwsInternetGateways() {

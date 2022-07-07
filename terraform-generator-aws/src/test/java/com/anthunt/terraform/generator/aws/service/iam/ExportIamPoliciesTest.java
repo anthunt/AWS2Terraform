@@ -34,8 +34,9 @@ class ExportIamPoliciesTest {
     public static void beforeAll() {
         exportIamPolicies = new ExportIamPolicies();
         exportIamPolicies.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AWS_GLOBAL).build();
-        client = amazonClients.getIamClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AWS_GLOBAL);
+        client = AmazonClients.getIamClient();
     }
 
     private List<AWSPolicy> getAwsPolicies() {

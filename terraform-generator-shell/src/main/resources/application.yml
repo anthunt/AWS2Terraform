@@ -1,3 +1,9 @@
+# https://github.com/spring-projects/spring-shell/issues/324
+# bgaborg commented on 20 Nov 2021
+# workaround: use spring-boot-starter-parent version 2.5.7. It took some time to figure this out though, maybe helps for someone else.
+spring:
+  main:
+    allow-circular-references : true
 logging:
   level:
     org.jline: ERROR

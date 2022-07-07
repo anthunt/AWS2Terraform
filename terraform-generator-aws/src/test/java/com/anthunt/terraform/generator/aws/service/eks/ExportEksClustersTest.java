@@ -36,8 +36,9 @@ class ExportEksClustersTest {
     public static void beforeAll() {
         exportEksClusters = new ExportEksClusters();
         exportEksClusters.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getEksClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getEksClient();
     }
 
     private List<AWSEksCluster> getAwsEksClusters() {

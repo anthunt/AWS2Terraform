@@ -34,8 +34,9 @@ class ExportElastiCacheReplicationGroupsTest {
     public static void beforeAll() {
         exportElastiCacheReplicationGroups = new ExportElastiCacheReplicationGroups();
         exportElastiCacheReplicationGroups.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getElastiCacheClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getElastiCacheClient();
     }
 
     private List<AWSCacheReplicationGroup> getAwsCacheReplicationGroups() {

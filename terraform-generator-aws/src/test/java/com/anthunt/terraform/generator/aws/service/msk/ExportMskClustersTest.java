@@ -36,8 +36,9 @@ class ExportMskClustersTest {
     public static void beforeAll() {
         exportMskClusters = new ExportMskClusters();
         exportMskClusters.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getKafkaClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getKafkaClient();
     }
 
     private List<AWSMskCluster> getAwsMskClusters() {

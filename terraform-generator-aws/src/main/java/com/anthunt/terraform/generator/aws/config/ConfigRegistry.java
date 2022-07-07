@@ -7,13 +7,16 @@ import lombok.Setter;
 @Setter
 public class ConfigRegistry {
 
-    private String profile;
-    private String region;
-    private static ConfigRegistry configRegistry = new ConfigRegistry();
+    private String profile = "default";
+    private String region = "ap-northeast-2";
+    private static ConfigRegistry configRegistry;
 
     private ConfigRegistry() {}
 
     public static ConfigRegistry getInstance() {
-            return configRegistry;
+        if(ConfigRegistry.configRegistry == null) {
+            ConfigRegistry.configRegistry = new ConfigRegistry();
+        }
+        return ConfigRegistry.configRegistry;
     }
 }
