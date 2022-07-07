@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "edu.sc.seis.launch4j" version "2.5.1"
+    id "edu.sc.seis.launch4j" version "2.5.3"
     id "com.dorongold.task-tree" version "2.1.0"
 }
 
@@ -29,7 +29,8 @@ bootRun {
 }
 
 bootJar {
-    mainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
+    mainClass.value("com.anthunt.terraform.generator.Aws2TerraformApplication")
+    //bootJarMainClassName = "com.anthunt.terraform.generator.Aws2TerraformApplication"
     enabled = true
 }
 
