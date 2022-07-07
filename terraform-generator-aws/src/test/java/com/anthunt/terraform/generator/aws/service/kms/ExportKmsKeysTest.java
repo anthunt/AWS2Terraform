@@ -40,8 +40,9 @@ class ExportKmsKeysTest {
     public static void beforeAll() {
         exportKmsKeys = new ExportKmsKeys();
         exportKmsKeys.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getKmsClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getKmsClient();
     }
 
     private List<AWSKmsKey> getAwsKmsKeys() {

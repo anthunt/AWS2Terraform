@@ -35,8 +35,9 @@ class ExportSubnetsTest {
     public static void beforeAll() {
         exportSubnets = new ExportSubnets();
         exportSubnets.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getEc2Client();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getEc2Client();
     }
 
     private List<AWSSubnet> getAwsSubnets() {

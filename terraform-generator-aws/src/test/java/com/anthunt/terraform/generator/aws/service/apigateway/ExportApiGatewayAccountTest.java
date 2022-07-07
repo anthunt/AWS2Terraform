@@ -33,8 +33,9 @@ class ExportApiGatewayAccountTest {
     public static void beforeAll() {
         exportApiGatewayAccount = new ExportApiGatewayAccount();
         exportApiGatewayAccount.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getApiGatewayClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getApiGatewayClient();
     }
 
     private AWSAccount getAwsAccount() {

@@ -37,8 +37,9 @@ class ExportEcrRepositoriesTest {
     public static void beforeAll() {
         exportEcrRepositories = new ExportEcrRepositories();
         exportEcrRepositories.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getEcrClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getEcrClient();
     }
 
     private List<AWSRepository> getRepositories() {

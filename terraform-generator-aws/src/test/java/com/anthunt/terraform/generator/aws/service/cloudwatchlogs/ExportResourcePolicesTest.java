@@ -35,8 +35,9 @@ class ExportResourcePolicesTest {
     public static void beforeAll() {
         exportResourcePolicies = new ExportResourcePolicies();
         exportResourcePolicies.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getCloudWatchLogGroupClient();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getCloudWatchLogGroupClient();
     }
 
     private List<AWSResourcePolicy> getResourcePolicies() {

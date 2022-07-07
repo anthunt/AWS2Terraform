@@ -35,8 +35,9 @@ class ExportSecurityGroupsTest {
     public static void beforeAll() {
         exportSecurityGroups = new ExportSecurityGroups();
         exportSecurityGroups.setDelayBetweenApis(0);
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        client = amazonClients.getEc2Client();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        client = AmazonClients.getEc2Client();
     }
 
     private List<AWSSecurityGroup> getAwsSecurityGroups() {
@@ -99,8 +100,9 @@ class ExportSecurityGroupsTest {
     @Test
     @DisabledOnNoAwsCredentials
     void listSecurityGroups() {
-        AmazonClients amazonClients = AmazonClients.builder().profileName("default").region(Region.AP_NORTHEAST_2).build();
-        Ec2Client ec2Client = amazonClients.getEc2Client();
+        AmazonClients.setProfileName("default");
+        AmazonClients.setRegion(Region.AP_NORTHEAST_2);
+        Ec2Client ec2Client = AmazonClients.getEc2Client();
 
         List<AWSSecurityGroup> securityGroups = exportSecurityGroups.listAwsSecurityGroups(ec2Client);
         log.debug("securityGroups => {}", securityGroups);
