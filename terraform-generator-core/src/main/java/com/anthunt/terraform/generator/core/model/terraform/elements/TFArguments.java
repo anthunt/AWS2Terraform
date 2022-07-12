@@ -139,6 +139,7 @@ public class TFArguments extends AbstractMarshaller<TFArguments> {
                     for (int $i = 0; $i < this.arguments$key.size(); $i++)
                         arguments.put(this.arguments$key.get($i), (AbstractMarshaller<?>) this.arguments$value.get($i));
                     arguments = java.util.Collections.unmodifiableMap(arguments);
+                    break;
             }
 
             return new TFArguments(arguments);
