@@ -115,6 +115,7 @@ public class TFObject extends AbstractMarshaller<TFObject> {
                     for (int $i = 0; $i < this.members$key.size(); $i++)
                         members.put(this.members$key.get($i), (AbstractMarshaller<?>) this.members$value.get($i));
                     members = java.util.Collections.unmodifiableMap(members);
+                    break;
             }
 
             return new TFObject(members);
