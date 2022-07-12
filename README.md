@@ -18,55 +18,55 @@ The goal of the current project is an extract program for Terraform resources, a
 ## AWS Services supported
 
 1.  EC2 
-  - EC2 Instances
-  - Launch Templates
+  -  EC2 Instances
+  -  Launch Templates
 2.  VPCs
-  - egress-only-internet-gateways
-  - internet-gateways
-  - nat-gateways
-  - route-tables
-  - security-groups
-  - subnets
-  - vpcs
+  -  egress-only-internet-gateways
+  -  internet-gateways
+  -  nat-gateways
+  -  route-tables
+  -  security-groups
+  -  subnets
+  -  vpcs
 3.  Api Gateway
-  - api-gateway-resources
-  - api-gateway-rest-apis
+  -  api-gateway-resources
+  -  api-gateway-rest-apis
 4.  Cloud Watch Logs
-  - cloud-watch-log-groups
-  - resource-policies
+  -  cloud-watch-log-groups
+  -  resource-policies
 5.  ECR
-  - ecr-repository
+  -  ecr-repository
 6.  EFS
-  - efs-file-systems 
+  -  efs-file-systems 
 7.  EKS
-  - eks-clusters
+  -  eks-clusters
 8.  ElastiCache
-  - elasti-cache-clusters
-  - elasti-cache-replication-groups
-  - elasti-cache-subnet-groups
+  -  elasti-cache-clusters
+  -  elasti-cache-replication-groups
+  -  elasti-cache-subnet-groups
 9.  Elastic Search(OpenSearch)
-  - elastic-search-domains
+  -  elastic-search-domains
 10. ELB
-  - load-balancer-listeners
-  - load-balancer-target-groups
-  - load-balancers
+  -  load-balancer-listeners
+  -  load-balancer-target-groups
+  -  load-balancers
 11. IAM
-  - iam-instance-profiles
-  - iam-policies
-  - iam-role-policies
-  - iam-role-policy-attachment
-  - iam-roles
+  -  iam-instance-profiles
+  -  iam-policies
+  -  iam-role-policies
+  -  iam-role-policy-attachment
+  -  iam-roles
 12. KMS
-  - kms-keys
+  -  kms-keys
 13. MSK
-  - msk-clusters
+  -  msk-clusters
 14. RDS
-  - rds-cluster-parameter-groups
-  - rds-clusters
-  - rds-option-groups
-  - rds-subnet-groups
+  -  rds-cluster-parameter-groups
+  -  rds-clusters
+  -  rds-option-groups
+  -  rds-subnet-groups
 15. S3
-  - s3buckets
+  -  s3buckets
 16. It will be added gradually.
 
 ## Run
