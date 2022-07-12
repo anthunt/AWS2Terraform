@@ -9,7 +9,7 @@ public enum VariableType {
     Map("map"),
     List("list");
 
-    private final String type;
+    private String type;
     private VariableType childType;
 
     VariableType(String type) {
