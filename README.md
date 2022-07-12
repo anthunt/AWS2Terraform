@@ -17,10 +17,10 @@ The goal of the current project is an extract program for Terraform resources, a
 
 ## AWS Services supported
 
-1. EC2 
+1.  EC2 
   - EC2 Instances
   - Launch Templates
-2. VPCs
+2.  VPCs
   - egress-only-internet-gateways
   - internet-gateways
   - nat-gateways
@@ -28,23 +28,23 @@ The goal of the current project is an extract program for Terraform resources, a
   - security-groups
   - subnets
   - vpcs
-3. Api Gateway
+3.  Api Gateway
   - api-gateway-resources
   - api-gateway-rest-apis
-4. Cloud Watch Logs
+4.  Cloud Watch Logs
   - cloud-watch-log-groups
   - resource-policies
-5. ECR
+5.  ECR
   - ecr-repository
-6. EFS
+6.  EFS
   - efs-file-systems 
-7. EKS
+7.  EKS
   - eks-clusters
-8. ElastiCache
+8.  ElastiCache
   - elasti-cache-clusters
   - elasti-cache-replication-groups
   - elasti-cache-subnet-groups
-9. Elastic Search(OpenSearch)
+9.  Elastic Search(OpenSearch)
   - elastic-search-domains
 10. ELB
   - load-balancer-listeners
@@ -77,7 +77,7 @@ java -jar terraform-generator-shell-[version].jar
 
 
 ## Getting started
-1. configure region and profile.
+1.  configure region and profile.
 
 ```shell
 export:>config --region ap-northeast-2 --profile default
@@ -85,7 +85,7 @@ Region is set to ap-northeast-2
 Profile is set to default
 ```
 
-2. Use `all-available-resources` command to export all available-resources from aws.
+2.  Use `all-available-resources` command to export all available-resources from aws.
 
 ```shell
 export:>all-available-resources
@@ -99,7 +99,7 @@ CloudWatchLogsCommands : cloud-watch-log-groups
 |##########------------------------------------------------------------------------------------------|10%|
 ```
 
-3. Exit shell and check out result files which is created on outout folder.
+3.  Exit shell and check out result files which is created on outout folder.
 *.tf files are terraform files, and *.cmd files are terraform import files.
 
 ```shell
