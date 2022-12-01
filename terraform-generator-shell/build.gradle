@@ -5,7 +5,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "edu.sc.seis.launch4j:launch4j:2.5.3"
+        classpath "edu.sc.seis.launch4j:launch4j:2.5.4"
     }
 }
 
