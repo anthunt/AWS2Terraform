@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '3.0.0'
+        springBootVersion = '3.0.1'
         springGradlePluginVersion = '1.1.0'
         awsSdkVersion = '2.18.30'
     }
