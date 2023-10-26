@@ -2,7 +2,7 @@ buildscript {
     ext {
         springBootVersion = '3.0.0'
         springGradlePluginVersion = '1.1.0'
-        awsSdkVersion = '2.18.30'
+        awsSdkVersion = '2.19.8'
     }
     repositories {
         mavenCentral()
