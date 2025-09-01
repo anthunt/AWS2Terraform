@@ -44,7 +44,7 @@ subprojects {
     }
 
     dependencies {
-        compileOnly 'org.slf4j:slf4j-api:1.7.36'
+        compileOnly 'org.slf4j:slf4j-api:2.0.17'
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
         testImplementation 'org.projectlombok:lombok'
